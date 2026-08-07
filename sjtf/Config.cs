@@ -12,7 +12,7 @@ public sealed class SjtfHttpHeaders
     /// <summary>
     /// HTTP 请求 User-Agent / HTTP request User-Agent.
     /// </summary>
-    [JsonPropertyName("user_agent")]
+    [TomlPropertyName("user_agent")]
     public string UserAgent { get; set; } = "";
 }
 

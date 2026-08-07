@@ -342,6 +342,23 @@
     },
     "fetch_source": "github"
   },
+  "xh": {
+    "description": "A friendly and fast tool for sending HTTP requests",
+    "repo": "ducaale/xh",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\xh",
+    "symlinks": {
+      "xh.exe": "xh.exe"
+    },
+    "fetch_source": "github"
+  },
   "bottom": {
     "description": "Cross-platform graphical process/system monitor",
     "repo": "ClementTsang/bottom",
