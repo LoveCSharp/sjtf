@@ -75,12 +75,6 @@ public sealed class SjtfGithub
 public sealed class SjtfPkgs
 {
     /// <summary>
-    /// 是否从远程获取 pkgs.json / Whether to fetch pkgs.json from remote.
-    /// </summary>
-    [JsonPropertyName("fetch_remote")]
-    public bool FetchRemote { get; set; } = false;
-
-    /// <summary>
     /// 远程 pkgs.json 地址 / Remote pkgs.json URL.
     /// </summary>
     [TomlPropertyName("remote_url")]
@@ -169,11 +163,6 @@ internal static class Config
         var proxy = LoadDoc()?.Github?.Proxy;
         return string.IsNullOrEmpty(proxy) ? "" : proxy;
     }
-
-    /// <summary>
-    /// 从配置中加载是否从远程获取 pkgs.json / Load fetch-remote setting from config.
-    /// </summary>
-    public static bool LoadFetchRemote() => LoadDoc()?.Pkgs?.FetchRemote ?? false;
 
     /// <summary>
     /// 从配置中加载远程 pkgs.json 地址 / Load remote pkgs.json URL from config.

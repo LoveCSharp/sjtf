@@ -34,12 +34,6 @@ pkgUpdateCommand.SetAction(async _ =>
 {
     try
     {
-        if (!Config.LoadFetchRemote())
-        {
-            Console.Error.WriteLine("error: fetch_remote is not enabled in config.toml [pkgs]");
-            return 1;
-        }
-
         var remoteUrl = Config.LoadPkgsRemoteUrl();
         if (string.IsNullOrEmpty(remoteUrl))
         {
