@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Tomlyn;
+using Tomlyn.Model;
 using Tomlyn.Serialization;
 
 namespace Sjtf;
@@ -12,8 +13,7 @@ public sealed class SjtfHttpHeaders
     /// <summary>
     /// HTTP 请求 User-Agent / HTTP request User-Agent.
     /// </summary>
-    [TomlPropertyName("user_agent")]
-    public string UserAgent { get; set; } = "";
+    public string user_agent { get; set; } = "";
 }
 
 /// <summary>
@@ -22,10 +22,10 @@ public sealed class SjtfHttpHeaders
 public sealed class SjtfHttp
 {
     /// <summary>
-    /// HTTP 请求头配置 / HTTP request header configuration.
+    /// HTTP 请求 User-Agent / HTTP request User-Agent.
     /// </summary>
-    [TomlPropertyName("request.header")]
-    public SjtfHttpHeaders RequestHeader { get; set; } = new();
+    [TomlPropertyName("user_agent")]
+    public string UserAgent { get; set; } = "";
 }
 
 /// <summary>
@@ -158,8 +158,28 @@ internal static class Config
     /// </summary>
     public static string LoadUserAgent()
     {
-        var doc = LoadDoc();
-        return doc?.Http?.RequestHeader?.UserAgent ?? DefaultUserAgent;
+        var path = ConfigPath();
+        if (!File.Exists(path)) return DefaultUserAgent;
+        try
+        {
+            var toml = File.ReadAllText(path);
+            var table = TomlSerializer.Deserialize(toml, TomlModelContext.Default.TomlTable);
+            if (table == null) return DefaultUserAgent;
+            
+            if (table.TryGetValue("http", out var httpVal) && httpVal is TomlTable httpTable)
+            {
+                if (httpTable.TryGetValue("request", out var reqVal) && reqVal is TomlTable reqTable)
+                {
+                    if (reqTable.TryGetValue("header", out var headerVal) && headerVal is TomlTable headerTable)
+                    {
+                        if (headerTable.TryGetValue("user_agent", out var uaVal) && uaVal is string ua)
+                            return ua;
+                    }
+                }
+            }
+        }
+        catch { }
+        return DefaultUserAgent;
     }
 
     /// <summary>
