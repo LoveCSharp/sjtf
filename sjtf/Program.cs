@@ -384,7 +384,7 @@ return await rootCommand.Parse(args).InvokeAsync();
     DownloadPlan plan;
     try
     {
-        plan = await source.ResolveAsync(pkg);
+        plan = await source.ResolveAsync(pkg, name);
     }
     catch (Exception ex)
     {
@@ -539,7 +539,7 @@ return await rootCommand.Parse(args).InvokeAsync();
     DownloadPlan plan;
     try
     {
-        plan = await source.ResolveAsync(pkg);
+        plan = await source.ResolveAsync(pkg, name);
     }
     catch (Exception ex)
     {

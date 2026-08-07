@@ -29,11 +29,11 @@ internal sealed class LuaFetchSource : IFetchSource
     /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
     /// <param name="ct">取消令牌 / Cancellation token.</param>
     /// <returns>下载计划 / Download plan.</returns>
-    public async Task<DownloadPlan> ResolveAsync(JsonObject pkg, CancellationToken ct = default)
+    public async Task<DownloadPlan> ResolveAsync(JsonObject pkg, string packageName, CancellationToken ct = default)
     {
         using var lua = new Lua();
 
-        var bindings = new LuaBindings(lua);
+        var bindings = new LuaBindings(lua) { PackageName = packageName };
         lua.RegisterFunction("http_get", bindings, typeof(LuaBindings).GetMethod(nameof(LuaBindings.HttpGet)));
         lua.RegisterFunction("json_decode", bindings, typeof(LuaBindings).GetMethod(nameof(LuaBindings.JsonDecode)));
         lua.RegisterFunction("regex_match", bindings, typeof(LuaBindings).GetMethod(nameof(LuaBindings.RegexMatch)));

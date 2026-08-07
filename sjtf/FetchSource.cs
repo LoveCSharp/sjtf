@@ -17,12 +17,13 @@ public interface IFetchSource
     string Name { get; }
 
     /// <summary>
-    /// 获取包定义中的 fetch_source 名称 / Get the fetch_source name from a package definition.
+    /// 解析包的下载计划和验证信息 / Resolve download plan and verification info for a package.
     /// </summary>
     /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
+    /// <param name="packageName">包名称 / Package name.</param>
     /// <param name="ct">取消令牌 / Cancellation token.</param>
     /// <returns>下载计划 / Download plan.</returns>
-    Task<DownloadPlan> ResolveAsync(JsonObject pkg, CancellationToken ct = default);
+    Task<DownloadPlan> ResolveAsync(JsonObject pkg, string packageName, CancellationToken ct = default);
 }
 
 /// <summary>

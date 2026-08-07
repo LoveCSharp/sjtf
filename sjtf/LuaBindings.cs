@@ -13,6 +13,7 @@ namespace Sjtf;
 internal class LuaBindings
 {
     private readonly Lua _lua;
+    public string? PackageName { get; set; }
 
     public LuaBindings(Lua lua)
     {
@@ -29,7 +30,8 @@ internal class LuaBindings
     /// <returns>响应内容字符串 / Response content string.</returns>
     public string HttpGet(string url, LuaTable headers)
     {
-        Console.WriteLine($"http_get: {url}");
+        var prefix = PackageName ?? "http_get";
+        Console.WriteLine($"{prefix}: fetching {url}");
         using var req = new HttpRequestMessage(HttpMethod.Get, url);
 
         req.Headers.TryAddWithoutValidation("User-Agent", Config.LoadUserAgent());
