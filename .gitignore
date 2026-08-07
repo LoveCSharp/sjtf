@@ -20,3 +20,18 @@ cache/
 # OS
 Thumbs.db
 .DS_Store
+
+# Ignore Pi coding agent local state
+.pi/
+.pi-subagents/
+.pi-tasks/
+.pi-workflows/
+.pi-plans/
+.pi-cache/
+.pi-temp/
+.pi-state/
+.pi-sessions/
+
+# Ignore Piolium security audit files
+piolium-*/
+*.pi-log
