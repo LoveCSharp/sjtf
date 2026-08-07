@@ -5,8 +5,9 @@
 ## 快速开始
 
 ```bash
-sjtf packages          # 列出可用包
-sjtf list              # 列出已安装包
+sjtf packages list    # 列出可用包
+sjtf packages update  # 从远程更新 pkgs.json
+sjtf list             # 列出已安装包
 sjtf install fnm uv    # 安装包
 sjtf uninstall fnm     # 卸载包
 sjtf upgrade --all     # 升级所有已安装包
@@ -18,11 +19,29 @@ sjtf --version         # 显示版本号
 
 ### `packages`（别名：`pkgs`）
 
-列出 `pkgs.json` 中定义的所有包。
+包定义管理的父命令。使用子命令 `list` 或 `update`。
 
 ```bash
 sjtf packages
 sjtf pkgs
+```
+
+#### `packages list`（别名：`pkgs list`）
+
+列出 `pkgs.json` 中定义的所有包。
+
+```bash
+sjtf packages list
+sjtf pkgs list
+```
+
+#### `packages update`（别名：`pkgs update`）
+
+从 `config.toml [pkgs].remote_url` 配置的远程 URL 下载最新的 `pkgs.json` 并覆盖本地文件。
+
+```bash
+sjtf packages update
+sjtf pkgs update
 ```
 
 ### `list`（别名：`ls`）
@@ -96,6 +115,9 @@ install_dir = "D:\\sjtf_pkgs"     # 所有安装的根目录
 download_retry_max = 3             # 下载最大重试次数
 create_symlink = true              # 是否创建符号链接（false 禁用）
 
+[pkgs]
+remote_url = "https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json"  # `sjtf packages update` 使用的远程 pkgs.json URL
+
 [github]
 token_classic = "put your classic token here"  # GitHub 个人访问令牌（可选）
 proxy = "https://gh-proxy.com"                 # GitHub 代理（可选）
@@ -106,7 +128,7 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 
 ### `pkgs.json`
 
-包定义文件。每个包包含：
+包定义文件。使用 `sjtf packages update` 可从 `config.toml` 配置的远程 URL 下载最新版本。
 
 | 字段 | 说明 |
 |---|---|

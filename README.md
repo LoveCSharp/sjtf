@@ -17,20 +17,22 @@ A portable CLI package manager that downloads, verifies, and manages command-lin
 ## Quick Start
 
 ```bash
-sjtf packages          # List available packages
-sjtf list              # List installed packages
-sjtf install fnm uv    # Install packages
-sjtf uninstall fnm     # Uninstall a package
-sjtf upgrade --all     # Upgrade all installed packages
-sjtf favorites         # Sync with favorites.json
-sjtf --version         # Show version
+sjtf packages list    # List available packages
+sjtf packages update  # Update pkgs.json from remote
+sjtf list             # List installed packages
+sjtf install fnm uv   # Install packages
+sjtf uninstall fnm    # Uninstall a package
+sjtf upgrade --all    # Upgrade all installed packages
+sjtf favorites        # Sync with favorites.json
+sjtf --version        # Show version
 ```
 
 ## Commands
 
 | Command | Aliases | Description |
 |---------|---------|-------------|
-| `packages` | `pkgs` | List packages defined in `pkgs.json` |
+| `packages list` | `pkgs list` | List packages defined in `pkgs.json` |
+| `packages update` | `pkgs update` | Download latest `pkgs.json` from remote |
 | `list` | `ls` | List installed packages |
 | `install` | `i` | Install one or more packages |
 | `uninstall` | `u`, `rm`, `remove` | Uninstall one or more packages |
@@ -52,6 +54,9 @@ install_dir = "D:\\sjtf_pkgs"     # Root directory for all installations
 download_retry_max = 3             # Max download retry attempts
 create_symlink = true              # Create symlinks (false to disable)
 
+[pkgs]
+remote_url = "https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json"  # Remote pkgs.json URL for `sjtf packages update`
+
 [github]
 token_classic = "put your classic token here"  # GitHub personal access token (optional)
 proxy = "https://gh-proxy.com"                 # GitHub proxy (optional)
@@ -62,7 +67,7 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 
 ### `pkgs.json`
 
-Package definitions.
+Package definitions. Use `sjtf packages update` to download the latest version from the remote URL configured in `config.toml`.
 
 ```json
 {
