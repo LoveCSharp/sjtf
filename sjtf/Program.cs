@@ -267,58 +267,43 @@ return await rootCommand.Parse(args).InvokeAsync();
     /// </summary>
     /// <returns>退出代码 / Exit code.</returns>
     static int ListPackages()
-{
-    var path = Path.Combine(Tools.SjtfRoot(), "pkgs.json");
-
-    if (!File.Exists(path))
     {
-        Console.Error.WriteLine($"error: pkgs.json not found at {path}");
-        return 1;
-    }
-
-    try
-    {
-        using var stream = File.OpenRead(path);
-        using var doc = JsonDocument.Parse(stream);
-
-        if (doc.RootElement.ValueKind != JsonValueKind.Object)
+        try
         {
-            Console.Error.WriteLine("error: pkgs.json root must be a JSON object.");
-            return 1;
-        }
+            var pkgs = Packages.Load();
 
-        var rows = new List<(string Name, string Description)>();
-        foreach (var prop in doc.RootElement.EnumerateObject())
-        {
-            var description = "";
-            if (prop.Value.TryGetProperty("description", out var descNode) && descNode.ValueKind == JsonValueKind.String)
-                description = descNode.GetString() ?? "";
-            rows.Add((prop.Name, description));
-        }
-        rows.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+            if (pkgs.Count == 0)
+            {
+                AnsiConsole.MarkupLine("[yellow]packages:[/]");
+                AnsiConsole.MarkupLine("  [grey](none)[/]");
+                return 0;
+            }
 
-        if (rows.Count == 0)
-        {
-            AnsiConsole.MarkupLine("[yellow]packages:[/]");
-            AnsiConsole.MarkupLine("  [grey](none)[/]");
+            var rows = new List<(string Name, string Description)>();
+            foreach (var prop in pkgs.AsObject())
+            {
+                var description = "";
+                if (prop.Value is JsonObject descObj && descObj.TryGetPropertyValue("description", out var descNode) && descNode is JsonValue descVal && descVal.GetValueKind() == JsonValueKind.String)
+                    description = descVal.GetValue<string>();
+                rows.Add((prop.Key, description));
+            }
+            rows.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+
+            var table = new Table()
+                .Border(TableBorder.MinimalHeavyHead)
+                .AddColumn("[bold]Name[/]")
+                .AddColumn("[bold]Description[/]");
+            foreach (var (name, description) in rows)
+                table.AddRow(name, description);
+            AnsiConsole.Write(table);
             return 0;
         }
-
-        var table = new Table()
-            .Border(TableBorder.MinimalHeavyHead)
-            .AddColumn("[bold]Name[/]")
-            .AddColumn("[bold]Description[/]");
-        foreach (var (name, description) in rows)
-            table.AddRow(name, description);
-        AnsiConsole.Write(table);
-        return 0;
+        catch (JsonException ex)
+        {
+            Console.Error.WriteLine($"error: invalid JSON in pkgs.json: {ex.Message}");
+            return 1;
+        }
     }
-    catch (JsonException ex)
-    {
-        Console.Error.WriteLine($"error: invalid JSON in pkgs.json: {ex.Message}");
-        return 1;
-    }
-}
 
     /// <summary>
     /// 列出 installed.json 中已安装的包 / List installed packages from installed.json.
@@ -327,73 +312,71 @@ return await rootCommand.Parse(args).InvokeAsync();
     static int ListInstalled()
     {
         var installedPath = Path.Combine(Tools.SjtfRoot(), "installed.json");
-        var pkgsPath = Path.Combine(Tools.SjtfRoot(), "pkgs.json");
 
         if (!File.Exists(installedPath))
         {
             Installed.Load();
         }
 
+        var descriptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         try
         {
-        var descriptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        if (File.Exists(pkgsPath))
-        {
-            using var pkgsStream = File.OpenRead(pkgsPath);
-            using var pkgsDoc = JsonDocument.Parse(pkgsStream);
-            if (pkgsDoc.RootElement.ValueKind == JsonValueKind.Object)
+            var pkgs = Packages.Load();
+            foreach (var prop in pkgs.AsObject())
             {
-                foreach (var prop in pkgsDoc.RootElement.EnumerateObject())
-                {
-                    if (prop.Value.TryGetProperty("description", out var descNode) && descNode.ValueKind == JsonValueKind.String)
-                        descriptions[prop.Name] = descNode.GetString() ?? "";
-                }
+                if (prop.Value is JsonObject descObj && descObj.TryGetPropertyValue("description", out var descNode) && descNode is JsonValue descVal && descVal.GetValueKind() == JsonValueKind.String)
+                    descriptions[prop.Key] = descVal.GetValue<string>();
             }
         }
-
-        using var stream = File.OpenRead(installedPath);
-        using var doc = JsonDocument.Parse(stream);
-
-        if (doc.RootElement.ValueKind != JsonValueKind.Object)
+        catch (InvalidOperationException)
         {
-            Console.Error.WriteLine("error: installed.json root must be a JSON object.");
-            return 1;
         }
 
-        var entries = new List<(string Name, string Version, string Description)>();
-        foreach (var prop in doc.RootElement.EnumerateObject())
+        try
         {
-            var version = prop.Value.ValueKind == JsonValueKind.String
-                ? prop.Value.GetString() ?? ""
-                : prop.Value.GetRawText();
-            descriptions.TryGetValue(prop.Name, out var description);
-            entries.Add((prop.Name, version, description ?? ""));
-        }
-        entries.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+            using var stream = File.OpenRead(installedPath);
+            using var doc = JsonDocument.Parse(stream);
 
-        if (entries.Count == 0)
-        {
-            AnsiConsole.MarkupLine("[yellow]installed:[/]");
-            AnsiConsole.MarkupLine("  [grey](none)[/]");
+            if (doc.RootElement.ValueKind != JsonValueKind.Object)
+            {
+                Console.Error.WriteLine("error: installed.json root must be a JSON object.");
+                return 1;
+            }
+
+            var entries = new List<(string Name, string Version, string Description)>();
+            foreach (var prop in doc.RootElement.EnumerateObject())
+            {
+                var version = prop.Value.ValueKind == JsonValueKind.String
+                    ? prop.Value.GetString() ?? ""
+                    : prop.Value.GetRawText();
+                descriptions.TryGetValue(prop.Name, out var description);
+                entries.Add((prop.Name, version, description ?? ""));
+            }
+            entries.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+
+            if (entries.Count == 0)
+            {
+                AnsiConsole.MarkupLine("[yellow]installed:[/]");
+                AnsiConsole.MarkupLine("  [grey](none)[/]");
+                return 0;
+            }
+
+            var table = new Table()
+                .Border(TableBorder.MinimalHeavyHead)
+                .AddColumn("[bold]Name[/]")
+                .AddColumn("[bold]Version[/]")
+                .AddColumn("[bold]Description[/]");
+            foreach (var (name, version, description) in entries)
+                table.AddRow(name, version, description);
+            AnsiConsole.Write(table);
             return 0;
         }
-
-        var table = new Table()
-            .Border(TableBorder.MinimalHeavyHead)
-            .AddColumn("[bold]Name[/]")
-            .AddColumn("[bold]Version[/]")
-            .AddColumn("[bold]Description[/]");
-        foreach (var (name, version, description) in entries)
-            table.AddRow(name, version, description);
-        AnsiConsole.Write(table);
-        return 0;
+        catch (JsonException ex)
+        {
+            Console.Error.WriteLine($"error: invalid JSON in installed.json: {ex.Message}");
+            return 1;
+        }
     }
-    catch (JsonException ex)
-    {
-        Console.Error.WriteLine($"error: invalid JSON in installed.json: {ex.Message}");
-        return 1;
-    }
-}
 
     /// <summary>
     /// 异步安装单个包 / Asynchronously install a single package.

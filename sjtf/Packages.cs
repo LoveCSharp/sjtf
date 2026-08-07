@@ -27,6 +27,8 @@ internal static class Packages
     }
     /// <summary>
     /// 加载 pkgs.json 并返回根 JSON 对象 / Load pkgs.json and return the root JSON object.
+    /// 如果本地文件不存在且配置了 remote_url，则自动从远程下载。
+    /// If the local file does not exist and remote_url is configured, automatically download it from remote.
     /// </summary>
     /// <returns>包定义 JSON 对象 / Package definition JSON object.</returns>
     public static JsonObject Load()
@@ -34,7 +36,15 @@ internal static class Packages
         var path = Path.Combine(Tools.SjtfRoot(), "pkgs.json");
         if (!File.Exists(path))
         {
-            throw new InvalidOperationException($"pkgs.json not found at {path}");
+            var remoteUrl = Config.LoadPkgsRemoteUrl();
+            if (!string.IsNullOrEmpty(remoteUrl))
+            {
+                UpdateRemoteAsync(remoteUrl).GetAwaiter().GetResult();
+            }
+            else
+            {
+                throw new InvalidOperationException($"pkgs.json not found at {path}");
+            }
         }
         var raw = File.ReadAllText(path);
         var node = JsonNode.Parse(raw) ?? throw new InvalidOperationException("pkgs.json is empty");
