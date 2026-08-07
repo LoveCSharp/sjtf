@@ -29,21 +29,6 @@ public sealed class SjtfHttp
 }
 
 /// <summary>
-/// sjtf 配置根模型 / sjtf configuration root model.
-/// </summary>
-public sealed class SjtfConfig
-{
-    [TomlPropertyName("general")]
-    public SjtfGeneral General { get; set; } = new();
-
-    [TomlPropertyName("github")]
-    public SjtfGithub Github { get; set; } = new();
-
-    [TomlPropertyName("http")]
-    public SjtfHttp Http { get; set; } = new();
-}
-
-/// <summary>
 /// 通用配置 / General configuration.
 /// </summary>
 public sealed class SjtfGeneral
@@ -84,11 +69,48 @@ public sealed class SjtfGithub
     public string Proxy { get; set; } = "";
 }
 
+/// <summary>
+/// 包源配置 / Package source configuration.
+/// </summary>
+public sealed class SjtfPkgs
+{
+    /// <summary>
+    /// 是否从远程获取 pkgs.json / Whether to fetch pkgs.json from remote.
+    /// </summary>
+    [JsonPropertyName("fetch_remote")]
+    public bool FetchRemote { get; set; } = false;
+
+    /// <summary>
+    /// 远程 pkgs.json 地址 / Remote pkgs.json URL.
+    /// </summary>
+    [TomlPropertyName("remote_url")]
+    public string RemoteUrl { get; set; } = "";
+}
+
+/// <summary>
+/// sjtf 配置根模型 / sjtf configuration root model.
+/// </summary>
+public sealed class SjtfConfig
+{
+    [TomlPropertyName("general")]
+    public SjtfGeneral General { get; set; } = new();
+
+    [TomlPropertyName("github")]
+    public SjtfGithub Github { get; set; } = new();
+
+    [TomlPropertyName("http")]
+    public SjtfHttp Http { get; set; } = new();
+
+    [TomlPropertyName("pkgs")]
+    public SjtfPkgs Pkgs { get; set; } = new();
+}
+
 [TomlSerializable(typeof(SjtfConfig))]
 [TomlSerializable(typeof(SjtfGeneral))]
 [TomlSerializable(typeof(SjtfGithub))]
 [TomlSerializable(typeof(SjtfHttp))]
 [TomlSerializable(typeof(SjtfHttpHeaders))]
+[TomlSerializable(typeof(SjtfPkgs))]
 internal partial class SjtfConfigContext : TomlSerializerContext
 {
 }
@@ -146,6 +168,20 @@ internal static class Config
     {
         var proxy = LoadDoc()?.Github?.Proxy;
         return string.IsNullOrEmpty(proxy) ? "" : proxy;
+    }
+
+    /// <summary>
+    /// 从配置中加载是否从远程获取 pkgs.json / Load fetch-remote setting from config.
+    /// </summary>
+    public static bool LoadFetchRemote() => LoadDoc()?.Pkgs?.FetchRemote ?? false;
+
+    /// <summary>
+    /// 从配置中加载远程 pkgs.json 地址 / Load remote pkgs.json URL from config.
+    /// </summary>
+    public static string LoadPkgsRemoteUrl()
+    {
+        var url = LoadDoc()?.Pkgs?.RemoteUrl;
+        return string.IsNullOrEmpty(url) ? "" : url;
     }
 
     /// <summary>
@@ -210,6 +246,9 @@ internal static class Config
 install_dir = ""D:\\sjtf_pkgs""
 download_retry_max = 3
 create_symlink = true
+
+[pkgs]
+remote_url = ""https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json""
 
 [github]
 token_classic = ""put your classic token here""

@@ -11,6 +11,21 @@ namespace Sjtf;
 internal static class Packages
 {
     /// <summary>
+    /// 从远程 URL 下载 pkgs.json 并覆盖本地文件 / Download pkgs.json from remote URL and overwrite local file.
+    /// </summary>
+    /// <param name="remoteUrl">远程 pkgs.json URL / Remote pkgs.json URL.</param>
+    /// <param name="ct">取消令牌 / Cancellation token.</param>
+    public static async Task UpdateRemoteAsync(string remoteUrl, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(remoteUrl))
+            throw new InvalidOperationException("remote_url is not set in config.toml [pkgs]");
+
+        var pkgsPath = Path.Combine(Tools.SjtfRoot(), "pkgs.json");
+        Console.WriteLine($"pkgs: fetching {remoteUrl}");
+        await Tools.DownloadFileAsync(remoteUrl, pkgsPath, "pkgs", ct);
+        Console.WriteLine($"pkgs: updated {pkgsPath}");
+    }
+    /// <summary>
     /// 加载 pkgs.json 并返回根 JSON 对象 / Load pkgs.json and return the root JSON object.
     /// </summary>
     /// <returns>包定义 JSON 对象 / Package definition JSON object.</returns>

@@ -15,11 +15,50 @@ rootCommand.SetAction(_ =>
     return 0;
 });
 
-var packagesCommand = new Command("packages", "List packages defined in pkgs.json.")
+var packagesCommand = new Command("packages", "Manage package definitions.")
 {
     Aliases = { "pkgs" }
 };
-packagesCommand.SetAction(_ => ListPackages());
+packagesCommand.SetAction(_ =>
+{
+    Console.WriteLine("Usage: sjtf packages <list|update>");
+    return 0;
+});
+
+var pkgListCommand = new Command("list", "List packages defined in pkgs.json.");
+pkgListCommand.SetAction(_ => ListPackages());
+packagesCommand.Subcommands.Add(pkgListCommand);
+
+var pkgUpdateCommand = new Command("update", "Update pkgs.json from remote source.");
+pkgUpdateCommand.SetAction(async _ =>
+{
+    try
+    {
+        if (!Config.LoadFetchRemote())
+        {
+            Console.Error.WriteLine("error: fetch_remote is not enabled in config.toml [pkgs]");
+            return 1;
+        }
+
+        var remoteUrl = Config.LoadPkgsRemoteUrl();
+        if (string.IsNullOrEmpty(remoteUrl))
+        {
+            Console.Error.WriteLine("error: remote_url is not set in config.toml [pkgs]");
+            return 1;
+        }
+
+        await Packages.UpdateRemoteAsync(remoteUrl);
+        return 0;
+    }
+    catch (Exception ex)
+    {
+        var root = Tools.GetInnermostException(ex);
+        Console.Error.WriteLine($"error: pkgs update failed: {root.Message}");
+        return 1;
+    }
+});
+packagesCommand.Subcommands.Add(pkgUpdateCommand);
+
 rootCommand.Subcommands.Add(packagesCommand);
 
 var listCommand = new Command("list", "List installed packages from installed.json.")
