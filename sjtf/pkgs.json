@@ -1,0 +1,532 @@
+{
+  "fnm": {
+    "description": "Fast and simple Node.js version manager",
+    "repo": "Schniz/fnm",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*windows).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "langs\\fnm",
+    "symlinks": {
+      "fnm.exe": "fnm.exe"
+    },
+    "fetch_source": "github"
+  },
+  "uv": {
+    "description": "Fast Python package installer and resolver written in Rust",
+    "repo": "astral-sh/uv",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "langs\\uv",
+    "symlinks": {
+      "uv.exe": "uv.exe",
+      "uvw.exe": "uvw.exe",
+      "uvx.exe": "uvx.exe"
+    },
+    "fetch_source": "github"
+  },
+  "g": {
+    "description": "Simple Go version manager for Windows, Linux and macOS",
+    "repo": "voidint/g",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*windows)(?=.*amd64).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "langs\\g\\bin",
+    "symlinks": {
+      "g.exe": "g.exe"
+    },
+    "fetch_source": "github"
+  },
+  "nushell": {
+    "description": "A new type of shell that works with structured data",
+    "repo": "nushell/nushell",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\nushell",
+    "symlinks": {
+      "nu.exe": "nu.exe"
+    },
+    "fetch_source": "github"
+  },
+  "zellij": {
+    "description": "A terminal workspace with batteries included",
+    "repo": "zellij-org/zellij",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*no-web)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\zellij",
+    "symlinks": {
+      "zellij.exe": "zellij.exe"
+    },
+    "fetch_source": "github"
+  },
+  "oh-my-posh": {
+    "description": "Cross-platform prompt theme engine for any shell",
+    "repo": "JanDeDobbeleer/oh-my-posh",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*windows)(?=.*amd64).*\\.exe$"
+        }
+      },
+      "type": "portable-exe"
+    },
+    "install_dir": "cli\\oh-my-posh",
+    "symlinks": {
+      "oh-my-posh.exe": "oh-my-posh.exe"
+    },
+    "fetch_source": "github"
+  },
+  "starship": {
+    "description": "Cross-shell prompt customizable in milliseconds",
+    "repo": "starship/starship",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\starship",
+    "symlinks": {
+      "starship.exe": "starship.exe"
+    },
+    "fetch_source": "github"
+  },
+  "microsoft-coreutils": {
+    "description": "Cross-platform Unix core utilities for Windows by Microsoft",
+    "repo": "microsoft/coreutils",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*x64).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\coreutils",
+    "symlinks": {
+      "coreutils.exe": "coreutils.exe"
+    },
+    "fetch_source": "github"
+  },
+  "yazi": {
+    "description": "Blazing fast terminal file manager written in Rust",
+    "repo": "sxyazi/yazi",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*windows)(?=.*x86_64)(?=.*msvc).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\yazi",
+    "symlinks": {
+      "yazi.exe": "yazi.exe",
+      "ya.exe": "ya.exe"
+    },
+    "fetch_source": "github"
+  },
+  "lf": {
+    "description": "Terminal file manager written in Go",
+    "repo": "gokcehan/lf",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*windows)(?=.*amd64).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\lf",
+    "symlinks": {
+      "lf.exe": "lf.exe"
+    },
+    "fetch_source": "github"
+  },
+  "fzf": {
+    "description": "Command-line fuzzy finder",
+    "repo": "junegunn/fzf",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*windows)(?=.*amd64).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\fzf",
+    "symlinks": {
+      "fzf.exe": "fzf.exe"
+    },
+    "fetch_source": "github"
+  },
+  "zoxide": {
+    "description": "Smarter cd command that learns your habits",
+    "repo": "ajeetdsouza/zoxide",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*x86_64)(?=.*windows).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\zoxide",
+    "symlinks": {
+      "zoxide.exe": "zoxide.exe"
+    },
+    "fetch_source": "github"
+  },
+  "fd": {
+    "description": "Simple, fast and user-friendly alternative to find",
+    "repo": "sharkdp/fd",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\fd",
+    "symlinks": {
+      "fd.exe": "fd.exe"
+    },
+    "fetch_source": "github"
+  },
+  "sd": {
+    "description": "Intuitive find and replace CLI tool",
+    "repo": "chmln/sd",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\sd",
+    "symlinks": {
+      "sd.exe": "sd.exe"
+    },
+    "fetch_source": "github"
+  },
+  "ripgrep": {
+    "description": "Fast line-oriented search tool that recursively searches directories",
+    "repo": "BurntSushi/ripgrep",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\ripgrep",
+    "symlinks": {
+      "rg.exe": "rg.exe"
+    },
+    "fetch_source": "github"
+  },
+  "eza": {
+    "description": "Modern replacement for ls with colors and Git integration",
+    "repo": "eza-community/eza",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*gnu).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\eza",
+    "symlinks": {
+      "eza.exe": "eza.exe"
+    },
+    "fetch_source": "github"
+  },
+  "dust": {
+    "description": "More intuitive version of du that shows disk usage",
+    "repo": "bootandy/dust",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\dust",
+    "symlinks": {
+      "dust.exe": "dust.exe"
+    },
+    "fetch_source": "github"
+  },
+  "duf": {
+    "description": "Better df alternative with colorful output",
+    "repo": "muesli/duf",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\duf",
+    "symlinks": {
+      "duf.exe": "duf.exe"
+    },
+    "fetch_source": "github"
+  },
+  "bat": {
+    "description": "Cat clone with syntax highlighting and Git integration",
+    "repo": "sharkdp/bat",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\bat",
+    "symlinks": {
+      "bat.exe": "bat.exe"
+    },
+    "fetch_source": "github"
+  },
+  "jq": {
+    "description": "Lightweight command-line JSON processor",
+    "repo": "jqlang/jq",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*windows)(?=.*amd64).*\\.exe$"
+        }
+      },
+      "type": "portable-exe"
+    },
+    "install_dir": "cli\\jq",
+    "symlinks": {
+      "jq.exe": "jq.exe"
+    },
+    "fetch_source": "github"
+  },
+  "bottom": {
+    "description": "Cross-platform graphical process/system monitor",
+    "repo": "ClementTsang/bottom",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\bottom",
+    "symlinks": {
+      "btm.exe": "btm.exe"
+    },
+    "fetch_source": "github"
+  },
+  "procs": {
+    "description": "Modern replacement for ps with colorized output",
+    "repo": "dalance/procs",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*x86_64)(?=.*windows).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\procs",
+    "symlinks": {
+      "procs.exe": "procs.exe"
+    },
+    "fetch_source": "github"
+  },
+  "carapace": {
+    "description": "Multi-shell tab completion generator for CLI tools",
+    "repo": "carapace-sh/carapace-bin",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*amd64)(?=.*windows).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "cli\\carapace",
+    "symlinks": {
+      "carapace.exe": "carapace.exe"
+    },
+    "fetch_source": "github"
+  },
+  "zed": {
+    "description": "High-performance multiplayer code editor from the creators of Atom",
+    "repo": "zed-industries/zed",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*x86_64).*\\.exe$"
+        }
+      },
+      "type": "installer",
+      "install_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /TASKS=\"!addtopath\" /DIR=\"{INSTALL_DIR}\"",
+      "uninstall_program": "unins000.exe",
+      "uninstall_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART"
+    },
+    "install_dir": "editor\\zed",
+    "symlinks": {
+      "zed.exe": "Zed.exe"
+    },
+    "fetch_source": "github"
+  },
+  "vscode": {
+    "description": "Visual Studio Code - lightweight source code editor by Microsoft",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "https://update.code.visualstudio.com/api/update/win32-x64-archive/stable/latest"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "editor\\vscode",
+    "script_after_install": true,
+    "script_after_uninstall": true,
+    "fetch_source": "update_code_visualstudio_com"
+  },
+  "edit": {
+    "description": "Simple text editor for Windows inspired by MS-DOS Editor",
+    "repo": "microsoft/edit",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "editor\\edit",
+    "symlinks": {
+      "edit.exe": "edit.exe"
+    },
+    "fetch_source": "github"
+  },
+  "notepad3": {
+    "description": "Lightweight Scintilla-based text editor with syntax highlighting",
+    "repo": "rizonesoft/Notepad3",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*x64)(?=.*Portable).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "editor\\notepad3",
+    "script_after_install": true,
+    "script_after_uninstall": true,
+    "fetch_source": "github"
+  },
+  "git": {
+    "description": "Distributed version control system",
+    "repo": "git-for-windows/git",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?i)(?=.*MinGit)(?=.*64-bit)(?!.*busybox).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "vcs\\git",
+    "symlinks": {
+      "git.exe": "cmd\\git.exe"
+    },
+    "fetch_source": "github"
+  },
+  "opencode": {
+    "description": "AI-powered coding assistant that runs in your terminal",
+    "repo": "anomalyco/opencode",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?i)(?=.*windows)(?=.*x64)(?!.*baseline).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "ai\\opencode",
+    "symlinks": {
+      "opencode.exe": "opencode.exe"
+    },
+    "fetch_source": "github"
+  },
+  "pi": {
+    "description": "Pi is a minimal agent harness.",
+    "repo": "earendil-works/pi",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?i)(?=.*windows)(?=.*x64).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "ai\\pi",
+    "symlinks": {
+      "pi.exe": "pi.exe"
+    },
+    "fetch_source": "github"
+  },
+  "rtk": {
+    "description": "CLI toolkit for AI-assisted development workflows",
+    "repo": "rtk-ai/rtk",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?i)(?=.*windows)(?=.*x86_64)(?=.*msvc).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "install_dir": "ai\\rtk",
+    "symlinks": {
+      "rtk.exe": "rtk.exe"
+    },
+    "fetch_source": "github"
+  }
+}

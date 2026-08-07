@@ -1,0 +1,22 @@
+# Build outputs
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+
+# Auto-generated files (created at runtime)
+installed.json
+config.toml
+cache/
+
+# VS / IDE
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# OS
+Thumbs.db
+.DS_Store
