@@ -204,7 +204,8 @@ internal static class InstallHelpers
                 var cmdContent = kv.Value?.GetValue<string>() ?? "";
                 if (string.IsNullOrEmpty(cmdContent)) continue;
                 var cmdPath = Path.Combine(symRoot, cmdName);
-                var replaced = cmdContent.Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase);
+                var replaced = cmdContent.Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase)
+                                        .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
                 Console.WriteLine($"{name}: shim {cmdPath}");
                 File.WriteAllText(cmdPath, replaced, System.Text.Encoding.UTF8);
             }
