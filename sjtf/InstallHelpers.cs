@@ -45,7 +45,7 @@ internal static class InstallHelpers
         {
             if (!File.Exists(dlPath))
             {
-                await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, $"{name}: downloading", maxConn, splitCount, minSplitMB);
+                await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, $"{name}: downloading", maxConn, splitCount, minSplitMB, ct);
             }
 
             Console.WriteLine($"{name}: verifying {plan.DigestAlgorithm} digest...");
@@ -57,7 +57,7 @@ internal static class InstallHelpers
 
             try { File.Delete(dlPath); } catch { }
             Console.WriteLine($"{name}: digest mismatch, re-downloading...");
-            await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, $"{name}: downloading", maxConn, splitCount, minSplitMB);
+            await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, $"{name}: downloading", maxConn, splitCount, minSplitMB, ct);
 
             actualDigest = await ComputeDigestAsync(dlPath, plan.DigestAlgorithm, ct);
             if (string.Equals(actualDigest, plan.ExpectedDigest, StringComparison.OrdinalIgnoreCase))

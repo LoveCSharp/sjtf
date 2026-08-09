@@ -77,7 +77,7 @@ internal static class Aria2
         try
         {
             await Tools.DownloadFileBuiltinAsync(url, zipPath, "aria2: downloading",
-                Config.LoadMaxConnectionPerServer(), Config.LoadSplit(), Config.LoadMinSplitSize());
+                Config.LoadMaxConnectionPerServer(), Config.LoadSplit(), Config.LoadMinSplitSize(), ct);
             Console.WriteLine($"aria2: extracting {zipPath}...");
             ExtractAria2Binary(zipPath, toolsDir, exeName);
         }

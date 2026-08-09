@@ -23,7 +23,7 @@ internal static class Packages
         var pkgsPath = Path.Combine(Tools.SjtfRoot(), "pkgs.json");
         Console.WriteLine($"pkgs: fetching {remoteUrl}");
         await Tools.DownloadFileAsync(remoteUrl, pkgsPath, "pkgs",
-            Config.LoadMaxConnectionPerServer(), Config.LoadSplit(), Config.LoadMinSplitSize());
+            Config.LoadMaxConnectionPerServer(), Config.LoadSplit(), Config.LoadMinSplitSize(), ct);
         Console.WriteLine($"pkgs: updated {pkgsPath}");
     }
     /// <summary>

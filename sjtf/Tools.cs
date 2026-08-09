@@ -42,11 +42,12 @@ internal static partial class Tools
     /// <param name="url">要下载的 URL / URL to download.</param>
     /// <param name="destFile">目标文件路径 / Destination file path.</param>
     /// <param name="label">进度条标签 / Progress bar label.</param>
-    public static async Task DownloadFileAsync(string url, string destFile, string? label = null)
+    public static async Task DownloadFileAsync(string url, string destFile, string? label = null,
+        CancellationToken ct = default)
     {
         using var http = new HttpClient();
         http.DefaultRequestHeaders.UserAgent.ParseAdd(Config.LoadUserAgent());
-        using var resp = await http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+        using var resp = await http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
         resp.EnsureSuccessStatusCode();
 
         var total = resp.Content.Headers.ContentLength;
@@ -440,7 +441,8 @@ internal static partial class Tools
     /// <param name="splitCount">分块数 / Split count.</param>
     /// <param name="minSplitSizeMB">最小分块大小（MB）/ Minimum split size in MB.</param>
     public static async Task RunAria2Async(string aria2cPath, string url, string destFile, string? label,
-        int maxConnections, int splitCount, int minSplitSizeMB)
+        int maxConnections, int splitCount, int minSplitSizeMB,
+        CancellationToken ct = default)
     {
         var args = Aria2.BuildArgs(url, destFile, maxConnections, splitCount, minSplitSizeMB);
 
@@ -466,7 +468,15 @@ internal static partial class Tools
         _ = proc.StandardOutput.BaseStream.CopyToAsync(Console.OpenStandardOutput());
         _ = proc.StandardError.BaseStream.CopyToAsync(Console.OpenStandardError());
 
-        await tcs.Task;
+        try
+        {
+            await tcs.Task.WaitAsync(ct);
+        }
+        catch (OperationCanceledException)
+        {
+            try { proc.Kill(true); } catch { }
+            throw;
+        }
 
         if (proc.ExitCode != 0)
         {
@@ -485,7 +495,8 @@ internal static partial class Tools
     /// <param name="splitCount">目标分块数 / Target number of chunks.</param>
     /// <param name="minSplitSizeMB">最小分块大小（MB）/ Minimum chunk size (MB).</param>
     public static async Task DownloadFileAsync(string url, string destFile, string? label,
-        int maxConnections, int splitCount, int minSplitSizeMB)
+        int maxConnections, int splitCount, int minSplitSizeMB,
+        CancellationToken ct = default)
     {
         maxConnections = Math.Clamp(maxConnections, 1, 16);
         splitCount = Math.Clamp(splitCount, 1, 16);
@@ -495,10 +506,10 @@ internal static partial class Tools
         {
             try
             {
-                var aria2cPath = await Aria2.FindOrDownloadAria2Async();
+                var aria2cPath = await Aria2.FindOrDownloadAria2Async(ct);
                 if (!string.IsNullOrEmpty(aria2cPath) && File.Exists(aria2cPath))
                 {
-                    await RunAria2Async(aria2cPath, url, destFile, label, maxConnections, splitCount, minSplitSizeMB);
+                    await RunAria2Async(aria2cPath, url, destFile, label, maxConnections, splitCount, minSplitSizeMB, ct);
                     return;
                 }
             }
@@ -509,14 +520,15 @@ internal static partial class Tools
             }
         }
 
-        await DownloadFileBuiltinAsync(url, destFile, label, maxConnections, splitCount, minSplitSizeMB);
+        await DownloadFileBuiltinAsync(url, destFile, label, maxConnections, splitCount, minSplitSizeMB, ct);
     }
 
     /// <summary>
     /// 使用内置多线程分块下载文件（不使用 aria2）/ Download file using built-in multi-threaded chunk downloader (no aria2).
     /// </summary>
     public static async Task DownloadFileBuiltinAsync(string url, string destFile, string? label,
-        int maxConnections, int splitCount, int minSplitSizeMB)
+        int maxConnections, int splitCount, int minSplitSizeMB,
+        CancellationToken ct = default)
     {
         maxConnections = Math.Clamp(maxConnections, 1, 16);
         splitCount = Math.Clamp(splitCount, 1, 16);
@@ -525,20 +537,20 @@ internal static partial class Tools
         using var http = new HttpClient();
         http.DefaultRequestHeaders.UserAgent.ParseAdd(Config.LoadUserAgent());
 
-        using var headResp = await http.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
+        using var headResp = await http.SendAsync(new HttpRequestMessage(HttpMethod.Head, url), ct);
         headResp.EnsureSuccessStatusCode();
 
         var totalSize = headResp.Content.Headers.ContentLength;
         if (!totalSize.HasValue || totalSize.Value == 0)
         {
-            await DownloadFileAsync(url, destFile, label);
+            await DownloadFileAsync(url, destFile, label, ct);
             return;
         }
 
         var acceptRanges = headResp.Headers.AcceptRanges.Any(h => h.Equals("bytes", StringComparison.OrdinalIgnoreCase));
         if (!acceptRanges)
         {
-            await DownloadFileAsync(url, destFile, label);
+            await DownloadFileAsync(url, destFile, label, ct);
             return;
         }
 
@@ -548,7 +560,7 @@ internal static partial class Tools
         int actualConnections = Math.Min(splitCount, maxConnections);
         if (fileSize < minChunkBytes * 2 || actualConnections < 2)
         {
-            await DownloadFileAsync(url, destFile, label);
+            await DownloadFileAsync(url, destFile, label, ct);
             return;
         }
 
@@ -559,7 +571,7 @@ internal static partial class Tools
         actualConnections = Math.Clamp(actualConnections, 1, 16);
         if (actualConnections < 2)
         {
-            await DownloadFileAsync(url, destFile, label);
+            await DownloadFileAsync(url, destFile, label, ct);
             return;
         }
 
@@ -591,10 +603,10 @@ internal static partial class Tools
             for (int i = 0; i < actualConnections; i++)
             {
                 var (offset, length, chunkPath) = chunks[i];
-                tasks[i] = DownloadChunkAsync(http, url, offset, length, chunkPath, progress, i);
+                tasks[i] = DownloadChunkAsync(http, url, offset, length, chunkPath, progress, i, ct);
             }
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).WaitAsync(ct);
             progress.Complete();
 
             await using var finalStream = File.Create(destFile);
@@ -615,27 +627,27 @@ internal static partial class Tools
     /// 下载单个分块（带 Range 请求头）/ Download a single chunk with Range header.
     /// </summary>
     private static async Task DownloadChunkAsync(HttpClient http, string url, long offset, long length,
-        string chunkPath, ChunkProgress progress, int chunkIndex)
+        string chunkPath, ChunkProgress progress, int chunkIndex, CancellationToken ct = default)
     {
         using var req = new HttpRequestMessage(HttpMethod.Get, url);
         req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(offset, offset + length - 1);
         req.Headers.UserAgent.ParseAdd(Config.LoadUserAgent());
 
-        using var resp = await http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
+        using var resp = await http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
         resp.EnsureSuccessStatusCode();
 
         var expectedLen = resp.Content.Headers.ContentLength ?? length;
         if (expectedLen != length)
             throw new InvalidOperationException($"chunk {chunkIndex}: expected {length} bytes, server returned {expectedLen}");
 
-        await using var src = await resp.Content.ReadAsStreamAsync();
+        await using var src = await resp.Content.ReadAsStreamAsync(ct);
         await using var dst = File.Create(chunkPath);
 
         var buffer = new byte[65536];
         int read;
-        while ((read = await src.ReadAsync(buffer).ConfigureAwait(false)) > 0)
+        while ((read = await src.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
         {
-            await dst.WriteAsync(buffer.AsMemory(0, read)).ConfigureAwait(false);
+            await dst.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
             progress.Report(read);
         }
         progress.CompleteChunk();

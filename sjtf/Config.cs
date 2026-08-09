@@ -6,17 +6,6 @@ using Tomlyn.Serialization;
 namespace Sjtf;
 
 /// <summary>
-/// HTTP 请求头配置 / HTTP request header configuration.
-/// </summary>
-public sealed class SjtfHttpHeaders
-{
-    /// <summary>
-    /// HTTP 请求 User-Agent / HTTP request User-Agent.
-    /// </summary>
-    public string user_agent { get; set; } = "";
-}
-
-/// <summary>
 /// HTTP 相关配置 / HTTP related configuration.
 /// </summary>
 public sealed class SjtfHttp
@@ -161,7 +150,6 @@ public sealed class SjtfConfig
 [TomlSerializable(typeof(SjtfGeneral))]
 [TomlSerializable(typeof(SjtfGithub))]
 [TomlSerializable(typeof(SjtfHttp))]
-[TomlSerializable(typeof(SjtfHttpHeaders))]
 [TomlSerializable(typeof(SjtfPkgs))]
 [TomlSerializable(typeof(SjtfDownload))]
 [TomlSerializable(typeof(SjtfAria2))]
