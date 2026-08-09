@@ -45,7 +45,7 @@ internal static class InstallHelpers
         {
             if (!File.Exists(dlPath))
             {
-                await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, $"{name}: downloading", maxConn, splitCount, minSplitMB, ct);
+                await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, $"{name}: downloading", maxConn, splitCount, minSplitMB);
             }
 
             Console.WriteLine($"{name}: verifying {plan.DigestAlgorithm} digest...");
