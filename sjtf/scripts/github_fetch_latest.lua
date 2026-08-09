@@ -89,9 +89,14 @@ if type(digest) == "string" then
     end
 end
 
+local download_url = matched.browser_download_url
+if proxy ~= "" then
+    download_url = proxy .. "/" .. download_url
+end
+
 result = {
     version = tag,
-    url = proxy + "/" + matched.browser_download_url,
+    url = download_url,
     digest = digest,
     digest_algorithm = digest_algorithm
 }
