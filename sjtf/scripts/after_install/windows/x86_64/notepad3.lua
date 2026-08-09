@@ -8,9 +8,9 @@
 --   install_dir  - full path to the package install directory
 --   install_root - root install directory
 --
--- Creates notepad3.cmd and np3.cmd in the symlink directory.
+-- Creates notepad3.cmd and np3.cmd in the shims directory.
 
-local symlink_dir = install_root .. "\\symlink"
+local symlink_dir = install_root .. "\\shims"
 
 local content = "@echo off\r\nsetlocal\r\n\"" .. install_dir .. "\\Notepad3.exe\" %*\r\n"
 

@@ -65,7 +65,7 @@ sjtf i vscode
 
 ### `uninstall` (alias: `u`, `rm`, `remove`)
 
-Uninstall one or more packages. Removes symlinks, install directory, and runs uninstaller scripts if defined.
+Uninstall one or more packages. Removes shims, install directory, and runs uninstaller scripts if defined.
 
 ```bash
 sjtf uninstall fnm
@@ -113,7 +113,7 @@ Main configuration file. Automatically created with default values on first run.
 [general]
 install_dir = "D:\\sjtf_pkgs"     # Root directory for all installations
 download_retry_max = 3             # Max download retry attempts
-create_symlink = true              # Create symlinks (false to disable)
+create_symlink = true              # Create shims (false to disable)
 
 [pkgs]
 remote_url = "https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json"  # Remote pkgs.json URL for `sjtf packages update`
@@ -135,7 +135,7 @@ Package definitions. Use `sjtf packages update` to download the latest version f
 | `repo` | GitHub repository (`owner/name`) |
 | `fetch_asset` | Asset matching config (arch, type, pattern) |
 | `install_dir` | Relative install directory |
-| `symlinks` | Map of symlink name → relative path in install dir |
+| `shim` | Shim config: `{ "symlink": ["relative/path/to/exe"] }` — link name is derived from the target file name |
 | `fetch_source` | Fetch source type (`github`, `update_code_visualstudio_com`, etc.) |
 | `script_after_install` | `true` to run post-install Lua script |
 | `script_after_uninstall` | `true` to run post-uninstall Lua script |
@@ -162,9 +162,7 @@ Package definitions. Use `sjtf packages update` to download the latest version f
       "type": "portable-compressed-archive"
     },
     "install_dir": "langs\\fnm",
-    "symlinks": {
-      "fnm.exe": "fnm.exe"
-    },
+    "shim": { "symlink": ["fnm.exe"] },
     "fetch_source": "github"
   }
 }
@@ -396,7 +394,7 @@ C# injects the following global variables before executing scripts:
 -- scripts/after_install/windows/x86_64/vscode.lua
 
 local code_cmd_path = install_dir .. "\\bin\\code.cmd"
-local symlink_dir = install_root .. "\\symlink"
+local symlink_dir = install_root .. "\\shims"
 local output_path = symlink_dir .. "\\code.cmd"
 
 -- Read the original script content
@@ -408,7 +406,7 @@ f:close()
 -- Replace relative paths with absolute paths
 content = content:gsub("%%~dp0%.%.", install_dir)
 
--- Write to symlink directory
+-- Write to shims directory
 local out = io.open(output_path, "w")
 if not out then error("cannot write " .. output_path) end
 out:write(content)
@@ -427,7 +425,7 @@ end
 ```lua
 -- scripts/after_uninstall/windows/x86_64/vscode.lua
 
-local symlink_dir = install_root .. "\\symlink"
+local symlink_dir = install_root .. "\\shims"
 local output_path = symlink_dir .. "\\code.cmd"
 
 local err = remove_file(output_path)
@@ -441,13 +439,13 @@ end
 - Script paths must strictly match `{os}/{arch}/{name}.lua`, otherwise execution is skipped
 - Script failures do not prevent the install/uninstall process from completing (errors are printed to stderr)
 - During uninstallation, `install_dir` is still accessible (the directory has not been deleted yet), which can be used to clean up files created within that directory
-- The `install_root/symlink` directory is automatically created when the program starts; no need to create it manually in scripts
+- The `install_root/shims` directory is automatically created when the program starts; no need to create it manually in scripts
 
 ## Directory Structure
 
 ```
 install_dir/
-├── symlink/              # Symlinks and wrapper scripts
+├── shims/              # Shims and wrapper scripts
 │   ├── fnm.exe
 │   ├── uv.exe
 │   ├── code.cmd

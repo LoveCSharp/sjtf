@@ -11,11 +11,11 @@
 -- C# registered functions:
 --   create_directory(path) -> nil on success, error string on failure
 --
--- Creates a code.cmd wrapper in the symlink directory and
+-- Creates a code.cmd wrapper in the shims directory and
 -- ensures the data directory exists.
 
 local code_cmd_path = install_dir .. "\\bin\\code.cmd"
-local symlink_dir = install_root .. "\\symlink"
+local symlink_dir = install_root .. "\\shims"
 local output_path = symlink_dir .. "\\code.cmd"
 
 local f = io.open(code_cmd_path, "r")

@@ -65,7 +65,7 @@ sjtf i vscode
 
 ### `uninstall`（别名：`u`、`rm`、`remove`）
 
-卸载一个或多个包。删除符号链接、安装目录，并在定义了卸载脚本时执行卸载脚本。
+卸载一个或多个包。删除 shims、安装目录，并在定义了卸载脚本时执行卸载脚本。
 
 ```bash
 sjtf uninstall fnm
@@ -113,7 +113,7 @@ sjtf --version
 [general]
 install_dir = "D:\\sjtf_pkgs"     # 所有安装的根目录
 download_retry_max = 3             # 下载最大重试次数
-create_symlink = true              # 是否创建符号链接（false 禁用）
+create_symlink = true              # 是否创建 shims（false 禁用）
 
 [pkgs]
 remote_url = "https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json"  # `sjtf packages update` 使用的远程 pkgs.json URL
@@ -135,7 +135,7 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 | `repo` | GitHub 仓库（`owner/name`） |
 | `fetch_asset` | 资产匹配配置（架构、类型、正则） |
 | `install_dir` | 相对安装目录 |
-| `symlinks` | 符号链接名称 → 安装目录内相对路径的映射 |
+| `shim` | Shim 配置：`{ "symlink": ["相对路径/到/可执行文件"] }` — 链接名从目标文件名自动推导 |
 | `fetch_source` | 获取源类型（`github`、`update_code_visualstudio_com` 等） |
 | `script_after_install` | 设为 `true` 执行安装后 Lua 脚本 |
 | `script_after_uninstall` | 设为 `true` 执行卸载后 Lua 脚本 |
@@ -162,9 +162,7 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
       "type": "portable-compressed-archive"
     },
     "install_dir": "langs\\fnm",
-    "symlinks": {
-      "fnm.exe": "fnm.exe"
-    },
+    "shim": { "symlink": ["fnm.exe"] },
     "fetch_source": "github"
   }
 }
@@ -394,7 +392,7 @@ C# 在执行脚本前会注入以下全局变量：
 -- scripts/after_install/windows/x86_64/vscode.lua
 
 local code_cmd_path = install_dir .. "\\bin\\code.cmd"
-local symlink_dir = install_root .. "\\symlink"
+local symlink_dir = install_root .. "\\shims"
 local output_path = symlink_dir .. "\\code.cmd"
 
 -- 读取原始脚本内容
@@ -406,7 +404,7 @@ f:close()
 -- 替换相对路径为绝对路径
 content = content:gsub("%%~dp0%.%.", install_dir)
 
--- 写入 symlink 目录
+-- 写入 shims 目录
 local out = io.open(output_path, "w")
 if not out then error("cannot write " .. output_path) end
 out:write(content)
@@ -425,7 +423,7 @@ end
 ```lua
 -- scripts/after_uninstall/windows/x86_64/vscode.lua
 
-local symlink_dir = install_root .. "\\symlink"
+local symlink_dir = install_root .. "\\shims"
 local output_path = symlink_dir .. "\\code.cmd"
 
 local err = remove_file(output_path)
@@ -439,13 +437,13 @@ end
 - 脚本路径必须严格匹配 `{os}/{arch}/{name}.lua`，否则会跳过执行
 - 脚本执行失败不会阻止安装/卸载流程完成（错误会打印到 stderr）
 - 卸载时 `install_dir` 仍可访问（目录尚未被删除），可用于清理该目录内创建的文件
-- `install_root/symlink` 目录会在程序启动时自动创建，脚本中无需手动创建
+- `install_root/shims` 目录会在程序启动时自动创建，脚本中无需手动创建
 
 ## 目录结构
 
 ```
 install_dir/
-├── symlink/              # 符号链接和包装脚本
+├── shims/              # 符号链接和包装脚本
 │   ├── fnm.exe
 │   ├── uv.exe
 │   ├── code.cmd

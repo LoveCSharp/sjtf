@@ -11,9 +11,9 @@
 -- C# registered functions:
 --   remove_file(path) -> nil on success, error string on failure
 --
--- Removes the code.cmd wrapper from the symlink directory.
+-- Removes the code.cmd wrapper from the shims directory.
 
-local symlink_dir = install_root .. "\\symlink"
+local symlink_dir = install_root .. "\\shims"
 local output_path = symlink_dir .. "\\code.cmd"
 
 local err = remove_file(output_path)

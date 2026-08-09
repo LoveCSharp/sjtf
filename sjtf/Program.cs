@@ -519,7 +519,7 @@ catch (OperationCanceledException)
     {
         if (shimObj.TryGetPropertyValue("symlink", out var symlinkNode) && symlinkNode is JsonArray symlinkArr)
         {
-            var symRoot = Path.Combine(installRoot, "symlink");
+            var symRoot = Path.Combine(installRoot, "shims");
             foreach (var item in symlinkArr)
             {
                 if (item is not JsonValue val || val.GetValueKind() != JsonValueKind.String) continue;
@@ -537,13 +537,13 @@ catch (OperationCanceledException)
     }
     else if (pkg.TryGetPropertyValue("symlinks", out var symNode) && symNode is JsonObject symObj)
     {
-        var symRoot = Path.Combine(installRoot, "symlink");
+        var symRoot = Path.Combine(installRoot, "shims");
         foreach (var kv in symObj)
         {
             var linkPath = Path.Combine(symRoot, kv.Key);
             if (File.Exists(linkPath))
             {
-                Console.WriteLine($"{name}: removing symlink {linkPath}");
+                    Console.WriteLine($"{name}: removing shim {linkPath}");
                 File.Delete(linkPath);
             }
         }

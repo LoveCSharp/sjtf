@@ -198,11 +198,11 @@ internal static class InstallHelpers
     {
         if (!Config.LoadCreateSymlink())
         {
-            Console.WriteLine($"{name}: symlink creation disabled by config");
+            Console.WriteLine($"{name}: shim creation disabled by config");
             return;
         }
 
-        var symRoot = Path.Combine(installRoot, "symlink");
+        var symRoot = Path.Combine(installRoot, "shims");
         Directory.CreateDirectory(symRoot);
 
         if (pkg.TryGetPropertyValue("shim", out var shimNode) && shimNode is JsonObject shimObj)
@@ -230,7 +230,7 @@ internal static class InstallHelpers
                 var linkPath = Path.Combine(symRoot, kv.Key);
                 var targetRel = kv.Value?.GetValueKind() == JsonValueKind.String ? kv.Value.GetValue<string>() : "";
                 var targetFull = Path.Combine(installFull, targetRel);
-                Console.WriteLine($"{name}: symlink {linkPath} -> {targetFull}");
+                Console.WriteLine($"{name}: shim {linkPath} -> {targetFull}");
                 Tools.CreateSymlink(linkPath, targetFull);
             }
         }
@@ -259,7 +259,7 @@ internal static class InstallHelpers
 
         Console.WriteLine($"{name}: running after-install script");
 
-        Directory.CreateDirectory(Path.Combine(installRoot, "symlink"));
+        Directory.CreateDirectory(Path.Combine(installRoot, "shims"));
 
         using var lua = new Lua();
 

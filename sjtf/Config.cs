@@ -267,12 +267,12 @@ internal static class Config
     }
 
     /// <summary>
-    /// 确保 symlink 目录存在 / Ensure the symlink directory exists.
+    /// 确保 shims 目录存在 / Ensure the shims directory exists.
     /// </summary>
     public static void EnsureSymlinkDir()
     {
         var installRoot = LoadInstallDir();
-        var symlinkDir = Path.Combine(installRoot, "symlink");
+        var symlinkDir = Path.Combine(installRoot, "shims");
         Directory.CreateDirectory(symlinkDir);
     }
 
