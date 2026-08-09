@@ -91,7 +91,7 @@ end
 
 result = {
     version = tag,
-    url = matched.browser_download_url,
+    url = proxy + "/" + matched.browser_download_url,
     digest = digest,
     digest_algorithm = digest_algorithm
 }
