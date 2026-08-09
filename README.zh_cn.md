@@ -10,15 +10,16 @@
 - 🚀 一键安装/卸载/升级命令行工具
 - 🔍 基于 Lua 脚本的可扩展版本获取
 - ✅ SHA-256/SHA-1/SHA-512/MD5 摘要校验
-- 🔗 自动创建符号链接
+- 🔗 自动创建 shim/符号链接
 - 🌐 跨平台：Windows、Linux、macOS
 - 🏗️ 支持 Native AOT 编译
 
 ## 快速开始
 
 ```bash
-sjtf packages          # 列出可用包
-sjtf list              # 列出已安装包
+sjtf packages list    # 列出可用包
+sjtf packages update  # 从远程更新 pkgs.json
+sjtf list             # 列出已安装包
 sjtf install fnm uv    # 安装包
 sjtf uninstall fnm     # 卸载包
 sjtf upgrade --all     # 升级所有已安装包
@@ -30,7 +31,8 @@ sjtf --version         # 显示版本号
 
 | 命令 | 别名 | 说明 |
 |---------|---------|-------------|
-| `packages` | `pkgs` | 列出 `pkgs.json` 中定义的所有包 |
+| `packages list` | `pkgs list`、`pkgs ls` | 列出 `pkgs.json` 中定义的所有包 |
+| `packages update` | `pkgs update`、`pkgs up` | 从远程下载最新的 `pkgs.json` |
 | `list` | `ls` | 列出已安装的包 |
 | `install` | `i` | 安装一个或多个包 |
 | `uninstall` | `u`、`rm`、`remove` | 卸载一个或多个包 |
@@ -42,6 +44,8 @@ sjtf --version         # 显示版本号
 
 所有配置文件位于可执行文件同级目录。
 
+> **注意（Windows）：** 创建符号链接需要管理员权限或启用开发人员模式。否则 symlink 创建会失败。
+
 ### `config.toml`
 
 主配置文件。首次运行时会自动生成，包含默认值。
@@ -50,19 +54,21 @@ sjtf --version         # 显示版本号
 [general]
 install_dir = "D:\\sjtf_pkgs"     # 所有安装的根目录
 download_retry_max = 3             # 下载最大重试次数
-create_symlink = true              # 是否创建符号链接（false 禁用）
+
+[pkgs]
+remote_url = "https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json"  # `sjtf packages update` 使用的远程 pkgs.json URL
 
 [github]
 token_classic = "put your classic token here"  # GitHub 个人访问令牌（可选）
 proxy = "https://gh-proxy.com"                 # GitHub 代理（可选）
 
 [http.request.header]
-user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0"  # HTTP 请求 User-Agent
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0"
 ```
 
 ### `pkgs.json`
 
-包定义文件。
+包定义文件。使用 `sjtf packages update` 可从 `config.toml` 配置的远程 URL 下载最新版本。
 
 ```json
 {
@@ -76,9 +82,11 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "langs\\fnm",
-    "symlinks": {
-      "fnm.exe": "fnm.exe"
+    "pkg_install_relative_dir": "langs\\fnm",
+    "shim": {
+      "windows": {
+        "symlink": ["fnm.exe"]
+      }
     },
     "fetch_source": "github"
   }
