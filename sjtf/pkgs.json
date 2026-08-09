@@ -10,7 +10,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "langs\\fnm",
+    "pkg_install_relative_dir": "langs\\fnm",
     "shim": {
       "windows": {
         "symlink": [
@@ -31,7 +31,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "langs\\uv",
+    "pkg_install_relative_dir": "langs\\uv",
     "shim": {
       "windows": {
         "symlink": [
@@ -54,7 +54,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "langs\\g\\bin",
+    "pkg_install_relative_dir": "langs\\g\\bin",
     "shim": {
       "windows": {
         "symlink": [
@@ -75,7 +75,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\nushell",
+    "pkg_install_relative_dir": "cli\\nushell",
     "shim": {
       "windows": {
         "cmd": {
@@ -97,7 +97,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\zellij",
+    "pkg_install_relative_dir": "cli\\zellij",
     "shim": {
       "windows": {
         "symlink": [
@@ -118,7 +118,7 @@
       },
       "type": "portable-exe"
     },
-    "install_dir": "cli\\oh-my-posh",
+    "pkg_install_relative_dir": "cli\\oh-my-posh",
     "shim": {
       "windows": {
         "symlink": [
@@ -139,7 +139,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\starship",
+    "pkg_install_relative_dir": "cli\\starship",
     "shim": {
       "windows": {
         "symlink": [
@@ -160,7 +160,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\coreutils",
+    "pkg_install_relative_dir": "cli\\coreutils",
     "shim": {
       "windows": {
         "symlink": [
@@ -181,7 +181,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\yazi",
+    "pkg_install_relative_dir": "cli\\yazi",
     "shim": {
       "windows": {
         "symlink": [
@@ -203,7 +203,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\lf",
+    "pkg_install_relative_dir": "cli\\lf",
     "shim": {
       "windows": {
         "symlink": [
@@ -224,7 +224,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\fzf",
+    "pkg_install_relative_dir": "cli\\fzf",
     "shim": {
       "windows": {
         "symlink": [
@@ -245,7 +245,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\zoxide",
+    "pkg_install_relative_dir": "cli\\zoxide",
     "shim": {
       "windows": {
         "symlink": [
@@ -266,7 +266,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\fd",
+    "pkg_install_relative_dir": "cli\\fd",
     "shim": {
       "windows": {
         "symlink": [
@@ -287,7 +287,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\sd",
+    "pkg_install_relative_dir": "cli\\sd",
     "shim": {
       "windows": {
         "symlink": [
@@ -308,7 +308,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\ripgrep",
+    "pkg_install_relative_dir": "cli\\ripgrep",
     "shim": {
       "windows": {
         "symlink": [
@@ -329,7 +329,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\eza",
+    "pkg_install_relative_dir": "cli\\eza",
     "shim": {
       "windows": {
         "symlink": [
@@ -350,7 +350,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\dust",
+    "pkg_install_relative_dir": "cli\\dust",
     "shim": {
       "windows": {
         "symlink": [
@@ -371,7 +371,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\duf",
+    "pkg_install_relative_dir": "cli\\duf",
     "shim": {
       "windows": {
         "symlink": [
@@ -392,7 +392,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\bat",
+    "pkg_install_relative_dir": "cli\\bat",
     "shim": {
       "windows": {
         "symlink": [
@@ -413,7 +413,7 @@
       },
       "type": "portable-exe"
     },
-    "install_dir": "cli\\jq",
+    "pkg_install_relative_dir": "cli\\jq",
     "shim": {
       "windows": {
         "symlink": [
@@ -434,7 +434,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\xh",
+    "pkg_install_relative_dir": "cli\\xh",
     "shim": {
       "windows": {
         "symlink": [
@@ -455,7 +455,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\bottom",
+    "pkg_install_relative_dir": "cli\\bottom",
     "shim": {
       "windows": {
         "symlink": [
@@ -476,7 +476,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\procs",
+    "pkg_install_relative_dir": "cli\\procs",
     "shim": {
       "windows": {
         "symlink": [
@@ -497,7 +497,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "cli\\carapace",
+    "pkg_install_relative_dir": "cli\\carapace",
     "shim": {
       "windows": {
         "symlink": [
@@ -521,7 +521,7 @@
       "uninstall_program": "unins000.exe",
       "uninstall_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART"
     },
-    "install_dir": "editor\\zed",
+    "pkg_install_relative_dir": "editor\\zed",
     "shim": {
       "windows": {
         "symlink": [
@@ -541,7 +541,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "editor\\vscode",
+    "pkg_install_relative_dir": "editor\\vscode",
     "script_after_install": true,
     "script_after_uninstall": true,
     "fetch_source": "update_code_visualstudio_com"
@@ -557,7 +557,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "editor\\edit",
+    "pkg_install_relative_dir": "editor\\edit",
     "shim": {
       "windows": {
         "symlink": [
@@ -578,7 +578,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "editor\\notepad3",
+    "pkg_install_relative_dir": "editor\\notepad3",
     "script_after_install": true,
     "script_after_uninstall": true,
     "fetch_source": "github"
@@ -594,7 +594,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "vcs\\git",
+    "pkg_install_relative_dir": "vcs\\git",
     "shim": {
       "windows": {
         "symlink": [
@@ -615,7 +615,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "ai\\opencode",
+    "pkg_install_relative_dir": "ai\\opencode",
     "shim": {
       "windows": {
         "symlink": [
@@ -636,7 +636,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "ai\\pi",
+    "pkg_install_relative_dir": "ai\\pi",
     "shim": {
       "windows": {
         "symlink": [
@@ -657,7 +657,7 @@
       },
       "type": "portable-compressed-archive"
     },
-    "install_dir": "ai\\rtk",
+    "pkg_install_relative_dir": "ai\\rtk",
     "shim": {
       "windows": {
         "symlink": [

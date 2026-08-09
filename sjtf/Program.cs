@@ -458,7 +458,7 @@ catch (OperationCanceledException)
             return;
         }
 
-        var installDirRel = InstallHelpers.ReadRequiredString(pkg, "install_dir", name);
+        var installDirRel = InstallHelpers.ReadRequiredString(pkg, "pkg_install_relative_dir", name);
         var installRoot = Config.LoadInstallDir();
         var installFull = Path.Combine(installRoot, installDirRel);
         Directory.CreateDirectory(installFull);
@@ -667,7 +667,7 @@ catch (OperationCanceledException)
 
         Console.WriteLine($"{name}: upgrading from {installed[name]} to {plan.Version}");
 
-        var installDirRel = InstallHelpers.ReadRequiredString(pkg, "install_dir", name);
+        var installDirRel = InstallHelpers.ReadRequiredString(pkg, "pkg_install_relative_dir", name);
         var installRoot = Config.LoadInstallDir();
         var installFull = Path.Combine(installRoot, installDirRel);
         Directory.CreateDirectory(installFull);
