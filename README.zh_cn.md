@@ -180,7 +180,7 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 - **安装后脚本**：`scripts/after_install/{os}/{arch}/{name}.lua`
 - **卸载后脚本**：`scripts/after_uninstall/{os}/{arch}/{name}.lua`
 
-详见 [Manual.md](Manual.md)。
+详见 [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md)。
 
 ## 构建
 

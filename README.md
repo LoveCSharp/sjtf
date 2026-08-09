@@ -146,7 +146,7 @@ JSON array of package names for the `favorites` command.
 - **Post-install scripts**: `scripts/after_install/{os}/{arch}/{name}.lua`
 - **Post-uninstall scripts**: `scripts/after_uninstall/{os}/{arch}/{name}.lua`
 
-See [Manual.md](Manual.md) for detailed documentation.
+See [SCRIPTS.md](SCRIPTS.md) for detailed documentation.
 
 ## Building
 
