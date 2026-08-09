@@ -552,6 +552,22 @@ catch (OperationCanceledException)
                     }
                 }
             }
+
+            if (osObj.TryGetPropertyValue("ps", out var psNode) && psNode is JsonObject psObj)
+            {
+                var symRoot = Path.Combine(installRoot, "shims");
+                foreach (var kv in psObj)
+                {
+                    var psName = kv.Key;
+                    if (string.IsNullOrEmpty(psName)) continue;
+                    var psPath = Path.Combine(symRoot, psName);
+                    if (File.Exists(psPath))
+                    {
+                        Console.WriteLine($"{name}: removing shim {psPath}");
+                        File.Delete(psPath);
+                    }
+                }
+            }
         }
     }
     else if (pkg.TryGetPropertyValue("symlinks", out var symNode) && symNode is JsonObject symObj)

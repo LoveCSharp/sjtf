@@ -35,10 +35,10 @@
     "shim": {
       "windows": {
         "symlink": [
-        "uv.exe",
-        "uvw.exe",
-        "uvx.exe"
-      ]
+          "uv.exe",
+          "uvw.exe",
+          "uvx.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -58,8 +58,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "g.exe"
-      ]
+          "g.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -78,9 +78,12 @@
     "pkg_install_relative_dir": "cli\\nushell",
     "shim": {
       "windows": {
-      "cmd": {
-        "nu.cmd": "@\"{PKG_INSTALL_DIR}\\nu.exe\" %*"
-      }
+        "cmd": {
+          "nu.cmd": "@\"{PKG_INSTALL_DIR}\\nu.exe\" %*"
+        },
+        "ps": {
+          "nu.ps1": "& \"{PKG_INSTALL_DIR}\\nu.exe\" @args"
+        }
       }
     },
     "fetch_source": "github"
@@ -100,8 +103,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "zellij.exe"
-      ]
+          "zellij.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -121,8 +124,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "oh-my-posh.exe"
-      ]
+          "oh-my-posh.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -142,8 +145,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "starship.exe"
-      ]
+          "starship.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -163,8 +166,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "coreutils.exe"
-      ]
+          "coreutils.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -184,9 +187,9 @@
     "shim": {
       "windows": {
         "symlink": [
-        "yazi.exe",
-        "ya.exe"
-      ]
+          "yazi.exe",
+          "ya.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -206,8 +209,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "lf.exe"
-      ]
+          "lf.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -227,8 +230,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "fzf.exe"
-      ]
+          "fzf.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -248,8 +251,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "zoxide.exe"
-      ]
+          "zoxide.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -269,8 +272,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "fd.exe"
-      ]
+          "fd.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -290,8 +293,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "sd.exe"
-      ]
+          "sd.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -311,8 +314,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "rg.exe"
-      ]
+          "rg.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -332,8 +335,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "eza.exe"
-      ]
+          "eza.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -353,8 +356,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "dust.exe"
-      ]
+          "dust.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -374,8 +377,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "duf.exe"
-      ]
+          "duf.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -395,8 +398,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "bat.exe"
-      ]
+          "bat.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -416,8 +419,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "jq.exe"
-      ]
+          "jq.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -437,8 +440,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "xh.exe"
-      ]
+          "xh.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -458,8 +461,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "btm.exe"
-      ]
+          "btm.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -479,8 +482,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "procs.exe"
-      ]
+          "procs.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -500,8 +503,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "carapace.exe"
-      ]
+          "carapace.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -524,8 +527,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "Zed.exe"
-      ]
+          "Zed.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -560,8 +563,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "edit.exe"
-      ]
+          "edit.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -597,8 +600,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "cmd\\git.exe"
-      ]
+          "cmd\\git.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -618,8 +621,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "opencode.exe"
-      ]
+          "opencode.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -639,8 +642,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "pi.exe"
-      ]
+          "pi.exe"
+        ]
       }
     },
     "fetch_source": "github"
@@ -660,8 +663,8 @@
     "shim": {
       "windows": {
         "symlink": [
-        "rtk.exe"
-      ]
+          "rtk.exe"
+        ]
       }
     },
     "fetch_source": "github"

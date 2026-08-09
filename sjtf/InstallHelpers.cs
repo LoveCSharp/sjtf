@@ -211,6 +211,22 @@ internal static class InstallHelpers
                 File.WriteAllText(cmdPath, replaced, new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
             }
         }
+
+        if (osObj.TryGetPropertyValue("ps", out var psNode) && psNode is JsonObject psObj)
+        {
+            foreach (var kv in psObj)
+            {
+                var psName = kv.Key;
+                if (string.IsNullOrEmpty(psName)) continue;
+                var psContent = kv.Value?.GetValue<string>() ?? "";
+                if (string.IsNullOrEmpty(psContent)) continue;
+                var psPath = Path.Combine(symRoot, psName);
+                var replaced = psContent.Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase)
+                                        .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
+                Console.WriteLine($"{name}: shim {psPath}");
+                File.WriteAllText(psPath, replaced, new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            }
+        }
     }
 
     /// <summary>
