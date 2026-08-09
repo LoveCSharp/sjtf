@@ -169,6 +169,13 @@ internal static class Config
     /// </summary>
     private static string ConfigPath() => Path.Combine(Tools.SjtfRoot(), "config.toml");
 
+    private static SjtfConfig? _cachedDoc;
+    private static long _cachedDocMtime;
+    private static readonly object _cacheLock = new();
+
+    private static string? _cachedUserAgent;
+    private static long _cachedUserAgentMtime;
+
     /// <summary>
     /// 加载并反序列化 config.toml / Load and deserialize config.toml.
     /// </summary>
@@ -176,7 +183,19 @@ internal static class Config
     {
         var path = ConfigPath();
         if (!File.Exists(path)) return null;
-        return TomlSerializer.Deserialize(File.ReadAllText(path), SjtfConfigContext.Default.SjtfConfig);
+
+        var mtime = File.GetLastWriteTimeUtc(path).Ticks;
+
+        lock (_cacheLock)
+        {
+            if (_cachedDoc != null && _cachedDocMtime == mtime)
+                return _cachedDoc;
+
+            var doc = TomlSerializer.Deserialize(File.ReadAllText(path), SjtfConfigContext.Default.SjtfConfig);
+            _cachedDoc = doc;
+            _cachedDocMtime = mtime;
+            return doc;
+        }
     }
 
     /// <summary>
@@ -268,11 +287,32 @@ internal static class Config
     {
         var path = ConfigPath();
         if (!File.Exists(path)) return DefaultUserAgent;
+
+        var mtime = File.GetLastWriteTimeUtc(path).Ticks;
+
+        lock (_cacheLock)
+        {
+            if (_cachedUserAgentMtime == mtime)
+                return _cachedUserAgent ?? DefaultUserAgent;
+
+            var ua = TryReadUserAgentFromToml(path);
+            _cachedUserAgent = ua;
+            _cachedUserAgentMtime = mtime;
+            return ua ?? DefaultUserAgent;
+        }
+    }
+
+    /// <summary>
+    /// 从 config.toml 中解析 [http.request.header].user_agent；未找到返回 null。
+    /// Parse [http.request.header].user_agent from config.toml; return null if not found.
+    /// </summary>
+    private static string? TryReadUserAgentFromToml(string path)
+    {
         try
         {
             var toml = File.ReadAllText(path);
             var table = TomlSerializer.Deserialize(toml, TomlModelContext.Default.TomlTable);
-            if (table == null) return DefaultUserAgent;
+            if (table == null) return null;
 
             if (table.TryGetValue("http", out var httpVal) && httpVal is TomlTable httpTable)
             {
@@ -287,7 +327,7 @@ internal static class Config
             }
         }
         catch { }
-        return DefaultUserAgent;
+        return null;
     }
 
     /// <summary>
