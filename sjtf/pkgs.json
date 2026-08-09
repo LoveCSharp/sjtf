@@ -11,9 +11,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "langs\\fnm",
-    "shim": { "symlink": [
-      "fnm.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "fnm.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "uv": {
@@ -28,11 +30,13 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "langs\\uv",
-    "shim": { "symlink": [
-      "uv.exe",
-      "uvw.exe",
-      "uvx.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "uv.exe",
+        "uvw.exe",
+        "uvx.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "g": {
@@ -47,9 +51,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "langs\\g\\bin",
-    "shim": { "symlink": [
-      "g.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "g.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "nushell": {
@@ -64,9 +70,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\nushell",
-    "shim": { "symlink": [
-      "nu.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "nu.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "zellij": {
@@ -81,9 +89,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\zellij",
-    "shim": { "symlink": [
-      "zellij.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "zellij.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "oh-my-posh": {
@@ -98,9 +108,11 @@
       "type": "portable-exe"
     },
     "install_dir": "cli\\oh-my-posh",
-    "shim": { "symlink": [
-      "oh-my-posh.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "oh-my-posh.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "starship": {
@@ -115,9 +127,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\starship",
-    "shim": { "symlink": [
-      "starship.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "starship.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "microsoft-coreutils": {
@@ -132,9 +146,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\coreutils",
-    "shim": { "symlink": [
-      "coreutils.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "coreutils.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "yazi": {
@@ -149,10 +165,12 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\yazi",
-    "shim": { "symlink": [
-      "yazi.exe",
-      "ya.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "yazi.exe",
+        "ya.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "lf": {
@@ -167,9 +185,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\lf",
-    "shim": { "symlink": [
-      "lf.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "lf.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "fzf": {
@@ -184,9 +204,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\fzf",
-    "shim": { "symlink": [
-      "fzf.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "fzf.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "zoxide": {
@@ -201,9 +223,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\zoxide",
-    "shim": { "symlink": [
-      "zoxide.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "zoxide.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "fd": {
@@ -218,9 +242,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\fd",
-    "shim": { "symlink": [
-      "fd.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "fd.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "sd": {
@@ -235,9 +261,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\sd",
-    "shim": { "symlink": [
-      "sd.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "sd.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "ripgrep": {
@@ -252,9 +280,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\ripgrep",
-    "shim": { "symlink": [
-      "rg.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "rg.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "eza": {
@@ -269,9 +299,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\eza",
-    "shim": { "symlink": [
-      "eza.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "eza.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "dust": {
@@ -286,9 +318,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\dust",
-    "shim": { "symlink": [
-      "dust.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "dust.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "duf": {
@@ -303,9 +337,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\duf",
-    "shim": { "symlink": [
-      "duf.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "duf.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "bat": {
@@ -320,9 +356,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\bat",
-    "shim": { "symlink": [
-      "bat.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "bat.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "jq": {
@@ -337,9 +375,11 @@
       "type": "portable-exe"
     },
     "install_dir": "cli\\jq",
-    "shim": { "symlink": [
-      "jq.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "jq.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "xh": {
@@ -354,9 +394,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\xh",
-    "shim": { "symlink": [
-      "xh.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "xh.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "bottom": {
@@ -371,9 +413,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\bottom",
-    "shim": { "symlink": [
-      "btm.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "btm.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "procs": {
@@ -388,9 +432,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\procs",
-    "shim": { "symlink": [
-      "procs.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "procs.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "carapace": {
@@ -405,9 +451,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "cli\\carapace",
-    "shim": { "symlink": [
-      "carapace.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "carapace.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "zed": {
@@ -425,9 +473,11 @@
       "uninstall_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART"
     },
     "install_dir": "editor\\zed",
-    "shim": { "symlink": [
-      "Zed.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "Zed.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "vscode": {
@@ -457,9 +507,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "editor\\edit",
-    "shim": { "symlink": [
-      "edit.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "edit.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "notepad3": {
@@ -490,9 +542,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "vcs\\git",
-    "shim": { "symlink": [
-      "cmd\\git.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "cmd\\git.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "opencode": {
@@ -507,9 +561,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "ai\\opencode",
-    "shim": { "symlink": [
-      "opencode.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "opencode.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "pi": {
@@ -524,9 +580,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "ai\\pi",
-    "shim": { "symlink": [
-      "pi.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "pi.exe"
+      ]
+    },
     "fetch_source": "github"
   },
   "rtk": {
@@ -541,9 +599,11 @@
       "type": "portable-compressed-archive"
     },
     "install_dir": "ai\\rtk",
-    "shim": { "symlink": [
-      "rtk.exe"
-    ] },
+    "shim": {
+      "symlink": [
+        "rtk.exe"
+      ]
+    },
     "fetch_source": "github"
   }
 }

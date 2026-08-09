@@ -97,6 +97,46 @@ public sealed class SjtfDownload
     /// </summary>
     [JsonPropertyName("min_split_size")]
     public int MinSplitSize { get; set; } = 1;
+
+    /// <summary>
+    /// 是否启用 aria2 下载 / Whether to enable aria2 download.
+    /// </summary>
+    [JsonPropertyName("aria2_enable")]
+    public bool Aria2Enable { get; set; } = true;
+}
+
+/// <summary>
+/// aria2 配置 / aria2 configuration.
+/// </summary>
+public sealed class SjtfAria2
+{
+    /// <summary>
+    /// aria2 二进制文件下载地址，键名为 "{os}_{arch}"（如 windows_x86_64）/ aria2 binary download URL, key is "{os}_{arch}" (e.g. windows_x86_64).
+    /// </summary>
+    [TomlPropertyName("windows_x86_64")]
+    public string? WindowsX86_64 { get; set; }
+
+    [TomlPropertyName("linux_x86_64")]
+    public string? LinuxX86_64 { get; set; }
+
+    [TomlPropertyName("osx_arm64")]
+    public string? OsxArm64 { get; set; }
+
+    [TomlPropertyName("osx_x86_64")]
+    public string? OsxX86_64 { get; set; }
+
+    public string? GetUrl(string os, string arch)
+    {
+        var key = $"{os}_{arch}";
+        return key switch
+        {
+            "windows_x86_64" => WindowsX86_64,
+            "linux_x86_64" => LinuxX86_64,
+            "osx_arm64" => OsxArm64,
+            "osx_x86_64" => OsxX86_64,
+            _ => null
+        };
+    }
 }
 
 /// <summary>
@@ -118,6 +158,9 @@ public sealed class SjtfConfig
 
     [TomlPropertyName("download")]
     public SjtfDownload Download { get; set; } = new();
+
+    [TomlPropertyName("aria2")]
+    public SjtfAria2 Aria2 { get; set; } = new();
 }
 
 [TomlSerializable(typeof(SjtfConfig))]
@@ -127,6 +170,7 @@ public sealed class SjtfConfig
 [TomlSerializable(typeof(SjtfHttpHeaders))]
 [TomlSerializable(typeof(SjtfPkgs))]
 [TomlSerializable(typeof(SjtfDownload))]
+[TomlSerializable(typeof(SjtfAria2))]
 internal partial class SjtfConfigContext : TomlSerializerContext
 {
 }
@@ -223,6 +267,19 @@ internal static class Config
     }
 
     /// <summary>
+    /// 从配置中加载是否启用 aria2 / Load aria2 enable flag from config.
+    /// </summary>
+    public static bool LoadAria2Enable() => LoadDoc()?.Download.Aria2Enable ?? false;
+
+    /// <summary>
+    /// 从配置中加载指定 OS/Arch 的 aria2 下载地址 / Load aria2 download URL for given OS/arch from config.
+    /// </summary>
+    public static string? LoadAria2Url(string os, string arch)
+    {
+        return LoadDoc()?.Aria2.GetUrl(os, arch);
+    }
+
+    /// <summary>
     /// 从配置中加载 HTTP 请求 User-Agent，若未配置则使用默认值 / Load HTTP User-Agent from config, fallback to default if not set.
     /// </summary>
     public static string LoadUserAgent()
@@ -283,9 +340,13 @@ create_symlink = true
 remote_url = ""https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json""
 
 [download]
+aria2_enable = true
 max_connection_per_server = 10  # 1 ~ 16
 split = 10                      # 1 ~ 16
 min_split_size = 1              # Chunk download size setting, unit: MB     1 ~ 1024
+
+[aria2]
+windows_x86_64 = ""https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0-win-64bit-build1.zip""
 
 [github]
 token_classic = ""put your classic token here""
