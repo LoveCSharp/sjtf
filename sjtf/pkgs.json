@@ -78,10 +78,8 @@
     "pkg_install_relative_dir": "cli\\nushell",
     "shim": {
       "windows": {
-        "cmd": {
-          "nu.cmd": "@\"{PKG_INSTALL_DIR}\\nu.exe\" %*"
-        },
-        "ps": {
+        "shell_script": {
+          "nu.cmd": "@\"{PKG_INSTALL_DIR}\\nu.exe\" %*",
           "nu.ps1": "& \"{PKG_INSTALL_DIR}\\nu.exe\" @args"
         }
       }

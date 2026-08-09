@@ -196,35 +196,19 @@ internal static class InstallHelpers
             }
         }
 
-        if (osObj.TryGetPropertyValue("cmd", out var cmdNode) && cmdNode is JsonObject cmdObj)
+        if (osObj.TryGetPropertyValue("shell_script", out var shellNode) && shellNode is JsonObject shellObj)
         {
-            foreach (var kv in cmdObj)
+            foreach (var kv in shellObj)
             {
-                var cmdName = kv.Key;
-                if (string.IsNullOrEmpty(cmdName)) continue;
-                var cmdContent = kv.Value?.GetValue<string>() ?? "";
-                if (string.IsNullOrEmpty(cmdContent)) continue;
-                var cmdPath = Path.Combine(symRoot, cmdName);
-                var replaced = cmdContent.Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase)
-                                        .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
-                Console.WriteLine($"{name}: shim {cmdPath}");
-                File.WriteAllText(cmdPath, replaced, new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-            }
-        }
-
-        if (osObj.TryGetPropertyValue("ps", out var psNode) && psNode is JsonObject psObj)
-        {
-            foreach (var kv in psObj)
-            {
-                var psName = kv.Key;
-                if (string.IsNullOrEmpty(psName)) continue;
-                var psContent = kv.Value?.GetValue<string>() ?? "";
-                if (string.IsNullOrEmpty(psContent)) continue;
-                var psPath = Path.Combine(symRoot, psName);
-                var replaced = psContent.Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase)
-                                        .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
-                Console.WriteLine($"{name}: shim {psPath}");
-                File.WriteAllText(psPath, replaced, new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                var scriptName = kv.Key;
+                if (string.IsNullOrEmpty(scriptName)) continue;
+                var scriptContent = kv.Value?.GetValue<string>() ?? "";
+                if (string.IsNullOrEmpty(scriptContent)) continue;
+                var scriptPath = Path.Combine(symRoot, scriptName);
+                var replaced = scriptContent.Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase)
+                                            .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
+                Console.WriteLine($"{name}: shim {scriptPath}");
+                File.WriteAllText(scriptPath, replaced, new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
             }
         }
     }

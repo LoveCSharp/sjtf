@@ -537,34 +537,18 @@ catch (OperationCanceledException)
                 }
             }
 
-            if (osObj.TryGetPropertyValue("cmd", out var cmdNode) && cmdNode is JsonObject cmdObj)
+            if (osObj.TryGetPropertyValue("shell_script", out var shellNode) && shellNode is JsonObject shellObj)
             {
                 var symRoot = Path.Combine(installRoot, "shims");
-                foreach (var kv in cmdObj)
+                foreach (var kv in shellObj)
                 {
-                    var cmdName = kv.Key;
-                    if (string.IsNullOrEmpty(cmdName)) continue;
-                    var cmdPath = Path.Combine(symRoot, cmdName);
-                    if (File.Exists(cmdPath))
+                    var scriptName = kv.Key;
+                    if (string.IsNullOrEmpty(scriptName)) continue;
+                    var scriptPath = Path.Combine(symRoot, scriptName);
+                    if (File.Exists(scriptPath))
                     {
-                        Console.WriteLine($"{name}: removing shim {cmdPath}");
-                        File.Delete(cmdPath);
-                    }
-                }
-            }
-
-            if (osObj.TryGetPropertyValue("ps", out var psNode) && psNode is JsonObject psObj)
-            {
-                var symRoot = Path.Combine(installRoot, "shims");
-                foreach (var kv in psObj)
-                {
-                    var psName = kv.Key;
-                    if (string.IsNullOrEmpty(psName)) continue;
-                    var psPath = Path.Combine(symRoot, psName);
-                    if (File.Exists(psPath))
-                    {
-                        Console.WriteLine($"{name}: removing shim {psPath}");
-                        File.Delete(psPath);
+                        Console.WriteLine($"{name}: removing shim {scriptPath}");
+                        File.Delete(scriptPath);
                     }
                 }
             }
