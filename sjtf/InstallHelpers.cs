@@ -121,7 +121,7 @@ internal static class InstallHelpers
     /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
     /// <param name="dlPath">已下载的文件路径 / Downloaded file path.</param>
     /// <param name="installFull">完整安装目录 / Full installation directory.</param>
-    public static void PlaceAsset(string name, JsonObject pkg, string dlPath, string installFull)
+    public static void PlaceAsset(string name, JsonObject pkg, string dlPath, string installRoot, string installFull)
     {
         if (!pkg.TryGetPropertyValue("fetch_asset", out var fetchNode) || fetchNode is not JsonObject fetch)
             throw new InvalidOperationException($"{name}: fetch_asset missing");
@@ -143,7 +143,8 @@ internal static class InstallHelpers
                 var installParams = "";
                 if (fetch.TryGetPropertyValue("install_params", out var paramsNode) && paramsNode is JsonValue paramsVal && paramsVal.GetValueKind() == JsonValueKind.String)
                     installParams = paramsVal.GetValue<string>();
-                installParams = installParams.Replace("{INSTALL_DIR}", installFull);
+                installParams = installParams.Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase)
+                                            .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
                 Console.WriteLine($"{name}: running installer {dlPath} {installParams}");
                 var psi = new System.Diagnostics.ProcessStartInfo(dlPath, installParams)
                 {

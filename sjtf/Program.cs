@@ -470,7 +470,7 @@ catch (OperationCanceledException)
 
         var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan, ct);
 
-        InstallHelpers.PlaceAsset(name, pkg, dlPath, installFull);
+        InstallHelpers.PlaceAsset(name, pkg, dlPath, installRoot, installFull);
         InstallHelpers.CreateSymlinks(name, pkg, installRoot, installFull);
         InstallHelpers.RunAfterInstallScript(name, pkg, installRoot, installFull);
 
@@ -579,6 +579,12 @@ catch (OperationCanceledException)
         if (fetch != null && fetch.TryGetPropertyValue("uninstall_params", out var paramsNode) && paramsNode is JsonValue paramsVal && paramsVal.GetValueKind() == JsonValueKind.String)
             uninstallParams = paramsVal.GetValue<string>();
 
+        if (!string.IsNullOrEmpty(uninstallParams))
+        {
+            uninstallParams = uninstallParams.Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase)
+                                            .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
+        }
+
         if (!string.IsNullOrEmpty(uninstallProgram))
         {
             var uninstallExe = Path.Combine(installFull, uninstallProgram);
@@ -673,7 +679,7 @@ catch (OperationCanceledException)
 
         var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan, ct);
 
-        InstallHelpers.PlaceAsset(name, pkg, dlPath, installFull);
+        InstallHelpers.PlaceAsset(name, pkg, dlPath, installRoot, installFull);
         InstallHelpers.CreateSymlinks(name, pkg, installRoot, installFull);
         InstallHelpers.RunAfterInstallScript(name, pkg, installRoot, installFull);
 

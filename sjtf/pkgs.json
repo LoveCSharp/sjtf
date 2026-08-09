@@ -516,7 +516,7 @@
         }
       },
       "type": "installer",
-      "install_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /TASKS=\"!addtopath\" /DIR=\"{INSTALL_DIR}\"",
+      "install_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /TASKS=\"!addtopath\" /DIR=\"{PKG_INSTALL_DIR}\"",
       "uninstall_program": "unins000.exe",
       "uninstall_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART"
     },
