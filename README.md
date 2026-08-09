@@ -53,17 +53,25 @@ Main configuration file. Automatically created with default values on first run.
 ```toml
 [general]
 install_dir = "D:\\sjtf_pkgs"     # Root directory for all installations
-download_retry_max = 3             # Max download retry attempts
 
 [pkgs]
 remote_url = "https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json"  # Remote pkgs.json URL for `sjtf packages update`
+
+[download]
+aria2_enable = true                # Enable aria2 download
+max_connection_per_server = 10     # Max connections per server (1 ~ 16)
+split = 10                         # Download split count (1 ~ 16)
+min_split_size = 1                 # Minimum chunk size in MB (1 ~ 1024)
+
+[aria2]
+windows_x86_64 = "https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0-win-64bit-build1.zip"
 
 [github]
 token_classic = "put your classic token here"  # GitHub personal access token (optional)
 proxy = "https://gh-proxy.com"                 # GitHub proxy (optional)
 
 [http.request.header]
-user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0"
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0"
 ```
 
 ### `pkgs.json`

@@ -10,7 +10,7 @@
 - 🚀 一键安装/卸载/升级命令行工具
 - 🔍 基于 Lua 脚本的可扩展版本获取
 - ✅ SHA-256/SHA-1/SHA-512/MD5 摘要校验
-- 🔗 自动创建 shim/符号链接
+- 🔗 自动创建 shim（符号链接 / shell 脚本）
 - 🌐 跨平台：Windows、Linux、macOS
 - 🏗️ 支持 Native AOT 编译
 
@@ -20,11 +20,11 @@
 sjtf packages list    # 列出可用包
 sjtf packages update  # 从远程更新 pkgs.json
 sjtf list             # 列出已安装包
-sjtf install fnm uv    # 安装包
-sjtf uninstall fnm     # 卸载包
-sjtf upgrade --all     # 升级所有已安装包
-sjtf favorites         # 同步 favorites.json
-sjtf --version         # 显示版本号
+sjtf install fnm uv   # 安装包
+sjtf uninstall fnm    # 卸载包
+sjtf upgrade --all    # 升级所有已安装包
+sjtf favorites        # 同步 favorites.json
+sjtf --version        # 显示版本号
 ```
 
 ## 命令
@@ -53,10 +53,18 @@ sjtf --version         # 显示版本号
 ```toml
 [general]
 install_dir = "D:\\sjtf_pkgs"     # 所有安装的根目录
-download_retry_max = 3             # 下载最大重试次数
 
 [pkgs]
 remote_url = "https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json"  # `sjtf packages update` 使用的远程 pkgs.json URL
+
+[download]
+aria2_enable = true                # 是否启用 aria2 下载
+max_connection_per_server = 10     # 每服务器最大连接数（1 ~ 16）
+split = 10                         # 下载分块数（1 ~ 16）
+min_split_size = 1                 # 最小分块大小，单位 MB（1 ~ 1024）
+
+[aria2]
+windows_x86_64 = "https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0-win-64bit-build1.zip"
 
 [github]
 token_classic = "put your classic token here"  # GitHub 个人访问令牌（可选）
@@ -85,13 +93,47 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
     "pkg_install_relative_dir": "langs\\fnm",
     "shim": {
       "windows": {
-        "symlink": ["fnm.exe"]
+        "symlink": ["fnm.exe"],
+        "shell_script": {
+          "fnm.cmd": "@\"{PKG_INSTALL_DIR}\\fnm.exe\" %*",
+          "fnm.ps1": "& \"{PKG_INSTALL_DIR}\\fnm.exe\" @args"
+        }
       }
     },
     "fetch_source": "github"
   }
 }
 ```
+
+#### shim 配置
+
+`shim` 按操作系统分层，支持两种类型：
+
+- `symlink`：字符串数组，创建指向安装目录内文件的符号链接，链接名从目标文件名自动推导
+- `shell_script`：键值对对象，为每个键创建同名文件，内容为对应的值
+
+`shell_script` 支持以下占位符：
+
+| 占位符 | 替换为 |
+|--------|--------|
+| `{PKG_INSTALL_DIR}` | 包的完整安装路径（`config.install_dir` + `pkg_install_relative_dir`） |
+| `{INSTALL_DIR}` | 全局安装根目录（`config.install_dir`） |
+
+#### 包类型
+
+| 类型 | 说明 |
+|------|------|
+| `portable-compressed-archive` | ZIP/TAR.GZ/7Z 压缩包 |
+| `portable-exe` | 独立可执行文件 |
+| `installer` | 安装程序（使用 `install_params` 参数执行） |
+
+`installer` 类型支持以下字段：
+
+| 字段 | 说明 |
+|------|------|
+| `install_params` | 安装程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符 |
+| `uninstall_program` | 卸载程序文件名（相对于安装目录） |
+| `uninstall_params` | 卸载程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符 |
 
 ### `installed.json`
 
@@ -136,7 +178,7 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 - **安装后脚本**：`scripts/after_install/{os}/{arch}/{name}.lua`
 - **卸载后脚本**：`scripts/after_uninstall/{os}/{arch}/{name}.lua`
 
-详见 [Manual-zh_cn.md](Manual-zh_cn.md)。
+详见 [Manual.md](Manual.md)。
 
 ## 构建
 
