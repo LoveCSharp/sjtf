@@ -196,3 +196,5 @@ dotnet publish -c Release -r win-x64 --self-contained
 ## 许可证
 
 MIT — 详见 [LICENSE](LICENSE) 文件。
+
+> 本项目使用 [aria2](https://aria2.github.io/) 作为多线程下载引擎，aria2 为开源软件，遵循其相应开源许可证。

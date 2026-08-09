@@ -162,3 +162,5 @@ dotnet publish -c Release -r win-x64 --self-contained
 ## License
 
 MIT — see [LICENSE](LICENSE) for details.
+
+> This project uses [aria2](https://aria2.github.io/) as its multi-threaded download engine. aria2 is open-source software distributed under its own license.
