@@ -32,11 +32,17 @@ packagesCommand.SetAction(_ =>
     return 0;
 });
 
-var pkgListCommand = new Command("list", "List packages defined in pkgs.json.");
+var pkgListCommand = new Command("list", "List packages defined in pkgs.json.")
+{
+    Aliases = { "ls" }
+};
 pkgListCommand.SetAction(_ => ListPackages());
 packagesCommand.Subcommands.Add(pkgListCommand);
 
-var pkgUpdateCommand = new Command("update", "Update pkgs.json from remote source.");
+var pkgUpdateCommand = new Command("update", "Update pkgs.json from remote source.")
+{
+    Aliases = { "up" }
+};
 pkgUpdateCommand.SetAction(async _ =>
 {
     try
