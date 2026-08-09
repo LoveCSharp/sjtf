@@ -61,7 +61,7 @@ internal static class Aria2
             return null;
         }
 
-        Console.WriteLine($"aria2: downloading from {url}...");
+        Console.WriteLine($"aria2: downloading: {url}");
 
         var zipPath = localPath + ".zip";
         try

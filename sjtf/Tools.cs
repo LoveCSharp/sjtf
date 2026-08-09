@@ -498,6 +498,8 @@ internal static partial class Tools
         int maxConnections, int splitCount, int minSplitSizeMB,
         CancellationToken ct = default)
     {
+        Console.WriteLine($"{label ?? "downloading"}: {url}");
+
         maxConnections = Math.Clamp(maxConnections, 1, 16);
         splitCount = Math.Clamp(splitCount, 1, 16);
         minSplitSizeMB = Math.Clamp(minSplitSizeMB, 1, 1024);

@@ -32,7 +32,7 @@ internal class LuaBindings
     public string HttpGet(string url, LuaTable? headers = null)
     {
         var prefix = PackageName ?? "http_get";
-        Console.WriteLine($"{prefix}: fetching {url}");
+        Console.WriteLine($"{prefix}: http get request: {url}");
         using var req = new HttpRequestMessage(HttpMethod.Get, url);
 
         req.Headers.TryAddWithoutValidation("User-Agent", Config.LoadUserAgent());
