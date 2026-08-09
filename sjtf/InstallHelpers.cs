@@ -56,7 +56,16 @@ internal static class InstallHelpers
             }
 
             try { File.Delete(dlPath); } catch { }
-            throw new InvalidOperationException($"{name}: {plan.DigestAlgorithm} digest mismatch (expected {plan.ExpectedDigest}, got {actualDigest})");
+            Console.WriteLine($"{name}: digest mismatch, re-downloading...");
+            await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, $"{name}: downloading", maxConn, splitCount, minSplitMB);
+
+            actualDigest = await ComputeDigestAsync(dlPath, plan.DigestAlgorithm, ct);
+            if (string.Equals(actualDigest, plan.ExpectedDigest, StringComparison.OrdinalIgnoreCase))
+            {
+                return dlPath;
+            }
+
+            throw new InvalidOperationException($"{name}: {plan.DigestAlgorithm} digest mismatch after re-download (expected {plan.ExpectedDigest}, got {actualDigest})");
         }
         catch (OperationCanceledException)
         {
