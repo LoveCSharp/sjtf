@@ -30,8 +30,9 @@ internal static class InstallHelpers
     /// <param name="name">包名称 / Package name.</param>
     /// <param name="plan">下载计划 / Download plan.</param>
     /// <param name="maxAttempts">最大重试次数 / Maximum retry attempts.</param>
+    /// <param name="ct">取消令牌 / Cancellation token.</param>
     /// <returns>下载文件的本地路径 / Local path of the downloaded file.</returns>
-    public static async Task<string> DownloadAndVerifyAsync(string name, DownloadPlan plan, int maxAttempts)
+    public static async Task<string> DownloadAndVerifyAsync(string name, DownloadPlan plan, int maxAttempts, CancellationToken ct = default)
     {
         if (maxAttempts <= 0) maxAttempts = 3;
 
@@ -52,8 +53,13 @@ internal static class InstallHelpers
                     var label = attempt == 1
                         ? $"{name}: downloading"
                         : $"{name}: downloading (retry {attempt - 1}/{maxAttempts - 1})";
-                    await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, label, maxConn, splitCount, minSplitMB);
+                    await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, label, maxConn, splitCount, minSplitMB, ct);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                Tools.CleanupPartialDownload(dlPath);
+                throw;
             }
             catch (Exception ex)
             {
@@ -61,14 +67,14 @@ internal static class InstallHelpers
                 if (attempt < maxAttempts)
                 {
                     Console.Error.WriteLine($"{name}: download failed ({ex.Message}), retrying in 3s ({attempt}/{maxAttempts})...");
-                    await Task.Delay(3000);
+                    await Task.Delay(3000, ct).ConfigureAwait(false);
                     continue;
                 }
                 throw new InvalidOperationException($"{name}: download failed after {maxAttempts} attempts: {ex.Message}", ex);
             }
 
             Console.WriteLine($"{name}: verifying {plan.DigestAlgorithm} digest...");
-            var actualDigest = await ComputeDigestAsync(dlPath, plan.DigestAlgorithm);
+            var actualDigest = await ComputeDigestAsync(dlPath, plan.DigestAlgorithm, ct);
             if (string.Equals(actualDigest, plan.ExpectedDigest, StringComparison.OrdinalIgnoreCase))
             {
                 return dlPath;
@@ -80,7 +86,7 @@ internal static class InstallHelpers
             if (attempt < maxAttempts)
             {
                 Console.Error.WriteLine($"{name}: {plan.DigestAlgorithm} digest mismatch (expected {plan.ExpectedDigest}, got {actualDigest}), retrying in 3s ({attempt}/{maxAttempts})...");
-                await Task.Delay(3000);
+                await Task.Delay(3000, ct).ConfigureAwait(false);
             }
             else
             {

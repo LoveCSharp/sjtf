@@ -7,6 +7,13 @@ using System.Text.Json.Nodes;
 Config.EnsureDefault();
 Config.EnsureSymlinkDir();
 
+var cts = new CancellationTokenSource();
+Console.CancelKeyPress += (_, e) =>
+{
+    e.Cancel = true;
+    cts.Cancel();
+};
+
 var rootCommand = new RootCommand("sjtf - command-line skeleton tool.");
 
 rootCommand.SetAction(_ =>
@@ -41,8 +48,13 @@ pkgUpdateCommand.SetAction(async _ =>
             return 1;
         }
 
-        await Packages.UpdateRemoteAsync(remoteUrl);
+        await Packages.UpdateRemoteAsync(remoteUrl, cts.Token);
         return 0;
+    }
+    catch (OperationCanceledException)
+    {
+        Console.Error.WriteLine("pkgs: update cancelled");
+        return 1;
     }
     catch (Exception ex)
     {
@@ -80,7 +92,12 @@ installCommand.SetAction(async parseResult =>
     {
         try
         {
-            await InstallOneAsync(name, skipIfUptodate: true);
+            await InstallOneAsync(name, skipIfUptodate: true, ct: cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            Console.Error.WriteLine($"{name}: cancelled");
+            anyError = true;
         }
         catch (Exception ex)
         {
@@ -111,7 +128,12 @@ uninstallCommand.SetAction(async parseResult =>
     {
         try
         {
-            await UninstallOneAsync(name);
+            await UninstallOneAsync(name, ct: cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            Console.Error.WriteLine($"{name}: cancelled");
+            anyError = true;
         }
         catch (Exception ex)
         {
@@ -168,7 +190,12 @@ upgradeCommand.SetAction(async parseResult =>
     {
         try
         {
-            await UpgradeOneAsync(name);
+            await UpgradeOneAsync(name, ct: cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            Console.Error.WriteLine($"{name}: cancelled");
+            anyError = true;
         }
         catch (Exception ex)
         {
@@ -228,9 +255,14 @@ favoritesCommand.SetAction(async _ =>
         try
         {
             if (installed.ContainsKey(name))
-                await UpgradeOneAsync(name);
+                await UpgradeOneAsync(name, ct: cts.Token);
             else
-                await InstallOneAsync(name, skipIfUptodate: true);
+                await InstallOneAsync(name, skipIfUptodate: true, ct: cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            Console.Error.WriteLine($"{name}: cancelled");
+            anyError = true;
         }
         catch (Exception ex)
         {
@@ -246,7 +278,12 @@ favoritesCommand.SetAction(async _ =>
     {
         try
         {
-            await UninstallOneAsync(name);
+            await UninstallOneAsync(name, ct: cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            Console.Error.WriteLine($"{name}: cancelled");
+            anyError = true;
         }
         catch (Exception ex)
         {
@@ -260,7 +297,14 @@ favoritesCommand.SetAction(async _ =>
 });
 rootCommand.Subcommands.Add(favoritesCommand);
 
-return await rootCommand.Parse(args).InvokeAsync();
+try
+{
+    return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration(), cts.Token);
+}
+catch (OperationCanceledException)
+{
+    return 130;
+}
 
     /// <summary>
     /// 列出 pkgs.json 中定义的所有包 / List all packages defined in pkgs.json.
@@ -383,60 +427,66 @@ return await rootCommand.Parse(args).InvokeAsync();
     /// </summary>
     /// <param name="name">包名称 / Package name.</param>
     /// <param name="skipIfUptodate">如果已是最新版本则跳过 / Skip if already up-to-date.</param>
-    static async Task InstallOneAsync(string name, bool skipIfUptodate)
-{
-    var pkgs = Packages.Load();
-    if (!pkgs.TryGetPropertyValue(name, out var pkgNode) || pkgNode is not JsonObject pkg)
+    /// <param name="ct">取消令牌 / Cancellation token.</param>
+    static async Task InstallOneAsync(string name, bool skipIfUptodate, CancellationToken ct = default)
     {
-        throw new InvalidOperationException($"package \"{name}\" not found in pkgs.json");
+        var pkgs = Packages.Load();
+        if (!pkgs.TryGetPropertyValue(name, out var pkgNode) || pkgNode is not JsonObject pkg)
+        {
+            throw new InvalidOperationException($"package \"{name}\" not found in pkgs.json");
+        }
+
+        var fetchSourceName = InstallHelpers.ReadRequiredString(pkg, "fetch_source", name);
+        var source = FetchSources.Get(fetchSourceName);
+
+        var installed = Installed.Load();
+
+        Console.WriteLine($"{name}: fetching latest version info...");
+        DownloadPlan plan;
+        try
+        {
+            plan = await source.ResolveAsync(pkg, name, ct);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            var root = Tools.GetInnermostException(ex);
+            Console.WriteLine($"skip {name}: {root.Message}");
+            return;
+        }
+
+        var installDirRel = InstallHelpers.ReadRequiredString(pkg, "install_dir", name);
+        var installRoot = Config.LoadInstallDir();
+        var installFull = Path.Combine(installRoot, installDirRel);
+        Directory.CreateDirectory(installFull);
+        if (skipIfUptodate && installed.TryGetValue(name, out var currentVer) && currentVer == plan.Version)
+        {
+            Console.WriteLine($"{name}: {plan.Version} is already installed, skipping");
+            return;
+        }
+
+        var maxAttempts = Config.LoadDownloadRetryMax();
+        var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan, maxAttempts, ct);
+
+        InstallHelpers.PlaceAsset(name, pkg, dlPath, installFull);
+        InstallHelpers.CreateSymlinks(name, pkg, installRoot, installFull);
+        InstallHelpers.RunAfterInstallScript(name, pkg, installRoot, installFull);
+
+        installed[name] = plan.Version;
+        Installed.Save(installed);
+        Console.WriteLine($"{name}: installed {plan.Version}");
     }
-
-    var fetchSourceName = InstallHelpers.ReadRequiredString(pkg, "fetch_source", name);
-    var source = FetchSources.Get(fetchSourceName);
-
-    var installed = Installed.Load();
-
-    Console.WriteLine($"{name}: fetching latest version info...");
-    DownloadPlan plan;
-    try
-    {
-        plan = await source.ResolveAsync(pkg, name);
-    }
-    catch (Exception ex)
-    {
-        var root = Tools.GetInnermostException(ex);
-        Console.WriteLine($"skip {name}: {root.Message}");
-        return;
-    }
-
-    var installDirRel = InstallHelpers.ReadRequiredString(pkg, "install_dir", name);
-    var installRoot = Config.LoadInstallDir();
-    var installFull = Path.Combine(installRoot, installDirRel);
-    Directory.CreateDirectory(installFull);
-    if (skipIfUptodate && installed.TryGetValue(name, out var currentVer) && currentVer == plan.Version)
-    {
-        Console.WriteLine($"{name}: {plan.Version} is already installed, skipping");
-        return;
-    }
-
-    var maxAttempts = Config.LoadDownloadRetryMax();
-    var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan, maxAttempts);
-
-    InstallHelpers.PlaceAsset(name, pkg, dlPath, installFull);
-    InstallHelpers.CreateSymlinks(name, pkg, installRoot, installFull);
-    InstallHelpers.RunAfterInstallScript(name, pkg, installRoot, installFull);
-
-    installed[name] = plan.Version;
-    Installed.Save(installed);
-    Console.WriteLine($"{name}: installed {plan.Version}");
-}
 
     /// <summary>
     /// 异步卸载单个包 / Asynchronously uninstall a single package.
     /// </summary>
     /// <param name="name">包名称 / Package name.</param>
-    static async Task UninstallOneAsync(string name)
-{
+    /// <param name="ct">取消令牌 / Cancellation token.</param>
+    static async Task UninstallOneAsync(string name, CancellationToken ct = default)
+    {
     var installed = Installed.Load();
     if (!installed.ContainsKey(name))
     {
@@ -533,58 +583,63 @@ return await rootCommand.Parse(args).InvokeAsync();
     /// 异步升级单个包 / Asynchronously upgrade a single package.
     /// </summary>
     /// <param name="name">包名称 / Package name.</param>
-    static async Task UpgradeOneAsync(string name)
-{
-    var installed = Installed.Load();
-    if (!installed.ContainsKey(name))
+    /// <param name="ct">取消令牌 / Cancellation token.</param>
+    static async Task UpgradeOneAsync(string name, CancellationToken ct = default)
     {
-        Console.WriteLine($"{name}: not installed, cannot upgrade");
-        return;
+        var installed = Installed.Load();
+        if (!installed.ContainsKey(name))
+        {
+            Console.WriteLine($"{name}: not installed, cannot upgrade");
+            return;
+        }
+
+        var pkgs = Packages.Load();
+        if (!pkgs.TryGetPropertyValue(name, out var pkgNode) || pkgNode is not JsonObject pkg)
+        {
+            throw new InvalidOperationException($"package \"{name}\" not found in pkgs.json");
+        }
+
+        var fetchSourceName = InstallHelpers.ReadRequiredString(pkg, "fetch_source", name);
+        var source = FetchSources.Get(fetchSourceName);
+
+        Console.WriteLine($"{name}: fetching latest version info...");
+        DownloadPlan plan;
+        try
+        {
+            plan = await source.ResolveAsync(pkg, name, ct);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            var root = Tools.GetInnermostException(ex);
+            Console.WriteLine($"skip {name}: {root.Message}");
+            return;
+        }
+
+        if (installed[name] == plan.Version)
+        {
+            Console.WriteLine($"{name}: {plan.Version} is already the latest version");
+            return;
+        }
+
+        Console.WriteLine($"{name}: upgrading from {installed[name]} to {plan.Version}");
+
+        var installDirRel = InstallHelpers.ReadRequiredString(pkg, "install_dir", name);
+        var installRoot = Config.LoadInstallDir();
+        var installFull = Path.Combine(installRoot, installDirRel);
+        Directory.CreateDirectory(installFull);
+
+        var maxAttempts = Config.LoadDownloadRetryMax();
+        var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan, maxAttempts, ct);
+
+        InstallHelpers.PlaceAsset(name, pkg, dlPath, installFull);
+        InstallHelpers.CreateSymlinks(name, pkg, installRoot, installFull);
+        InstallHelpers.RunAfterInstallScript(name, pkg, installRoot, installFull);
+
+        installed[name] = plan.Version;
+        Installed.Save(installed);
+        Console.WriteLine($"{name}: upgraded to {plan.Version}");
     }
-
-    var pkgs = Packages.Load();
-    if (!pkgs.TryGetPropertyValue(name, out var pkgNode) || pkgNode is not JsonObject pkg)
-    {
-        throw new InvalidOperationException($"package \"{name}\" not found in pkgs.json");
-    }
-
-    var fetchSourceName = InstallHelpers.ReadRequiredString(pkg, "fetch_source", name);
-    var source = FetchSources.Get(fetchSourceName);
-
-    Console.WriteLine($"{name}: fetching latest version info...");
-    DownloadPlan plan;
-    try
-    {
-        plan = await source.ResolveAsync(pkg, name);
-    }
-    catch (Exception ex)
-    {
-        var root = Tools.GetInnermostException(ex);
-        Console.WriteLine($"skip {name}: {root.Message}");
-        return;
-    }
-
-    if (installed[name] == plan.Version)
-    {
-        Console.WriteLine($"{name}: {plan.Version} is already the latest version");
-        return;
-    }
-
-    Console.WriteLine($"{name}: upgrading from {installed[name]} to {plan.Version}");
-
-    var installDirRel = InstallHelpers.ReadRequiredString(pkg, "install_dir", name);
-    var installRoot = Config.LoadInstallDir();
-    var installFull = Path.Combine(installRoot, installDirRel);
-    Directory.CreateDirectory(installFull);
-
-    var maxAttempts = Config.LoadDownloadRetryMax();
-    var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan, maxAttempts);
-
-    InstallHelpers.PlaceAsset(name, pkg, dlPath, installFull);
-    InstallHelpers.CreateSymlinks(name, pkg, installRoot, installFull);
-    InstallHelpers.RunAfterInstallScript(name, pkg, installRoot, installFull);
-
-    installed[name] = plan.Version;
-    Installed.Save(installed);
-    Console.WriteLine($"{name}: upgraded to {plan.Version}");
-}

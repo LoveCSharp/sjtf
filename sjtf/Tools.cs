@@ -426,7 +426,7 @@ internal static partial class Tools
                 chunks[i] = (offset, len, chunkPath);
             }
 
-            using var progress = new ChunkProgress(label ?? "downloading", fileSize, actualConnections);
+            using var progress = new ChunkProgress(label ?? "downloading", fileSize, actualConnections, ct);
             progress.StartProgressLoop();
 
             var tasks = new Task[actualConnections];
@@ -497,18 +497,20 @@ internal sealed class ChunkProgress : IDisposable
     private readonly int _totalChunks;
     private readonly string _label;
     private readonly CancellationTokenSource _cts;
+    private readonly CancellationToken _externalCt;
     private Task? _progressTask;
     private volatile bool _disposed;
     private readonly object _renderLock = new();
 
     private static int _lastProgressLength;
 
-    public ChunkProgress(string label, long totalSize, int totalChunks)
+    public ChunkProgress(string label, long totalSize, int totalChunks, CancellationToken externalCt = default)
     {
         _label = label;
         _totalSize = totalSize;
         _totalChunks = totalChunks;
         _cts = new CancellationTokenSource();
+        _externalCt = externalCt;
     }
 
     public void Report(long bytes)
@@ -534,7 +536,7 @@ internal sealed class ChunkProgress : IDisposable
         var lastUpdate = DateTime.UtcNow;
         var lastLength = 0;
 
-        while (!ct.IsCancellationRequested && !_disposed)
+        while (!ct.IsCancellationRequested && !_disposed && !_externalCt.IsCancellationRequested)
         {
             await Task.Delay(100, ct).ConfigureAwait(false);
 
@@ -544,7 +546,7 @@ internal sealed class ChunkProgress : IDisposable
 
             lock (_renderLock)
             {
-                if ((now - lastUpdate).TotalMilliseconds < 100 && completed < _totalChunks && !_disposed)
+                if ((now - lastUpdate).TotalMilliseconds < 100 && completed < _totalChunks && !_disposed && !_externalCt.IsCancellationRequested)
                     continue;
                 lastUpdate = now;
 
@@ -578,7 +580,7 @@ internal sealed class ChunkProgress : IDisposable
             if (completed >= _totalChunks) break;
         }
 
-        if (_disposed) return;
+        if (_disposed || _externalCt.IsCancellationRequested) return;
 
         lock (_renderLock)
         {
