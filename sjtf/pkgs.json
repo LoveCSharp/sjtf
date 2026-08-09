@@ -547,7 +547,7 @@
       "windows": {
         "shell_script": {
           "code.cmd": "@\"{PKG_INSTALL_DIR}\\bin\\code.cmd\" %*",
-          "code.ps1": "& \"{PKG_INSTALL_DIR}\\bin\\code.cmd\" @args",
+          "code.ps1": "& \"{PKG_INSTALL_DIR}\\bin\\code.cmd\" @args"
         }
       }
     },
