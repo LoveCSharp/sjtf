@@ -422,7 +422,8 @@ internal static partial class Tools
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"aria2: {ex.Message}, falling back to built-in downloader");
+                Console.Error.WriteLine($"aria2: {ex.Message}");
+                throw;
             }
         }
 
