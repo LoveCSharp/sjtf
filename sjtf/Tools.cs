@@ -456,46 +456,33 @@ internal static partial class Tools
     }
 
     /// <summary>
-    /// 下载单个分块（带 Range 请求头，分块级重试）/ Download a single chunk with Range header and chunk-level retry.
+    /// 下载单个分块（带 Range 请求头）/ Download a single chunk with Range header.
     /// </summary>
     private static async Task DownloadChunkAsync(HttpClient http, string url, long offset, long length,
         string chunkPath, ChunkProgress progress, int chunkIndex, CancellationToken ct)
     {
-        const int maxChunkRetry = 3;
-        for (int retry = 0; retry <= maxChunkRetry; retry++)
+        using var req = new HttpRequestMessage(HttpMethod.Get, url);
+        req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(offset, offset + length - 1);
+        req.Headers.UserAgent.ParseAdd(Config.LoadUserAgent());
+
+        using var resp = await http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
+        resp.EnsureSuccessStatusCode();
+
+        var expectedLen = resp.Content.Headers.ContentLength ?? length;
+        if (expectedLen != length)
+            throw new InvalidOperationException($"chunk {chunkIndex}: expected {length} bytes, server returned {expectedLen}");
+
+        await using var src = await resp.Content.ReadAsStreamAsync(ct);
+        await using var dst = File.Create(chunkPath);
+
+        var buffer = new byte[65536];
+        int read;
+        while ((read = await src.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
         {
-            try
-            {
-                using var req = new HttpRequestMessage(HttpMethod.Get, url);
-                req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(offset, offset + length - 1);
-                req.Headers.UserAgent.ParseAdd(Config.LoadUserAgent());
-
-                using var resp = await http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
-                resp.EnsureSuccessStatusCode();
-
-                var expectedLen = resp.Content.Headers.ContentLength ?? length;
-                if (expectedLen != length)
-                    throw new InvalidOperationException($"chunk {chunkIndex}: expected {length} bytes, server returned {expectedLen}");
-
-                await using var src = await resp.Content.ReadAsStreamAsync(ct);
-                await using var dst = File.Create(chunkPath);
-
-                var buffer = new byte[65536];
-                int read;
-                while ((read = await src.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
-                {
-                    await dst.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
-                    progress.Report(read);
-                }
-                progress.CompleteChunk();
-                return;
-            }
-            catch (Exception) when (retry < maxChunkRetry)
-            {
-                try { File.Delete(chunkPath); } catch { }
-                await Task.Delay(1000 * (retry + 1), ct).ConfigureAwait(false);
-            }
+            await dst.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
+            progress.Report(read);
         }
+        progress.CompleteChunk();
     }
 }
 
