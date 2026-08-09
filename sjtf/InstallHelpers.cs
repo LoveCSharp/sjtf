@@ -208,7 +208,7 @@ internal static class InstallHelpers
                 var replaced = cmdContent.Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase)
                                         .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
                 Console.WriteLine($"{name}: shim {cmdPath}");
-                File.WriteAllText(cmdPath, replaced, System.Text.Encoding.UTF8);
+                File.WriteAllText(cmdPath, replaced, new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
             }
         }
     }
