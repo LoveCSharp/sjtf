@@ -1,7 +1,9 @@
 using System.Security.Cryptography;
+using System.IO.Compression;
 using System.Linq;
 using SharpCompress.Archives;
 using SharpCompress.Common;
+using SharpCompress.Readers;
 
 namespace Sjtf;
 
@@ -206,6 +208,17 @@ internal static partial class Tools
     public static void ExtractArchive(string archivePath, string destDir, string? label = null)
     {
         Directory.CreateDirectory(destDir);
+
+        var isTarGz = archivePath.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase) ||
+                      archivePath.EndsWith(".tar.GZ", StringComparison.OrdinalIgnoreCase) ||
+                      archivePath.EndsWith(".tgz", StringComparison.OrdinalIgnoreCase);
+
+        if (isTarGz)
+        {
+            ExtractTarGz(archivePath, destDir, label);
+            return;
+        }
+
         using var archive = ArchiveFactory.OpenArchive(archivePath);
 
         var totalSize = archive.TotalUncompressedSize;
@@ -236,6 +249,75 @@ internal static partial class Tools
             entryStream.CopyTo(fs);
 
             extractedBytes += entry.Size;
+
+            if (showProgress)
+            {
+                var now = DateTime.UtcNow;
+                if ((now - lastUpdate).TotalMilliseconds >= 100 || extractedBytes >= totalSize)
+                {
+                    lastUpdate = now;
+                    var speed = ComputeSlidingSpeed(samples, now, extractedBytes, windowSec);
+                    DrawProgress(label!, extractedBytes, totalSize, speed, barWidth);
+                }
+            }
+        }
+
+        if (showProgress)
+        {
+            var finalSpeed = ComputeSlidingSpeed(samples, DateTime.UtcNow, extractedBytes, windowSec);
+            DrawProgress(label!, extractedBytes, totalSize, finalSpeed, barWidth);
+            EndProgressLine();
+        }
+    }
+
+    private static void ExtractTarGz(string archivePath, string destDir, string? label)
+    {
+        using var fileStream = File.OpenRead(archivePath);
+        using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
+        using var reader = ReaderFactory.OpenReader(gzipStream);
+
+        long totalSize = 0;
+        var entries = new List<IEntry>();
+        while (reader.MoveToNextEntry())
+        {
+            if (!reader.Entry.IsDirectory)
+            {
+                totalSize += reader.Entry.Size;
+                entries.Add(reader.Entry);
+            }
+        }
+
+        long extractedBytes = 0;
+        var lastUpdate = DateTime.UtcNow;
+        var samples = new Queue<(DateTime Time, long Bytes)>();
+        const double windowSec = 2.0;
+        const int barWidth = 20;
+        var showProgress = !string.IsNullOrEmpty(label);
+
+        if (showProgress)
+        {
+            _lastProgressLength = 0;
+            DrawProgress(label!, 0, totalSize, 0, barWidth);
+        }
+
+        using var fileStream2 = File.OpenRead(archivePath);
+        using var gzipStream2 = new GZipStream(fileStream2, CompressionMode.Decompress);
+        using var reader2 = ReaderFactory.OpenReader(gzipStream2);
+
+        while (reader2.MoveToNextEntry())
+        {
+            if (reader2.Entry.IsDirectory || string.IsNullOrEmpty(reader2.Entry.Key)) continue;
+
+            var entryPath = Path.Combine(destDir, reader2.Entry.Key);
+            var entryDir = Path.GetDirectoryName(entryPath);
+            if (!string.IsNullOrEmpty(entryDir))
+                Directory.CreateDirectory(entryDir);
+
+            using var entryStream = reader2.OpenEntryStream();
+            using var fs = File.Create(entryPath);
+            entryStream.CopyTo(fs);
+
+            extractedBytes += reader2.Entry.Size;
 
             if (showProgress)
             {
