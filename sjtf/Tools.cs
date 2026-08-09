@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 using System.Linq;
 using SharpCompress.Archives;
 using SharpCompress.Common;
@@ -36,6 +35,8 @@ internal static partial class Tools
     }
 
     /// <summary>
+    /// 异步下载文件到指定路径 / Download a file asynchronously to the specified path.
+    /// </summary>
     /// 异步下载文件到指定路径 / Download a file asynchronously to the specified path.
     /// </summary>
     /// <param name="url">要下载的 URL / URL to download.</param>
@@ -379,9 +380,6 @@ internal static partial class Tools
         using var proc = System.Diagnostics.Process.Start(psi)
             ?? throw new InvalidOperationException($"aria2c: failed to start process: {aria2cPath}");
 
-        var progressState = new Aria2ProgressState(label ?? "downloading");
-        var showProgress = !string.IsNullOrEmpty(label);
-
         var stderrTask = Task.Run(async () =>
         {
             string? line;
@@ -392,7 +390,6 @@ internal static partial class Tools
                     try { proc.Kill(true); } catch { }
                     return;
                 }
-                progressState.UpdateFromLine(line);
             }
         }, ct);
 
@@ -401,109 +398,12 @@ internal static partial class Tools
 
         if (proc.ExitCode != 0)
         {
-            if (showProgress) EndProgressLine();
             throw new InvalidOperationException($"aria2c exited with code {proc.ExitCode}");
-        }
-
-        if (showProgress)
-        {
-            progressState.PrintFinal();
-            EndProgressLine();
         }
 
         if (!File.Exists(destFile))
         {
             throw new InvalidOperationException($"aria2c: output file not found: {destFile}");
-        }
-    }
-
-    /// <summary>
-    /// aria2 进度状态 / aria2 progress state.
-    /// </summary>
-    private sealed class Aria2ProgressState
-    {
-        private readonly string _label;
-        private long _totalSize;
-        private long _downloaded;
-        private DateTime _lastSpeedUpdate;
-        private readonly Queue<(DateTime Time, long Bytes)> _samples = new();
-        private readonly object _lock = new();
-        private static int _lastProgressLength;
-
-        public Aria2ProgressState(string label)
-        {
-            _label = label;
-            _lastSpeedUpdate = DateTime.UtcNow;
-        }
-
-        public void UpdateFromLine(string line)
-        {
-            // aria2 stderr: [#xxxxx] 12.3% 45.6M/100.0M 1.2M/s ETA 0:01:23
-            var match = Regex.Match(line, @"#\d+\s+(\d+\.\d+)%\s+([\d.]+[KMG]?)\s*\/\s*([\d.]+[KMG]?)\s+([\d.]+[KMG]?)\/s");
-            if (!match.Success) return;
-
-            var percent = double.Parse(match.Groups[1].Value);
-            var dl = ParseSize(match.Groups[2].Value);
-            var total = ParseSize(match.Groups[3].Value);
-
-            lock (_lock)
-            {
-                _downloaded = dl;
-                if (total > 0) _totalSize = total;
-
-                var now = DateTime.UtcNow;
-                if ((now - _lastSpeedUpdate).TotalMilliseconds < 100) return;
-                _lastSpeedUpdate = now;
-
-                _samples.Enqueue((now, _downloaded));
-                while (_samples.Count > 0 && _samples.Peek().Time < now - TimeSpan.FromSeconds(2.0))
-                    _samples.Dequeue();
-
-                var speed = 0.0;
-                if (_samples.Count >= 2)
-                {
-                    var first = _samples.Peek();
-                    var last = _samples.Last();
-                    var dt = (last.Time - first.Time).TotalSeconds;
-                    if (dt > 0) speed = (last.Bytes - first.Bytes) / dt;
-                }
-
-                var pct = (int)Math.Clamp(percent, 0, 100);
-                var filled = _totalSize > 0 ? (int)(20.0 * _downloaded / _totalSize) : 0;
-                if (filled > 20) filled = 20;
-                if (filled < 0) filled = 0;
-                var bar = new string('█', filled) + new string(' ', 20 - filled);
-                var speedStr = $"{FormatSize((long)speed)}/s";
-                var text = $"{_label} [{bar}] {pct,3}% {FormatSize(_downloaded)}/{FormatSize(_totalSize)} ({speedStr})";
-
-                if (text.Length < _lastProgressLength) text += new string(' ', _lastProgressLength - text.Length);
-                _lastProgressLength = text.Length;
-                Console.Write($"\r{text}");
-            }
-        }
-
-        public void PrintFinal()
-        {
-            lock (_lock)
-            {
-                var pct = _totalSize > 0 ? 100 : 0;
-                var bar = new string('█', 20);
-                var text = $"{_label} [{bar}] {pct,3}% {FormatSize(_downloaded)}/{FormatSize(_totalSize)}";
-                if (text.Length < _lastProgressLength) text += new string(' ', _lastProgressLength - text.Length);
-                Console.Write($"\r{text}");
-                _lastProgressLength = 0;
-            }
-        }
-
-        private static long ParseSize(string s)
-        {
-            s = s.Trim();
-            var mult = s.EndsWith("K", StringComparison.OrdinalIgnoreCase) ? 1024L :
-                       s.EndsWith("M", StringComparison.OrdinalIgnoreCase) ? 1024L * 1024 :
-                       s.EndsWith("G", StringComparison.OrdinalIgnoreCase) ? 1024L * 1024 * 1024 : 1L;
-            var num = s.Substring(0, s.Length - (mult > 1 ? 1 : 0));
-            if (double.TryParse(num, out var v)) return (long)(v * mult);
-            return 0;
         }
     }
     /// <param name="url">要下载的 URL / URL to download.</param>
@@ -522,13 +422,33 @@ internal static partial class Tools
 
         if (Config.LoadAria2Enable())
         {
-            var aria2cPath = await Aria2.FindOrDownloadAria2Async(ct);
-            if (!string.IsNullOrEmpty(aria2cPath) && File.Exists(aria2cPath))
+            try
             {
-                await RunAria2Async(aria2cPath, url, destFile, label, maxConnections, splitCount, minSplitSizeMB, ct);
-                return;
+                var aria2cPath = await Aria2.FindOrDownloadAria2Async(ct);
+                if (!string.IsNullOrEmpty(aria2cPath) && File.Exists(aria2cPath))
+                {
+                    await RunAria2Async(aria2cPath, url, destFile, label, maxConnections, splitCount, minSplitSizeMB, ct);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"aria2: {ex.Message}, falling back to built-in downloader");
             }
         }
+
+        await DownloadFileBuiltinAsync(url, destFile, label, maxConnections, splitCount, minSplitSizeMB, ct);
+    }
+
+    /// <summary>
+    /// 使用内置多线程分块下载文件（不使用 aria2）/ Download file using built-in multi-threaded chunk downloader (no aria2).
+    /// </summary>
+    public static async Task DownloadFileBuiltinAsync(string url, string destFile, string? label,
+        int maxConnections, int splitCount, int minSplitSizeMB, CancellationToken ct = default)
+    {
+        maxConnections = Math.Clamp(maxConnections, 1, 16);
+        splitCount = Math.Clamp(splitCount, 1, 16);
+        minSplitSizeMB = Math.Clamp(minSplitSizeMB, 1, 1024);
 
         using var http = new HttpClient();
         http.DefaultRequestHeaders.UserAgent.ParseAdd(Config.LoadUserAgent());

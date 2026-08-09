@@ -76,9 +76,14 @@ internal static class Aria2
         var zipPath = localPath + ".zip";
         try
         {
-            await Tools.DownloadFileAsync(url, zipPath, "aria2: downloading", ct);
+            await Tools.DownloadFileBuiltinAsync(url, zipPath, "aria2: downloading",
+                Config.LoadMaxConnectionPerServer(), Config.LoadSplit(), Config.LoadMinSplitSize(), ct);
             Console.WriteLine($"aria2: extracting {zipPath}...");
             ExtractAria2Binary(zipPath, toolsDir, exeName);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"aria2: failed to download or extract: {ex.Message}", ex);
         }
         finally
         {
@@ -91,8 +96,7 @@ internal static class Aria2
             return localPath;
         }
 
-        Console.WriteLine("aria2: extraction failed, falling back to built-in downloader");
-        return null;
+        throw new InvalidOperationException($"aria2: binary not found after extraction: {localPath}");
     }
 
     /// <summary>
