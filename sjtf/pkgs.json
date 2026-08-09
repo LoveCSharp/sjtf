@@ -78,9 +78,9 @@
     "install_dir": "cli\\nushell",
     "shim": {
       "windows": {
-        "cmd": {
-          "nu.cmd": "@\"{INSTALL_DIR}\\cli\\nushell\\nu.exe\" %*"
-        }
+      "cmd": {
+        "nu.cmd": "@\"{PKG_DIR}\\nu.exe\" %*"
+      }
       }
     },
     "fetch_source": "github"
