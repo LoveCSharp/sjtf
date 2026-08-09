@@ -190,15 +190,14 @@ internal static class InstallHelpers
         if (!shimObj.TryGetPropertyValue(os, out var osNode) || osNode is not JsonObject osObj)
             return;
 
-        if (osObj.TryGetPropertyValue("symlink", out var symlinkNode) && symlinkNode is JsonArray symlinkArr)
+        if (osObj.TryGetPropertyValue("symlink", out var symlinkNode) && symlinkNode is JsonObject symlinkObj)
         {
-            foreach (var item in symlinkArr)
+            foreach (var kv in symlinkObj)
             {
-                if (item is not JsonValue val || val.GetValueKind() != JsonValueKind.String) continue;
-                var targetRel = val.GetValue<string>() ?? "";
-                if (string.IsNullOrEmpty(targetRel)) continue;
-                var linkName = Path.GetFileName(targetRel);
+                var linkName = kv.Key;
                 if (string.IsNullOrEmpty(linkName)) continue;
+                var targetRel = kv.Value?.GetValue<string>() ?? "";
+                if (string.IsNullOrEmpty(targetRel)) continue;
                 var linkPath = Path.Combine(symRoot, linkName);
                 var targetFull = Path.Combine(installFull, targetRel);
                 Console.WriteLine($"{name}: shim {linkPath} -> {targetFull}");

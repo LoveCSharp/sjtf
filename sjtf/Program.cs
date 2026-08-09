@@ -525,14 +525,12 @@ catch (OperationCanceledException)
     {
         if (shimObj.TryGetPropertyValue(os, out var osNode) && osNode is JsonObject osObj)
         {
-            if (osObj.TryGetPropertyValue("symlink", out var symlinkNode) && symlinkNode is JsonArray symlinkArr)
+            if (osObj.TryGetPropertyValue("symlink", out var symlinkNode) && symlinkNode is JsonObject symlinkObj)
             {
                 var symRoot = Path.Combine(installRoot, "shims");
-                foreach (var item in symlinkArr)
+                foreach (var kv in symlinkObj)
                 {
-                    if (item is not JsonValue val || val.GetValueKind() != JsonValueKind.String) continue;
-                    var targetRel = val.GetValue<string>() ?? "";
-                    var linkName = Path.GetFileName(targetRel);
+                    var linkName = kv.Key;
                     if (string.IsNullOrEmpty(linkName)) continue;
                     var linkPath = Path.Combine(symRoot, linkName);
                     if (File.Exists(linkPath))

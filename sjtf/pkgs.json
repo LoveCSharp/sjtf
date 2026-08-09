@@ -13,9 +13,9 @@
     "pkg_install_relative_dir": "langs\\fnm",
     "shim": {
       "windows": {
-        "symlink": [
-          "fnm.exe"
-        ]
+        "symlink": {
+          "fnm.exe": "fnm.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -34,11 +34,11 @@
     "pkg_install_relative_dir": "langs\\uv",
     "shim": {
       "windows": {
-        "symlink": [
-          "uv.exe",
-          "uvw.exe",
-          "uvx.exe"
-        ]
+        "symlink": {
+          "uv.exe": "uv.exe",
+          "uvw.exe": "uvw.exe",
+          "uvx.exe": "uvx.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -57,9 +57,9 @@
     "pkg_install_relative_dir": "langs\\g\\bin",
     "shim": {
       "windows": {
-        "symlink": [
-          "g.exe"
-        ]
+        "symlink": {
+          "g.exe": "g.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -100,9 +100,9 @@
     "pkg_install_relative_dir": "cli\\zellij",
     "shim": {
       "windows": {
-        "symlink": [
-          "zellij.exe"
-        ]
+        "symlink": {
+          "zellij.exe": "zellij.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -121,9 +121,9 @@
     "pkg_install_relative_dir": "cli\\oh-my-posh",
     "shim": {
       "windows": {
-        "symlink": [
-          "oh-my-posh.exe"
-        ]
+        "symlink": {
+          "oh-my-posh.exe": "oh-my-posh.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -142,9 +142,9 @@
     "pkg_install_relative_dir": "cli\\starship",
     "shim": {
       "windows": {
-        "symlink": [
-          "starship.exe"
-        ]
+        "symlink": {
+          "starship.exe": "starship.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -163,9 +163,9 @@
     "pkg_install_relative_dir": "cli\\coreutils",
     "shim": {
       "windows": {
-        "symlink": [
-          "coreutils.exe"
-        ]
+        "symlink": {
+          "coreutils.exe": "coreutils.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -184,10 +184,10 @@
     "pkg_install_relative_dir": "cli\\yazi",
     "shim": {
       "windows": {
-        "symlink": [
-          "yazi.exe",
-          "ya.exe"
-        ]
+        "symlink": {
+          "yazi.exe": "yazi.exe",
+          "ya.exe": "ya.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -206,9 +206,9 @@
     "pkg_install_relative_dir": "cli\\lf",
     "shim": {
       "windows": {
-        "symlink": [
-          "lf.exe"
-        ]
+        "symlink": {
+          "lf.exe": "lf.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -227,9 +227,9 @@
     "pkg_install_relative_dir": "cli\\fzf",
     "shim": {
       "windows": {
-        "symlink": [
-          "fzf.exe"
-        ]
+        "symlink": {
+          "fzf.exe": "fzf.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -248,9 +248,9 @@
     "pkg_install_relative_dir": "cli\\zoxide",
     "shim": {
       "windows": {
-        "symlink": [
-          "zoxide.exe"
-        ]
+        "symlink": {
+          "zoxide.exe": "zoxide.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -269,9 +269,9 @@
     "pkg_install_relative_dir": "cli\\fd",
     "shim": {
       "windows": {
-        "symlink": [
-          "fd.exe"
-        ]
+        "symlink": {
+          "fd.exe": "fd.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -290,9 +290,9 @@
     "pkg_install_relative_dir": "cli\\sd",
     "shim": {
       "windows": {
-        "symlink": [
-          "sd.exe"
-        ]
+        "symlink": {
+          "sd.exe": "sd.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -311,9 +311,9 @@
     "pkg_install_relative_dir": "cli\\ripgrep",
     "shim": {
       "windows": {
-        "symlink": [
-          "rg.exe"
-        ]
+        "symlink": {
+          "rg.exe": "rg.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -332,9 +332,9 @@
     "pkg_install_relative_dir": "cli\\eza",
     "shim": {
       "windows": {
-        "symlink": [
-          "eza.exe"
-        ]
+        "symlink": {
+          "eza.exe": "eza.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -353,9 +353,9 @@
     "pkg_install_relative_dir": "cli\\dust",
     "shim": {
       "windows": {
-        "symlink": [
-          "dust.exe"
-        ]
+        "symlink": {
+          "dust.exe": "dust.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -374,9 +374,9 @@
     "pkg_install_relative_dir": "cli\\duf",
     "shim": {
       "windows": {
-        "symlink": [
-          "duf.exe"
-        ]
+        "symlink": {
+          "duf.exe": "duf.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -395,9 +395,9 @@
     "pkg_install_relative_dir": "cli\\bat",
     "shim": {
       "windows": {
-        "symlink": [
-          "bat.exe"
-        ]
+        "symlink": {
+          "bat.exe": "bat.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -416,9 +416,9 @@
     "pkg_install_relative_dir": "cli\\jq",
     "shim": {
       "windows": {
-        "symlink": [
-          "jq.exe"
-        ]
+        "symlink": {
+          "jq.exe": "jq.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -437,9 +437,9 @@
     "pkg_install_relative_dir": "cli\\xh",
     "shim": {
       "windows": {
-        "symlink": [
-          "xh.exe"
-        ]
+        "symlink": {
+          "xh.exe": "xh.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -458,9 +458,9 @@
     "pkg_install_relative_dir": "cli\\bottom",
     "shim": {
       "windows": {
-        "symlink": [
-          "btm.exe"
-        ]
+        "symlink": {
+          "btm.exe": "btm.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -479,9 +479,9 @@
     "pkg_install_relative_dir": "cli\\procs",
     "shim": {
       "windows": {
-        "symlink": [
-          "procs.exe"
-        ]
+        "symlink": {
+          "procs.exe": "procs.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -500,9 +500,9 @@
     "pkg_install_relative_dir": "cli\\carapace",
     "shim": {
       "windows": {
-        "symlink": [
-          "carapace.exe"
-        ]
+        "symlink": {
+          "carapace.exe": "carapace.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -568,9 +568,9 @@
     "pkg_install_relative_dir": "editor\\edit",
     "shim": {
       "windows": {
-        "symlink": [
-          "edit.exe"
-        ]
+        "symlink": {
+          "edit.exe": "edit.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -635,9 +635,9 @@
     "pkg_install_relative_dir": "ai\\opencode",
     "shim": {
       "windows": {
-        "symlink": [
-          "opencode.exe"
-        ]
+        "symlink": {
+          "opencode.exe": "opencode.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -656,9 +656,30 @@
     "pkg_install_relative_dir": "ai\\pi",
     "shim": {
       "windows": {
-        "symlink": [
-          "pi.exe"
-        ]
+        "symlink": {
+          "pi.exe": "pi.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "jcode": {
+    "description": "The most RAM efficient harness.The most most intelligent harness.",
+    "repo": "1jehuang/jcode",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?i)(?=.*windows)(?=.*x86_64).*\\.tar.gz$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "pkg_install_relative_dir": "ai\\jcode",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "jcode.exe": "jcode.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -677,9 +698,9 @@
     "pkg_install_relative_dir": "ai\\rtk",
     "shim": {
       "windows": {
-        "symlink": [
-          "rtk.exe"
-        ]
+        "symlink": {
+          "rtk.exe": "rtk.exe"
+        }
       }
     },
     "fetch_source": "github"
