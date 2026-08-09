@@ -101,10 +101,15 @@ internal static class InstallHelpers
         var dot = filename.LastIndexOf('.');
         if (dot <= 0) return "";
 
-        if (dot > 4 && filename[(dot - 4)..dot] is ".tar" or ".TAR")
-            return filename[(dot - 4)..];
+        var ext = filename[dot..];
+        if (ext.Equals(".gz", StringComparison.OrdinalIgnoreCase) && dot >= 4)
+        {
+            var prefix = filename[(dot - 4)..dot];
+            if (prefix.Equals(".tar", StringComparison.OrdinalIgnoreCase))
+                return filename[(dot - 4)..];
+        }
 
-        return filename[dot..];
+        return ext;
     }
 
     /// <summary>
