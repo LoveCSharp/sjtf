@@ -29,13 +29,10 @@ internal static class InstallHelpers
     /// </summary>
     /// <param name="name">包名称 / Package name.</param>
     /// <param name="plan">下载计划 / Download plan.</param>
-    /// <param name="maxAttempts">最大重试次数 / Maximum retry attempts.</param>
     /// <param name="ct">取消令牌 / Cancellation token.</param>
     /// <returns>下载文件的本地路径 / Local path of the downloaded file.</returns>
-    public static async Task<string> DownloadAndVerifyAsync(string name, DownloadPlan plan, int maxAttempts, CancellationToken ct = default)
+    public static async Task<string> DownloadAndVerifyAsync(string name, DownloadPlan plan, CancellationToken ct = default)
     {
-        if (maxAttempts <= 0) maxAttempts = 3;
-
         var maxConn = Config.LoadMaxConnectionPerServer();
         var splitCount = Config.LoadSplit();
         var minSplitMB = Config.LoadMinSplitSize();
@@ -44,33 +41,11 @@ internal static class InstallHelpers
         var dlName = $"{name}-{Arch.CurrentOs()}-{Arch.CurrentArch()}-{plan.Version}{ext}";
         var dlPath = Path.Combine(Tools.CacheDir(), dlName);
 
-        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        try
         {
-            try
+            if (!File.Exists(dlPath))
             {
-                if (!File.Exists(dlPath))
-                {
-                    var label = attempt == 1
-                        ? $"{name}: downloading"
-                        : $"{name}: downloading (retry {attempt - 1}/{maxAttempts - 1})";
-                    await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, label, maxConn, splitCount, minSplitMB, ct);
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                Tools.CleanupPartialDownload(dlPath);
-                throw;
-            }
-            catch (Exception ex)
-            {
-                Tools.CleanupPartialDownload(dlPath);
-                if (attempt < maxAttempts)
-                {
-                    Console.Error.WriteLine($"{name}: download failed ({ex.Message}), retrying in 3s ({attempt}/{maxAttempts})...");
-                    await Task.Delay(3000, ct).ConfigureAwait(false);
-                    continue;
-                }
-                throw new InvalidOperationException($"{name}: download failed after {maxAttempts} attempts: {ex.Message}", ex);
+                await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, $"{name}: downloading", maxConn, splitCount, minSplitMB, ct);
             }
 
             Console.WriteLine($"{name}: verifying {plan.DigestAlgorithm} digest...");
@@ -80,21 +55,18 @@ internal static class InstallHelpers
                 return dlPath;
             }
 
-            try { File.Delete(dlPath); } catch { }
-            Tools.CleanupPartialDownload(dlPath);
-
-            if (attempt < maxAttempts)
-            {
-                Console.Error.WriteLine($"{name}: {plan.DigestAlgorithm} digest mismatch (expected {plan.ExpectedDigest}, got {actualDigest}), retrying in 3s ({attempt}/{maxAttempts})...");
-                await Task.Delay(3000, ct).ConfigureAwait(false);
-            }
-            else
-            {
-                throw new InvalidOperationException($"{name}: {plan.DigestAlgorithm} digest verification failed after {maxAttempts} attempts (expected {plan.ExpectedDigest}, got {actualDigest})");
-            }
+            throw new InvalidOperationException($"{name}: {plan.DigestAlgorithm} digest mismatch (expected {plan.ExpectedDigest}, got {actualDigest})");
         }
-
-        return dlPath;
+        catch (OperationCanceledException)
+        {
+            Tools.CleanupPartialDownload(dlPath);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Tools.CleanupPartialDownload(dlPath);
+            throw new InvalidOperationException($"{name}: download failed: {ex.Message}", ex);
+        }
     }
 
     /// <summary>

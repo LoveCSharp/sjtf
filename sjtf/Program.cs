@@ -468,8 +468,7 @@ catch (OperationCanceledException)
             return;
         }
 
-        var maxAttempts = Config.LoadDownloadRetryMax();
-        var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan, maxAttempts, ct);
+        var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan, ct);
 
         InstallHelpers.PlaceAsset(name, pkg, dlPath, installFull);
         InstallHelpers.CreateSymlinks(name, pkg, installRoot, installFull);
@@ -652,8 +651,7 @@ catch (OperationCanceledException)
         var installFull = Path.Combine(installRoot, installDirRel);
         Directory.CreateDirectory(installFull);
 
-        var maxAttempts = Config.LoadDownloadRetryMax();
-        var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan, maxAttempts, ct);
+        var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan, ct);
 
         InstallHelpers.PlaceAsset(name, pkg, dlPath, installFull);
         InstallHelpers.CreateSymlinks(name, pkg, installRoot, installFull);
