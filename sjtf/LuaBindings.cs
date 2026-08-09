@@ -28,7 +28,7 @@ internal class LuaBindings
     /// <param name="url">请求 URL / Request URL.</param>
     /// <param name="headers">请求头 Lua 表 / Request headers Lua table.</param>
     /// <returns>响应内容字符串 / Response content string.</returns>
-    public string HttpGet(string url, LuaTable headers)
+    public string HttpGet(string url, LuaTable? headers = null)
     {
         var prefix = PackageName ?? "http_get";
         Console.WriteLine($"{prefix}: fetching {url}");
