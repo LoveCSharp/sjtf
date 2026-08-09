@@ -43,6 +43,7 @@ public sealed class SjtfGithub
     /// <summary>
     /// GitHub API 请求代理地址 / Proxy address for GitHub API requests.
     /// </summary>
+    [TomlPropertyName("proxy")]
     public string Proxy { get; set; } = "";
 }
 
@@ -165,6 +166,12 @@ internal static class Config
     public const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0";
 
     /// <summary>
+    /// aria2 默认二进制下载 URL（Windows x64）。当 config.toml 中未配置 [aria2] 时使用。
+    /// Default aria2 binary download URL (Windows x64). Used when [aria2] is not configured in config.toml.
+    /// </summary>
+    public const string DefaultAria2WindowsX64Url = "https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0-win-64bit-build1.zip";
+
+    /// <summary>
     /// 获取 config.toml 的完整路径 / Get the full path of config.toml.
     /// </summary>
     private static string ConfigPath() => Path.Combine(Tools.SjtfRoot(), "config.toml");
@@ -223,6 +230,15 @@ internal static class Config
     }
 
     /// <summary>
+    /// 从配置中加载 GitHub 代理地址 / Load GitHub proxy address from config.
+    /// </summary>
+    public static string LoadGithubProxy()
+    {
+        var proxy = LoadDoc()?.Github?.Proxy;
+        return string.IsNullOrEmpty(proxy) ? "" : proxy;
+    }
+
+    /// <summary>
     /// 从配置中加载远程 pkgs.json 地址 / Load remote pkgs.json URL from config.
     /// </summary>
     public static string LoadPkgsRemoteUrl()
@@ -261,14 +277,21 @@ internal static class Config
     /// <summary>
     /// 从配置中加载是否启用 aria2 / Load aria2 enable flag from config.
     /// </summary>
-    public static bool LoadAria2Enable() => LoadDoc()?.Download.Aria2Enable ?? false;
+    public static bool LoadAria2Enable() => LoadDoc()?.Download.Aria2Enable ?? true;
 
     /// <summary>
     /// 从配置中加载指定 OS/Arch 的 aria2 下载地址 / Load aria2 download URL for given OS/arch from config.
+    /// 若 config.toml 未配置，回退到内置默认值。
+    /// Falls back to built-in default if config.toml does not configure it.
     /// </summary>
     public static string? LoadAria2Url(string os, string arch)
     {
-        return LoadDoc()?.Aria2.GetUrl(os, arch);
+        var url = LoadDoc()?.Aria2.GetUrl(os, arch);
+        if (!string.IsNullOrEmpty(url)) return url;
+
+        // Fallback when [aria2] section is missing in config.toml
+        if (os == "windows" && arch == "x86_64") return DefaultAria2WindowsX64Url;
+        return null;
     }
 
     /// <summary>
@@ -345,7 +368,7 @@ internal static class Config
         if (!string.IsNullOrEmpty(dir))
             Directory.CreateDirectory(dir);
 
-        var content = @"[general]
+        var content = $@"[general]
 install_dir = ""D:\\sjtf_pkgs""
 
 [pkgs]
@@ -358,14 +381,14 @@ split = 10                      # 1 ~ 16
 min_split_size = 1              # Chunk download size setting, unit: MB     1 ~ 1024
 
 [aria2]
-windows_x86_64 = ""https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0-win-64bit-build1.zip""
+windows_x86_64 = ""{DefaultAria2WindowsX64Url}""
 
 [github]
 token_classic = ""put your classic token here""
 proxy = ""https://gh-proxy.com""
 
 [http.request.header]
-user_agent = ""Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0""
+user_agent = ""{DefaultUserAgent}""
 ";
         File.WriteAllText(path, content);
     }
