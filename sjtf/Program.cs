@@ -514,8 +514,28 @@ catch (OperationCanceledException)
             pkgType = typeVal.GetValue<string>();
     }
 
-    // Delete symlinks first / 先删除符号链接
-    if (pkg.TryGetPropertyValue("symlinks", out var symNode) && symNode is JsonObject symObj)
+    // Delete shims first / 先删除 shim 符号链接
+    if (pkg.TryGetPropertyValue("shim", out var shimNode) && shimNode is JsonObject shimObj)
+    {
+        if (shimObj.TryGetPropertyValue("symlink", out var symlinkNode) && symlinkNode is JsonArray symlinkArr)
+        {
+            var symRoot = Path.Combine(installRoot, "symlink");
+            foreach (var item in symlinkArr)
+            {
+                if (item is not JsonValue val || val.GetValueKind() != JsonValueKind.String) continue;
+                var targetRel = val.GetValue<string>() ?? "";
+                var linkName = Path.GetFileName(targetRel);
+                if (string.IsNullOrEmpty(linkName)) continue;
+                var linkPath = Path.Combine(symRoot, linkName);
+                if (File.Exists(linkPath))
+                {
+                    Console.WriteLine($"{name}: removing shim {linkPath}");
+                    File.Delete(linkPath);
+                }
+            }
+        }
+    }
+    else if (pkg.TryGetPropertyValue("symlinks", out var symNode) && symNode is JsonObject symObj)
     {
         var symRoot = Path.Combine(installRoot, "symlink");
         foreach (var kv in symObj)

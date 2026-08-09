@@ -204,7 +204,26 @@ internal static class InstallHelpers
 
         var symRoot = Path.Combine(installRoot, "symlink");
         Directory.CreateDirectory(symRoot);
-        if (pkg.TryGetPropertyValue("symlinks", out var symNode) && symNode is JsonObject symObj)
+
+        if (pkg.TryGetPropertyValue("shim", out var shimNode) && shimNode is JsonObject shimObj)
+        {
+            if (shimObj.TryGetPropertyValue("symlink", out var symlinkNode) && symlinkNode is JsonArray symlinkArr)
+            {
+                foreach (var item in symlinkArr)
+                {
+                    if (item is not JsonValue val || val.GetValueKind() != JsonValueKind.String) continue;
+                    var targetRel = val.GetValue<string>() ?? "";
+                    if (string.IsNullOrEmpty(targetRel)) continue;
+                    var linkName = Path.GetFileName(targetRel);
+                    if (string.IsNullOrEmpty(linkName)) continue;
+                    var linkPath = Path.Combine(symRoot, linkName);
+                    var targetFull = Path.Combine(installFull, targetRel);
+                    Console.WriteLine($"{name}: shim {linkPath} -> {targetFull}");
+                    Tools.CreateSymlink(linkPath, targetFull);
+                }
+            }
+        }
+        else if (pkg.TryGetPropertyValue("symlinks", out var symNode) && symNode is JsonObject symObj)
         {
             foreach (var kv in symObj)
             {
