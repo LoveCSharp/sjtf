@@ -78,10 +78,9 @@
     "pkg_install_relative_dir": "cli\\nushell",
     "shim": {
       "windows": {
-        "cmd": {
-          "nu.cmd": "@\"{PKG_DIR}\\nu.exe\" %*",
-          "pkg_dir": "cli\\nushell"
-        }
+      "cmd": {
+        "nu.cmd": "@\"{PKG_INSTALL_DIR}\\nu.exe\" %*"
+      }
       }
     },
     "fetch_source": "github"
