@@ -100,6 +100,10 @@ internal static class InstallHelpers
 
         var dot = filename.LastIndexOf('.');
         if (dot <= 0) return "";
+
+        if (dot > 4 && filename[(dot - 4)..dot] is ".tar" or ".TAR")
+            return filename[(dot - 4)..];
+
         return filename[dot..];
     }
 
