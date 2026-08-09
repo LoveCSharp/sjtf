@@ -1,5 +1,7 @@
 # sjtf Lua Scripting Guide
 
+[English](SCRIPTS.md) | [中文](SCRIPTS.zh_cn.md)
+
 This document explains how to write three types of Lua scripts for sjtf: fetch source scripts, after-install scripts, and after-uninstall scripts.
 
 ## Script Types Overview

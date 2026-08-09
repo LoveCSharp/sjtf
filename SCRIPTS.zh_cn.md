@@ -1,5 +1,7 @@
 # sjtf Lua 脚本编写指南
 
+[English](SCRIPTS.md) | [中文](SCRIPTS.zh_cn.md)
+
 本文档介绍如何为 sjtf 编写三种 Lua 脚本：获取源脚本、安装后脚本和卸载后脚本。
 
 ## 脚本类型概览
