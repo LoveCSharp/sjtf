@@ -334,6 +334,20 @@ internal static partial class Tools
     }
 
     /// <summary>
+    /// 清理不完整的下载产物（最终文件 + 分块临时目录）/ Cleanup partial download artifacts (final file + chunk temp dirs).
+    /// </summary>
+    /// <param name="destFile">目标文件路径 / Destination file path.</param>
+    internal static void CleanupPartialDownload(string destFile)
+    {
+        try { File.Delete(destFile); } catch { }
+        var pattern = Path.GetFileName(destFile) + ".parts_*";
+        foreach (var d in Directory.GetDirectories(CacheDir(), pattern))
+        {
+            try { Directory.Delete(d, recursive: true); } catch { }
+        }
+    }
+
+    /// <summary>
     /// 分块下载文件（支持 Range 请求 + 多线程）/ Multi-chunk file download with Range requests.
     /// </summary>
     /// <param name="url">要下载的 URL / URL to download.</param>
@@ -442,33 +456,46 @@ internal static partial class Tools
     }
 
     /// <summary>
-    /// 下载单个分块（带 Range 请求头）/ Download a single chunk with Range header.
+    /// 下载单个分块（带 Range 请求头，分块级重试）/ Download a single chunk with Range header and chunk-level retry.
     /// </summary>
     private static async Task DownloadChunkAsync(HttpClient http, string url, long offset, long length,
         string chunkPath, ChunkProgress progress, int chunkIndex, CancellationToken ct)
     {
-        using var req = new HttpRequestMessage(HttpMethod.Get, url);
-        req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(offset, offset + length - 1);
-        req.Headers.UserAgent.ParseAdd(Config.LoadUserAgent());
-
-        using var resp = await http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
-        resp.EnsureSuccessStatusCode();
-
-        var expectedLen = resp.Content.Headers.ContentLength ?? length;
-        if (expectedLen != length)
-            throw new InvalidOperationException($"chunk {chunkIndex}: expected {length} bytes, server returned {expectedLen}");
-
-        await using var src = await resp.Content.ReadAsStreamAsync(ct);
-        await using var dst = File.Create(chunkPath);
-
-        var buffer = new byte[65536];
-        int read;
-        while ((read = await src.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
+        const int maxChunkRetry = 3;
+        for (int retry = 0; retry <= maxChunkRetry; retry++)
         {
-            await dst.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
-            progress.Report(read);
+            try
+            {
+                using var req = new HttpRequestMessage(HttpMethod.Get, url);
+                req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(offset, offset + length - 1);
+                req.Headers.UserAgent.ParseAdd(Config.LoadUserAgent());
+
+                using var resp = await http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
+                resp.EnsureSuccessStatusCode();
+
+                var expectedLen = resp.Content.Headers.ContentLength ?? length;
+                if (expectedLen != length)
+                    throw new InvalidOperationException($"chunk {chunkIndex}: expected {length} bytes, server returned {expectedLen}");
+
+                await using var src = await resp.Content.ReadAsStreamAsync(ct);
+                await using var dst = File.Create(chunkPath);
+
+                var buffer = new byte[65536];
+                int read;
+                while ((read = await src.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
+                {
+                    await dst.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
+                    progress.Report(read);
+                }
+                progress.CompleteChunk();
+                return;
+            }
+            catch (Exception) when (retry < maxChunkRetry)
+            {
+                try { File.Delete(chunkPath); } catch { }
+                await Task.Delay(1000 * (retry + 1), ct).ConfigureAwait(false);
+            }
         }
-        progress.CompleteChunk();
     }
 }
 

@@ -45,12 +45,26 @@ internal static class InstallHelpers
 
         for (int attempt = 1; attempt <= maxAttempts; attempt++)
         {
-            if (!File.Exists(dlPath))
+            try
             {
-                var label = attempt == 1
-                    ? $"{name}: downloading"
-                    : $"{name}: downloading (retry {attempt - 1}/{maxAttempts - 1})";
-                await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, label, maxConn, splitCount, minSplitMB);
+                if (!File.Exists(dlPath))
+                {
+                    var label = attempt == 1
+                        ? $"{name}: downloading"
+                        : $"{name}: downloading (retry {attempt - 1}/{maxAttempts - 1})";
+                    await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, label, maxConn, splitCount, minSplitMB);
+                }
+            }
+            catch (Exception ex)
+            {
+                Tools.CleanupPartialDownload(dlPath);
+                if (attempt < maxAttempts)
+                {
+                    Console.Error.WriteLine($"{name}: download failed ({ex.Message}), retrying in 3s ({attempt}/{maxAttempts})...");
+                    await Task.Delay(3000);
+                    continue;
+                }
+                throw new InvalidOperationException($"{name}: download failed after {maxAttempts} attempts: {ex.Message}", ex);
             }
 
             Console.WriteLine($"{name}: verifying {plan.DigestAlgorithm} digest...");
@@ -61,10 +75,12 @@ internal static class InstallHelpers
             }
 
             try { File.Delete(dlPath); } catch { }
+            Tools.CleanupPartialDownload(dlPath);
 
             if (attempt < maxAttempts)
             {
-                Console.Error.WriteLine($"{name}: {plan.DigestAlgorithm} digest mismatch (expected {plan.ExpectedDigest}, got {actualDigest}), retrying...");
+                Console.Error.WriteLine($"{name}: {plan.DigestAlgorithm} digest mismatch (expected {plan.ExpectedDigest}, got {actualDigest}), retrying in 3s ({attempt}/{maxAttempts})...");
+                await Task.Delay(3000);
             }
             else
             {

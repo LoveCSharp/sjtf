@@ -40,12 +40,6 @@ public sealed class SjtfGeneral
     public string InstallDir { get; set; } = "";
 
     /// <summary>
-    /// 下载失败时的最大重试次数 / Maximum retry count on download failure.
-    /// </summary>
-    [JsonPropertyName("download_retry_max")]
-    public int DownloadRetryMax { get; set; } = 3;
-
-    /// <summary>
     /// 是否创建符号链接 / Whether to create symbolic links.
     /// </summary>
     [JsonPropertyName("create_symlink")]
@@ -103,6 +97,12 @@ public sealed class SjtfDownload
     /// </summary>
     [JsonPropertyName("min_split_size")]
     public int MinSplitSize { get; set; } = 1;
+
+    /// <summary>
+    /// 下载和校验失败时的总重试次数 / Total retry count for download and verification failures. Range: 2 ~ 10.
+    /// </summary>
+    [JsonPropertyName("retry")]
+    public int Retry { get; set; } = 5;
 }
 
 /// <summary>
@@ -202,9 +202,13 @@ internal static class Config
     }
 
     /// <summary>
-    /// 从配置中加载下载最大重试次数 / Load download max retry count from config.
+    /// 从配置中加载下载和校验的总重试次数 / Load total retry count for download and verification from config.
     /// </summary>
-    public static int LoadDownloadRetryMax() => LoadDoc()?.General.DownloadRetryMax ?? 3;
+    public static int LoadDownloadRetryMax()
+    {
+        var v = LoadDoc()?.Download.Retry ?? 5;
+        return Math.Clamp(v, 2, 10);
+    }
 
     /// <summary>
     /// 从配置中加载每个服务器的最大连接数 / Load max connections per server from config.
@@ -288,7 +292,6 @@ internal static class Config
 
         var content = @"[general]
 install_dir = ""D:\\sjtf_pkgs""
-download_retry_max = 3
 create_symlink = true
 
 [pkgs]
@@ -298,6 +301,7 @@ remote_url = ""https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json""
 max_connection_per_server = 10  # 1 ~ 16
 split = 10                      # 1 ~ 16
 min_split_size = 1              # Chunk download size setting, unit: MB     1 ~ 1024
+retry = 5
 
 [github]
 token_classic = ""put your classic token here""
