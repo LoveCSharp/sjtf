@@ -68,7 +68,7 @@ internal static class Aria2
             var proxy = Config.LoadGithubProxy();
             if (!string.IsNullOrEmpty(proxy))
             {
-                url = url.Replace("https://github.com", proxy, StringComparison.OrdinalIgnoreCase);
+                url = proxy.TrimEnd('/') + "/" + url;
                 Console.WriteLine($"aria2: using GitHub proxy: {proxy}");
             }
         }
@@ -115,7 +115,7 @@ internal static class Aria2
         var args = new List<string>
         {
             "--continue=true",
-            $"--max-connection={maxConnections}",
+            $"--max-connection-per-server={maxConnections}",
             $"--split={splitCount}",
             $"--min-split-size={minSplitSizeMB}M",
             "--file-allocation=none",
