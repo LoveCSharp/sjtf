@@ -1,5 +1,7 @@
 # sjtf - Command-Line Skeleton Tool
 
+[English](README.md) | [中文](README.zh_cn.md)
+
 ![.NET](https://img.shields.io/badge/.NET-10.0-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)
 
