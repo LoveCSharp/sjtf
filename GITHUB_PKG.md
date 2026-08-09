@@ -32,7 +32,9 @@ Here is a complete package definition (using `fnm` as an example):
     "pkg_install_relative_dir": "langs\\fnm",
     "shim": {
       "windows": {
-        "symlink": ["fnm.exe"]
+        "symlink": {
+          "fnm.exe": "fnm.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -117,7 +119,9 @@ Shim configuration, layered by operating system. Only takes effect when the curr
 ```json
 "shim": {
   "windows": {
-    "symlink": ["fnm.exe"],
+    "symlink": {
+      "fnm.exe": "fnm.exe"
+    },
     "shell_script": {
       "fnm.cmd": "@\"{PKG_INSTALL_DIR}\\fnm.exe\" %*",
       "fnm.ps1": "& \"{PKG_INSTALL_DIR}\\fnm.exe\" @args"
@@ -128,13 +132,20 @@ Shim configuration, layered by operating system. Only takes effect when the curr
 
 #### `shim[os].symlink`
 
-String array creating symbolic links to files within the install directory. The link name is derived from the target file name.
+Key-value object mapping shim file names to target relative paths within the install directory.
 
 ```json
-"symlink": ["fnm.exe"]
+"symlink": {
+  "fnm.exe": "fnm.exe",
+  "jcode.exe": "jcode-windows-x86_64.exe"
+}
 ```
 
-This creates `fnm.exe` -> `langs\fnm\fnm.exe` in the `shims/` directory.
+This creates:
+- `shims/fnm.exe` -> `langs\fnm\fnm.exe`
+- `shims/jcode.exe` -> `ai\jcode\jcode-windows-x86_64.exe`
+
+The **key** is the shim file name in `shims/`, the **value** is the relative path inside the package install directory.
 
 #### `shim[os].shell_script`
 
@@ -155,6 +166,8 @@ Key-value object creating text shim files. Supports placeholders:
 This creates:
 - `shims/fnm.cmd`: Windows batch script
 - `shims/fnm.ps1`: PowerShell script
+
+Files are written as UTF-8 without BOM.
 
 ### `fetch_source` (required)
 
@@ -252,7 +265,7 @@ If package installation fails, check the error message:
 - **`no fetch_asset entry for os=xxx`**: Missing `arch` config for current OS in `pkgs.json`
 - **`no asset matching xxx`**: Regex didn't match any Release assets, check asset names and pattern
 - **`GitHub API response missing tag_name`**: Release has no `tag_name`, check repository Release settings
-- **`digest mismatch`**: Downloaded file doesn't match GitHub API digest, possible network issue or tampering
+- **`digest mismatch`**: Downloaded file doesn't match GitHub API digest, possible network issue or tampering. The corrupted file is deleted and re-downloaded automatically.
 
 ## Related Documentation
 

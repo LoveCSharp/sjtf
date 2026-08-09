@@ -87,7 +87,7 @@ Package definitions. Use `sjtf packages update` to download the latest version f
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows).*\\.zip$"
+          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -95,13 +95,56 @@ Package definitions. Use `sjtf packages update` to download the latest version f
     "pkg_install_relative_dir": "langs\\fnm",
     "shim": {
       "windows": {
-        "symlink": ["fnm.exe"]
+        "symlink": {
+          "fnm.exe": "fnm.exe"
+        }
       }
     },
     "fetch_source": "github"
   }
 }
 ```
+
+#### shim configuration
+
+`shim` is layered by operating system. Only takes effect when the current OS matches.
+
+- `symlink`: Key-value object. The **key** is the shim file name in `shims/`, the **value** is the relative path within the package install directory.
+- `shell_script`: Key-value object. Each key becomes a shim file name, and its value becomes the file content. Supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders. Files are written as UTF-8 without BOM.
+
+```json
+"shim": {
+  "windows": {
+    "symlink": {
+      "fnm.exe": "fnm.exe"
+    },
+    "shell_script": {
+      "fnm.cmd": "@\"{PKG_INSTALL_DIR}\\fnm.exe\" %*",
+      "fnm.ps1": "& \"{PKG_INSTALL_DIR}\\fnm.exe\" @args"
+    }
+  }
+}
+```
+
+#### Package types
+
+| Type | Description |
+|------|-------------|
+| `portable-compressed-archive` | ZIP/TAR.GZ/7Z archive, automatically extracted to install directory |
+| `portable-exe` | Standalone executable, copied directly to install directory |
+| `installer` | Installer executable, runs with arguments specified by `install_params` |
+
+`installer` type supports the following fields:
+
+| Field | Description |
+|------|-------------|
+| `install_params` | Installer arguments, supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders |
+| `uninstall_program` | Uninstaller program file name (relative to install directory) |
+| `uninstall_params` | Uninstaller arguments, supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders |
+
+#### Post-install / post-uninstall scripts
+
+Set `script_after_install: true` or `script_after_uninstall: true` to run Lua scripts after installation or uninstallation. See [SCRIPTS.md](SCRIPTS.md) for details.
 
 ### `installed.json`
 

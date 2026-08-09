@@ -73,7 +73,7 @@ token_classic = "put your classic token here"  # GitHub 个人访问令牌（可
 proxy = "https://gh-proxy.com"                 # GitHub 代理（可选）
 
 [http.request.header]
-user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0"
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0"
 ```
 
 ### `pkgs.json`
@@ -87,7 +87,7 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows).*\\.zip$"
+          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -95,10 +95,8 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
     "pkg_install_relative_dir": "langs\\fnm",
     "shim": {
       "windows": {
-        "symlink": ["fnm.exe"],
-        "shell_script": {
-          "fnm.cmd": "@\"{PKG_INSTALL_DIR}\\fnm.exe\" %*",
-          "fnm.ps1": "& \"{PKG_INSTALL_DIR}\\fnm.exe\" @args"
+        "symlink": {
+          "fnm.exe": "fnm.exe"
         }
       }
     },
@@ -109,25 +107,32 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 
 #### shim 配置
 
-`shim` 按操作系统分层，支持两种类型：
+`shim` 按操作系统分层，仅在当前操作系统匹配时生效。
 
-- `symlink`：字符串数组，创建指向安装目录内文件的符号链接，链接名从目标文件名自动推导
-- `shell_script`：键值对对象，为每个键创建同名文件，内容为对应的值
+- `symlink`：键值对对象。**键** 为 `shims/` 下的符号链接文件名，**值** 为包安装目录内的相对目标路径。
+- `shell_script`：键值对对象。为每个键创建同名文件，内容为对应的值。支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符。文件以 UTF-8 无 BOM 写入。
 
-`shell_script` 支持以下占位符：
-
-| 占位符 | 替换为 |
-|--------|--------|
-| `{PKG_INSTALL_DIR}` | 包的完整安装路径（`config.install_dir` + `pkg_install_relative_dir`） |
-| `{INSTALL_DIR}` | 全局安装根目录（`config.install_dir`） |
+```json
+"shim": {
+  "windows": {
+    "symlink": {
+      "fnm.exe": "fnm.exe"
+    },
+    "shell_script": {
+      "fnm.cmd": "@\"{PKG_INSTALL_DIR}\\fnm.exe\" %*",
+      "fnm.ps1": "& \"{PKG_INSTALL_DIR}\\fnm.exe\" @args"
+    }
+  }
+}
+```
 
 #### 包类型
 
 | 类型 | 说明 |
 |------|------|
-| `portable-compressed-archive` | ZIP/TAR.GZ/7Z 压缩包 |
-| `portable-exe` | 独立可执行文件 |
-| `installer` | 安装程序（使用 `install_params` 参数执行） |
+| `portable-compressed-archive` | ZIP/TAR.GZ/7Z 压缩包，自动解压到安装目录 |
+| `portable-exe` | 独立可执行文件，直接复制到安装目录 |
+| `installer` | 安装程序，执行 `install_params` 指定的参数 |
 
 `installer` 类型支持以下字段：
 
@@ -136,6 +141,10 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 | `install_params` | 安装程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符 |
 | `uninstall_program` | 卸载程序文件名（相对于安装目录） |
 | `uninstall_params` | 卸载程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符 |
+
+#### 安装后 / 卸载后脚本
+
+设置 `script_after_install: true` 或 `script_after_uninstall: true` 可在安装或卸载完成后执行 Lua 脚本。详见 [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md)。
 
 ### `installed.json`
 

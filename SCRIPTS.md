@@ -105,7 +105,9 @@ To support a new version source, simply create a `{fetch_source}_fetch_latest.lu
 
 ### Purpose
 
-Execute after a package is installed. Handles post-installation tasks that the installer itself cannot complete, such as creating wrapper scripts or data directories.
+Execute after a package is installed. Handles post-installation tasks that the installer itself cannot complete, such as creating data directories or performing cleanup.
+
+> **Note:** For simple wrapper script creation, consider using the `shell_script` shim block in `pkgs.json` instead of a Lua script. `shell_script` supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders and writes files as UTF-8 without BOM.
 
 ### Script Location
 

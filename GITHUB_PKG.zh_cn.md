@@ -32,7 +32,9 @@
     "pkg_install_relative_dir": "langs\\fnm",
     "shim": {
       "windows": {
-        "symlink": ["fnm.exe"]
+        "symlink": {
+          "fnm.exe": "fnm.exe"
+        }
       }
     },
     "fetch_source": "github"
@@ -117,7 +119,10 @@ Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
 ```json
 "shim": {
   "windows": {
-    "symlink": ["fnm.exe"],
+    "symlink": {
+      "fnm.exe": "fnm.exe",
+      "jcode.exe": "jcode-windows-x86_64.exe"
+    },
     "shell_script": {
       "fnm.cmd": "@\"{PKG_INSTALL_DIR}\\fnm.exe\" %*",
       "fnm.ps1": "& \"{PKG_INSTALL_DIR}\\fnm.exe\" @args"
@@ -128,13 +133,18 @@ Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
 
 #### `shim[os].symlink`
 
-字符串数组，为每个路径创建符号链接。链接名从目标文件名自动推导。
+键值对对象。**键** 为 `shims/` 下的符号链接文件名，**值** 为包安装目录内的相对目标路径。
 
 ```json
-"symlink": ["fnm.exe"]
+"symlink": {
+  "fnm.exe": "fnm.exe",
+  "jcode.exe": "jcode-windows-x86_64.exe"
+}
 ```
 
-上述配置会在 `shims/` 目录下创建 `fnm.exe` -> `langs\fnm\fnm.exe` 的符号链接。
+上述配置会创建：
+- `shims/fnm.exe` -> `langs\fnm\fnm.exe`
+- `shims/jcode.exe` -> `ai\jcode\jcode-windows-x86_64.exe`
 
 #### `shim[os].shell_script`
 
@@ -155,6 +165,8 @@ Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
 上述配置会创建：
 - `shims/fnm.cmd`：Windows 批处理脚本
 - `shims/fnm.ps1`：PowerShell 脚本
+
+文件以 UTF-8 无 BOM 格式写入。
 
 ### `fetch_source`（必需）
 
@@ -202,7 +214,7 @@ Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
    - 缓存文件名格式：`{name}-{os}-{arch}-{version}.{ext}`
 
 3. **验证**：计算下载文件的摘要，与 GitHub API 返回的 digest 比对
-   - 不匹配则删除文件并重新下载一次
+   - 不匹配则立即删除文件并重新下载一次
    - 再次不匹配则报错
 
 4. **安装**：根据 `fetch_asset.type` 处理
@@ -252,9 +264,9 @@ proxy = "https://gh-proxy.com"       # 可选代理
 - **`no fetch_asset entry for os=xxx`**：`pkgs.json` 中缺少当前操作系统的 `arch` 配置
 - **`no asset matching xxx`**：正则表达式没有匹配到任何 Release asset，检查资产名和正则
 - **`GitHub API response missing tag_name`**：Release 没有 tag_name，检查仓库 Release 配置
-- **`digest mismatch`**：下载的文件与 GitHub API 返回的 digest 不一致，可能是网络问题或文件被篡改
+- **`digest mismatch`**：下载的文件与 GitHub API 返回的 digest 不一致，可能是网络问题或文件被篡改。程序会自动删除坏文件并重新下载一次。
 
 ## 相关文档
 
-- [SCRIPTS.md](SCRIPTS.md) — Lua 脚本编写指南（获取源、安装后、卸载后脚本）
-- [README.md](README.md) — 项目主页
+- [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md) — Lua 脚本编写指南（获取源、安装后、卸载后脚本）
+- [README.zh_cn.md](README.zh_cn.md) — 项目主页
