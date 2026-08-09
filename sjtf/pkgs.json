@@ -524,9 +524,10 @@
     "pkg_install_relative_dir": "editor\\zed",
     "shim": {
       "windows": {
-        "symlink": [
-          "Zed.exe"
-        ]
+        "shell_script": {
+          "zed.cmd": "@\"{PKG_INSTALL_DIR}\\bin\\zed.exe\" --user-data-dir \"{PKG_INSTALL_DIR}\\user-data\" %*",
+          "zed.ps1": "& \"{PKG_INSTALL_DIR}\\bin\\zed.exe\" --user-data-dir \"{PKG_INSTALL_DIR}\\user-data\" @args"
+        }
       }
     },
     "fetch_source": "github"
@@ -542,8 +543,14 @@
       "type": "portable-compressed-archive"
     },
     "pkg_install_relative_dir": "editor\\vscode",
-    "script_after_install": true,
-    "script_after_uninstall": true,
+    "shim": {
+      "windows": {
+        "shell_script": {
+          "code.cmd": "@\"{PKG_INSTALL_DIR}\\bin\\code.cmd\" %*",
+          "code.ps1": "& \"{PKG_INSTALL_DIR}\\bin\\code.cmd\" @args",
+        }
+      }
+    },
     "fetch_source": "update_code_visualstudio_com"
   },
   "edit": {
@@ -579,8 +586,16 @@
       "type": "portable-compressed-archive"
     },
     "pkg_install_relative_dir": "editor\\notepad3",
-    "script_after_install": true,
-    "script_after_uninstall": true,
+    "shim": {
+      "windows": {
+        "shell_script": {
+          "notepad3.cmd": "@\"{PKG_INSTALL_DIR}\\Notepad3.exe\" %*",
+          "notepad3.ps1": "& \"{PKG_INSTALL_DIR}\\Notepad3.exe\" @args",
+          "n3.cmd": "@\"{PKG_INSTALL_DIR}\\Notepad3.exe\" %*",
+          "n3.ps1": "& \"{PKG_INSTALL_DIR}\\Notepad3.exe\" @args"
+        }
+      }
+    },
     "fetch_source": "github"
   },
   "git": {
@@ -597,9 +612,10 @@
     "pkg_install_relative_dir": "vcs\\git",
     "shim": {
       "windows": {
-        "symlink": [
-          "cmd\\git.exe"
-        ]
+        "shell_script": {
+          "git.cmd": "@\"{PKG_INSTALL_DIR}\\cmd\\git.exe\" %*",
+          "git.ps1": "& \"{PKG_INSTALL_DIR}\\cmd\\git.exe\" @args"
+        }
       }
     },
     "fetch_source": "github"
