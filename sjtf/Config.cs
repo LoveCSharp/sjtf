@@ -82,6 +82,30 @@ public sealed class SjtfPkgs
 }
 
 /// <summary>
+/// 下载配置 / Download configuration.
+/// </summary>
+public sealed class SjtfDownload
+{
+    /// <summary>
+    /// 每个服务器的最大连接数（线程数）/ Maximum connections per server (thread count). Range: 1 ~ 16.
+    /// </summary>
+    [JsonPropertyName("max_connection_per_server")]
+    public int MaxConnectionPerServer { get; set; } = 10;
+
+    /// <summary>
+    /// 下载分块数 / Number of download chunks. Range: 1 ~ 16.
+    /// </summary>
+    [JsonPropertyName("split")]
+    public int Split { get; set; } = 10;
+
+    /// <summary>
+    /// 最小分块大小（单位 MB）/ Minimum chunk size (unit: MB). Range: 1 ~ 1024.
+    /// </summary>
+    [JsonPropertyName("min_split_size")]
+    public int MinSplitSize { get; set; } = 1;
+}
+
+/// <summary>
 /// sjtf 配置根模型 / sjtf configuration root model.
 /// </summary>
 public sealed class SjtfConfig
@@ -97,6 +121,9 @@ public sealed class SjtfConfig
 
     [TomlPropertyName("pkgs")]
     public SjtfPkgs Pkgs { get; set; } = new();
+
+    [TomlPropertyName("download")]
+    public SjtfDownload Download { get; set; } = new();
 }
 
 [TomlSerializable(typeof(SjtfConfig))]
@@ -105,6 +132,7 @@ public sealed class SjtfConfig
 [TomlSerializable(typeof(SjtfHttp))]
 [TomlSerializable(typeof(SjtfHttpHeaders))]
 [TomlSerializable(typeof(SjtfPkgs))]
+[TomlSerializable(typeof(SjtfDownload))]
 internal partial class SjtfConfigContext : TomlSerializerContext
 {
 }
@@ -179,6 +207,33 @@ internal static class Config
     public static int LoadDownloadRetryMax() => LoadDoc()?.General.DownloadRetryMax ?? 3;
 
     /// <summary>
+    /// 从配置中加载每个服务器的最大连接数 / Load max connections per server from config.
+    /// </summary>
+    public static int LoadMaxConnectionPerServer()
+    {
+        var v = LoadDoc()?.Download.MaxConnectionPerServer ?? 10;
+        return Math.Clamp(v, 1, 16);
+    }
+
+    /// <summary>
+    /// 从配置中加载下载分块数 / Load download split count from config.
+    /// </summary>
+    public static int LoadSplit()
+    {
+        var v = LoadDoc()?.Download.Split ?? 10;
+        return Math.Clamp(v, 1, 16);
+    }
+
+    /// <summary>
+    /// 从配置中加载最小分块大小（MB）/ Load minimum split size in MB from config.
+    /// </summary>
+    public static int LoadMinSplitSize()
+    {
+        var v = LoadDoc()?.Download.MinSplitSize ?? 1;
+        return Math.Clamp(v, 1, 1024);
+    }
+
+    /// <summary>
     /// 从配置中加载 HTTP 请求 User-Agent，若未配置则使用默认值 / Load HTTP User-Agent from config, fallback to default if not set.
     /// </summary>
     public static string LoadUserAgent()
@@ -190,7 +245,7 @@ internal static class Config
             var toml = File.ReadAllText(path);
             var table = TomlSerializer.Deserialize(toml, TomlModelContext.Default.TomlTable);
             if (table == null) return DefaultUserAgent;
-            
+
             if (table.TryGetValue("http", out var httpVal) && httpVal is TomlTable httpTable)
             {
                 if (httpTable.TryGetValue("request", out var reqVal) && reqVal is TomlTable reqTable)
@@ -238,6 +293,11 @@ create_symlink = true
 
 [pkgs]
 remote_url = ""https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json""
+
+[download]
+max_connection_per_server = 10  # 1 ~ 16
+split = 10                      # 1 ~ 16
+min_split_size = 1              # Chunk download size setting, unit: MB     1 ~ 1024
 
 [github]
 token_classic = ""put your classic token here""

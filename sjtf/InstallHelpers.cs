@@ -35,6 +35,10 @@ internal static class InstallHelpers
     {
         if (maxAttempts <= 0) maxAttempts = 3;
 
+        var maxConn = Config.LoadMaxConnectionPerServer();
+        var splitCount = Config.LoadSplit();
+        var minSplitMB = Config.LoadMinSplitSize();
+
         var ext = ExtractExtensionFromUrl(plan.DownloadUrl);
         var dlName = $"{name}-{Arch.CurrentOs()}-{Arch.CurrentArch()}-{plan.Version}{ext}";
         var dlPath = Path.Combine(Tools.CacheDir(), dlName);
@@ -46,7 +50,7 @@ internal static class InstallHelpers
                 var label = attempt == 1
                     ? $"{name}: downloading"
                     : $"{name}: downloading (retry {attempt - 1}/{maxAttempts - 1})";
-                await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, label);
+                await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, label, maxConn, splitCount, minSplitMB);
             }
 
             Console.WriteLine($"{name}: verifying {plan.DigestAlgorithm} digest...");

@@ -332,4 +332,266 @@ internal static partial class Tools
             root = root.InnerException;
         return root;
     }
+
+    /// <summary>
+    /// 分块下载文件（支持 Range 请求 + 多线程）/ Multi-chunk file download with Range requests.
+    /// </summary>
+    /// <param name="url">要下载的 URL / URL to download.</param>
+    /// <param name="destFile">目标文件路径 / Destination file path.</param>
+    /// <param name="label">进度条标签 / Progress bar label.</param>
+    /// <param name="maxConnections">最大连接数（线程数）/ Maximum connections (threads).</param>
+    /// <param name="splitCount">目标分块数 / Target number of chunks.</param>
+    /// <param name="minSplitSizeMB">最小分块大小（MB）/ Minimum chunk size (MB).</param>
+    /// <param name="ct">取消令牌 / Cancellation token.</param>
+    public static async Task DownloadFileAsync(string url, string destFile, string? label,
+        int maxConnections, int splitCount, int minSplitSizeMB, CancellationToken ct = default)
+    {
+        maxConnections = Math.Clamp(maxConnections, 1, 16);
+        splitCount = Math.Clamp(splitCount, 1, 16);
+        minSplitSizeMB = Math.Clamp(minSplitSizeMB, 1, 1024);
+
+        using var http = new HttpClient();
+        http.DefaultRequestHeaders.UserAgent.ParseAdd(Config.LoadUserAgent());
+
+        using var headResp = await http.SendAsync(new HttpRequestMessage(HttpMethod.Head, url), ct);
+        headResp.EnsureSuccessStatusCode();
+
+        var totalSize = headResp.Content.Headers.ContentLength;
+        if (!totalSize.HasValue || totalSize.Value == 0)
+        {
+            await DownloadFileAsync(url, destFile, label, ct);
+            return;
+        }
+
+        var acceptRanges = headResp.Headers.AcceptRanges.Any(h => h.Equals("bytes", StringComparison.OrdinalIgnoreCase));
+        if (!acceptRanges)
+        {
+            await DownloadFileAsync(url, destFile, label, ct);
+            return;
+        }
+
+        var fileSize = totalSize.Value;
+        var minChunkBytes = (long)minSplitSizeMB * 1024 * 1024;
+
+        int actualConnections = Math.Min(splitCount, maxConnections);
+        if (fileSize < minChunkBytes * 2 || actualConnections < 2)
+        {
+            await DownloadFileAsync(url, destFile, label, ct);
+            return;
+        }
+
+        if (fileSize < minChunkBytes * actualConnections)
+        {
+            actualConnections = Math.Max(1, (int)(fileSize / minChunkBytes));
+        }
+        actualConnections = Math.Clamp(actualConnections, 1, 16);
+        if (actualConnections < 2)
+        {
+            await DownloadFileAsync(url, destFile, label, ct);
+            return;
+        }
+
+        var baseChunkSize = fileSize / actualConnections;
+        var remainder = fileSize % actualConnections;
+
+        var tempDir = Path.Combine(CacheDir(), $"{Path.GetFileName(destFile)}.parts_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+        Directory.CreateDirectory(tempDir);
+
+        try
+        {
+            var chunks = new (long Offset, long Length, string Path)[actualConnections];
+            for (int i = 0; i < actualConnections; i++)
+            {
+                var offset = i * baseChunkSize + Math.Min(i, (int)remainder);
+                var len = baseChunkSize + (i < remainder ? 1 : 0);
+                if (i == actualConnections - 1)
+                {
+                    len = fileSize - offset;
+                }
+                var chunkPath = Path.Combine(tempDir, $"chunk_{i:D4}");
+                chunks[i] = (offset, len, chunkPath);
+            }
+
+            using var progress = new ChunkProgress(label ?? "downloading", fileSize, actualConnections);
+            progress.StartProgressLoop();
+
+            var tasks = new Task[actualConnections];
+            for (int i = 0; i < actualConnections; i++)
+            {
+                var (offset, length, chunkPath) = chunks[i];
+                tasks[i] = DownloadChunkAsync(http, url, offset, length, chunkPath, progress, i, ct);
+            }
+
+            await Task.WhenAll(tasks);
+
+            if (ct.IsCancellationRequested)
+                throw new OperationCanceledException(ct);
+
+            await using var finalStream = File.Create(destFile);
+            for (int i = 0; i < actualConnections; i++)
+            {
+                await using var chunkStream = File.OpenRead(chunks[i].Path);
+                await chunkStream.CopyToAsync(finalStream, ct);
+                await finalStream.FlushAsync(ct);
+            }
+        }
+        finally
+        {
+            try { Directory.Delete(tempDir, recursive: true); } catch { }
+        }
+    }
+
+    /// <summary>
+    /// 下载单个分块（带 Range 请求头）/ Download a single chunk with Range header.
+    /// </summary>
+    private static async Task DownloadChunkAsync(HttpClient http, string url, long offset, long length,
+        string chunkPath, ChunkProgress progress, int chunkIndex, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get, url);
+        req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(offset, offset + length - 1);
+        req.Headers.UserAgent.ParseAdd(Config.LoadUserAgent());
+
+        using var resp = await http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
+        resp.EnsureSuccessStatusCode();
+
+        var expectedLen = resp.Content.Headers.ContentLength ?? length;
+        if (expectedLen != length)
+            throw new InvalidOperationException($"chunk {chunkIndex}: expected {length} bytes, server returned {expectedLen}");
+
+        await using var src = await resp.Content.ReadAsStreamAsync(ct);
+        await using var dst = File.Create(chunkPath);
+
+        var buffer = new byte[65536];
+        int read;
+        while ((read = await src.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
+        {
+            await dst.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
+            progress.Report(read);
+        }
+        progress.CompleteChunk();
+    }
+}
+
+/// <summary>
+/// 多线程分块下载进度聚合器（线程安全）/ Multi-thread chunk download progress aggregator (thread-safe).
+/// </summary>
+internal sealed class ChunkProgress : IDisposable
+{
+    private readonly long _totalSize;
+    private long _downloaded;
+    private int _completedChunks;
+    private readonly int _totalChunks;
+    private readonly string _label;
+    private readonly CancellationTokenSource _cts;
+    private Task? _progressTask;
+    private volatile bool _disposed;
+    private readonly object _renderLock = new();
+
+    private static int _lastProgressLength;
+
+    public ChunkProgress(string label, long totalSize, int totalChunks)
+    {
+        _label = label;
+        _totalSize = totalSize;
+        _totalChunks = totalChunks;
+        _cts = new CancellationTokenSource();
+    }
+
+    public void Report(long bytes)
+    {
+        Interlocked.Add(ref _downloaded, bytes);
+    }
+
+    public void CompleteChunk()
+    {
+        Interlocked.Increment(ref _completedChunks);
+    }
+
+    public void StartProgressLoop()
+    {
+        _progressTask = Task.Run(() => ProgressLoopAsync(_cts.Token));
+    }
+
+    private async Task ProgressLoopAsync(CancellationToken ct)
+    {
+        var samples = new Queue<(DateTime Time, long Bytes)>();
+        const double windowSec = 2.0;
+        const int barWidth = 20;
+        var lastUpdate = DateTime.UtcNow;
+        var lastLength = 0;
+
+        while (!ct.IsCancellationRequested && !_disposed)
+        {
+            await Task.Delay(100, ct).ConfigureAwait(false);
+
+            var downloaded = Interlocked.Read(ref _downloaded);
+            var completed = Volatile.Read(ref _completedChunks);
+            var now = DateTime.UtcNow;
+
+            lock (_renderLock)
+            {
+                if ((now - lastUpdate).TotalMilliseconds < 100 && completed < _totalChunks && !_disposed)
+                    continue;
+                lastUpdate = now;
+
+                samples.Enqueue((now, downloaded));
+                while (samples.Count > 0 && samples.Peek().Time < now - TimeSpan.FromSeconds(windowSec))
+                    samples.Dequeue();
+
+                double speed = 0;
+                if (samples.Count >= 2)
+                {
+                    var first = samples.Peek();
+                    var last = samples.Last();
+                    var dt = (last.Time - first.Time).TotalSeconds;
+                    if (dt > 0) speed = (last.Bytes - first.Bytes) / dt;
+                }
+
+                var percent = _totalSize > 0 ? (int)(100.0 * downloaded / _totalSize) : 0;
+                var filled = _totalSize > 0 ? (int)(barWidth * downloaded / _totalSize) : 0;
+                if (filled > barWidth) filled = barWidth;
+                if (filled < 0) filled = 0;
+                var bar = new string('█', filled) + new string(' ', barWidth - filled);
+                var speedStr = $"{Tools.FormatSize((long)speed)}/s";
+                var text = $"{_label} [{bar}] {percent,3}% {Tools.FormatSize(downloaded)}/{Tools.FormatSize(_totalSize)} ({speedStr}) [{completed}/{_totalChunks} chunks]";
+
+                if (text.Length < lastLength) text += new string(' ', lastLength - text.Length);
+                lastLength = text.Length;
+                _lastProgressLength = lastLength;
+                Console.Write($"\r{text}");
+            }
+
+            if (completed >= _totalChunks) break;
+        }
+
+        if (_disposed) return;
+
+        lock (_renderLock)
+        {
+            var downloaded = Interlocked.Read(ref _downloaded);
+            var finalSpeed = 0.0;
+            if (samples.Count >= 2)
+            {
+                var first = samples.Peek();
+                var last = samples.Last();
+                var dt = (last.Time - first.Time).TotalSeconds;
+                if (dt > 0) finalSpeed = (last.Bytes - first.Bytes) / dt;
+            }
+            var percent = _totalSize > 0 ? 100 : 0;
+            var bar = new string('█', barWidth);
+            var text = $"{_label} [{bar}] {percent,3}% {Tools.FormatSize(downloaded)}/{Tools.FormatSize(_totalSize)} ({Tools.FormatSize((long)finalSpeed)}/s) [{_totalChunks}/{_totalChunks} chunks]";
+            if (text.Length < _lastProgressLength) text += new string(' ', _lastProgressLength - text.Length);
+            Console.WriteLine($"\r{text}");
+            _lastProgressLength = 0;
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        try { _cts.Cancel(); } catch { }
+        try { _progressTask?.Wait(3000); } catch { }
+        _cts.Dispose();
+    }
 }
