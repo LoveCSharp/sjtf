@@ -172,6 +172,10 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 | SHA-512 | `sha512` |
 | MD5 | `md5` |
 
+## 编写 GitHub 源包
+
+详见 [GITHUB_PKG.zh_cn.md](GITHUB_PKG.zh_cn.md)，了解如何编写 `fetch_source: "github"` 的包，包括 `pkgs.json` 字段说明、资产正则匹配、shim 配置以及完整安装流程。
+
 ## 使用 Lua 脚本扩展
 
 `sjtf` 支持通过 Lua 脚本自定义获取源和安装/卸载后处理。

@@ -1,0 +1,260 @@
+# 编写 GitHub 源包
+
+[English](GITHUB_PKG.md) | [中文](GITHUB_PKG.zh_cn.md)
+
+本文档详细介绍如何编写一个基于 GitHub Releases 的 sjtf 包定义。
+
+## 概述
+
+基于 GitHub 的包需要两个部分：
+
+1. **`pkgs.json` 中的包定义**：描述包的基本信息、资产匹配规则、安装目录和 shim 配置
+2. **`fetch_source` 指向 `github`**：使用内置的 `scripts/github_fetch_latest.lua` 自动从 GitHub Releases API 获取最新版本
+
+`sjtf` 内置了对 GitHub Releases API 的支持，无需编写自定义 Lua 脚本即可使用。
+
+## 完整示例
+
+以下是一个完整的包定义示例（以 `fnm` 为例）：
+
+```json
+{
+  "fnm": {
+    "repo": "Schniz/fnm",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "pkg_install_relative_dir": "langs\\fnm",
+    "shim": {
+      "windows": {
+        "symlink": ["fnm.exe"]
+      }
+    },
+    "fetch_source": "github"
+  }
+}
+```
+
+## 字段详解
+
+### `repo`（必需）
+
+GitHub 仓库标识，格式为 `owner/name`。
+
+```json
+"repo": "Schniz/fnm"
+```
+
+`sjtf` 会将其拼接为 GitHub API URL：
+```
+https://api.github.com/repos/Schniz/fnm/releases/latest
+```
+
+### `fetch_asset`（必需）
+
+资产匹配配置，用于从 GitHub Release 的 assets 列表中选择正确的文件。
+
+#### `fetch_asset.arch`（必需）
+
+按操作系统和架构分层的正则表达式映射。
+
+```json
+"arch": {
+  "windows": {
+    "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+  },
+  "linux": {
+    "x86_64": "(?=.*linux)(?=.*x86_64).*\\.tar.gz$"
+  },
+  "macos": {
+    "aarch64": "(?=.*macos)(?=.*aarch64).*\\.zip$"
+  }
+}
+```
+
+结构为 `fetch_asset.arch[os][arch] = regex_pattern`：
+
+| 层级 | 值 | 说明 |
+|------|-----|------|
+| `os` | `windows` / `linux` / `macos` | 操作系统 |
+| `arch` | `x86_64` / `aarch64` / `arm` | 架构 |
+| 值 | Lua 正则表达式字符串 | 用于匹配资产文件名 |
+
+正则表达式使用 Lua 语法（PCRE 风格），匹配资产列表中的 `name` 字段。第一个匹配成功的资产将被使用。
+
+#### `fetch_asset.type`（必需）
+
+包类型，决定安装时的处理方式：
+
+| 类型 | 说明 |
+|------|------|
+| `portable-compressed-archive` | ZIP/TAR.GZ/7Z 压缩包，自动解压到安装目录 |
+| `portable-exe` | 独立可执行文件，直接复制到安装目录 |
+| `installer` | 安装程序，执行 `install_params` 指定的参数 |
+
+### `pkg_install_relative_dir`（必需）
+
+包在安装根目录下的相对路径。最终完整路径为 `config.install_dir + pkg_install_relative_dir`。
+
+```json
+"pkg_install_relative_dir": "langs\\fnm"
+```
+
+如果 `config.toml` 中 `install_dir = "D:\\sjtf_pkgs"`，则 fnm 的完整安装路径为：
+```
+D:\sjtf_pkgs\langs\fnm
+```
+
+### `shim`（可选）
+
+Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
+
+```json
+"shim": {
+  "windows": {
+    "symlink": ["fnm.exe"],
+    "shell_script": {
+      "fnm.cmd": "@\"{PKG_INSTALL_DIR}\\fnm.exe\" %*",
+      "fnm.ps1": "& \"{PKG_INSTALL_DIR}\\fnm.exe\" @args"
+    }
+  }
+}
+```
+
+#### `shim[os].symlink`
+
+字符串数组，为每个路径创建符号链接。链接名从目标文件名自动推导。
+
+```json
+"symlink": ["fnm.exe"]
+```
+
+上述配置会在 `shims/` 目录下创建 `fnm.exe` -> `langs\fnm\fnm.exe` 的符号链接。
+
+#### `shim[os].shell_script`
+
+键值对对象，为每个键创建同名文件，内容为对应的值。支持占位符：
+
+| 占位符 | 替换为 |
+|--------|--------|
+| `{PKG_INSTALL_DIR}` | 包的完整安装路径 |
+| `{INSTALL_DIR}` | 全局安装根目录（`config.install_dir`） |
+
+```json
+"shell_script": {
+  "fnm.cmd": "@\"{PKG_INSTALL_DIR}\\fnm.exe\" %*",
+  "fnm.ps1": "& \"{PKG_INSTALL_DIR}\\fnm.exe\" @args"
+}
+```
+
+上述配置会创建：
+- `shims/fnm.cmd`：Windows 批处理脚本
+- `shims/fnm.ps1`：PowerShell 脚本
+
+### `fetch_source`（必需）
+
+指定版本获取源。GitHub Releases 使用内置的 `github` 源：
+
+```json
+"fetch_source": "github"
+```
+
+对应脚本路径：`scripts/github_fetch_latest.lua`
+
+该脚本会：
+1. 调用 `https://api.github.com/repos/{repo}/releases/latest`
+2. 解析 `tag_name` 作为版本号
+3. 使用 `fetch_asset.arch[os][arch]` 正则匹配 assets 列表
+4. 提取 `browser_download_url` 作为下载地址
+5. 提取 `digest` 作为摘要（GitHub API 返回的资产 digest 格式为 `sha256:abc123...`）
+
+### `script_after_install`（可选）
+
+设为 `true` 时，安装完成后执行 `scripts/after_install/{os}/{arch}/{name}.lua`。
+
+```json
+"script_after_install": true
+```
+
+### `script_after_uninstall`（可选）
+
+设为 `true` 时，卸载完成后执行 `scripts/after_uninstall/{os}/{arch}/{name}.lua`。
+
+```json
+"script_after_uninstall": true
+```
+
+## 工作流程
+
+当用户执行 `sjtf install fnm` 时：
+
+1. **版本获取**：执行 `scripts/github_fetch_latest.lua`
+   - 调用 GitHub API 获取最新 Release
+   - 匹配资产正则，提取下载 URL 和版本号
+   - 返回 `DownloadPlan{Version, DownloadUrl, DigestAlgorithm, ExpectedDigest}`
+
+2. **下载**：使用多线程分块下载（或 aria2c）到缓存目录
+   - 缓存文件名格式：`{name}-{os}-{arch}-{version}.{ext}`
+
+3. **验证**：计算下载文件的摘要，与 GitHub API 返回的 digest 比对
+   - 不匹配则删除文件并重新下载一次
+   - 再次不匹配则报错
+
+4. **安装**：根据 `fetch_asset.type` 处理
+   - `portable-compressed-archive`：解压到 `pkg_install_relative_dir`
+   - `portable-exe`：复制到 `pkg_install_relative_dir`
+   - `installer`：执行安装程序
+
+5. **创建 shim**：根据 `shim[os]` 创建符号链接或 shell 脚本
+
+6. **安装后脚本**（可选）：执行 `after_install` Lua 脚本
+
+## 正则表达式示例
+
+根据资产命名规则编写匹配正则：
+
+| 资产名示例 | 匹配正则 | 说明 |
+|-----------|---------|------|
+| `fnm-windows-x86_64.zip` | `(?=.*windows)(?=.*x86_64).*\.zip$` | 同时包含 windows 和 x86_64 的 zip |
+| `uv-aarch64-apple-darwin.tar.gz` | `(?=.*aarch64)(?=.*darwin).*\.tar\.gz$` | macOS ARM64 |
+| `jq-windows-amd64.exe` | `(?=.*windows)(?=.*amd64).*\.exe$` | Windows x64 exe |
+| `rg-x86_64-unknown-linux-musl.tar.gz` | `(?=.*x86_64)(?=.*linux).*\.tar\.gz$` | Linux x64 |
+
+技巧：
+- 使用 `(?=.*keyword)` 正向预查确保多个关键词同时出现
+- 使用 `\.` 转义点号匹配文件扩展名
+- 使用 `$` 锚定结尾
+
+## GitHub API 认证
+
+在 `config.toml` 中可以配置 GitHub 认证信息，以提高 API 速率限制：
+
+```toml
+[github]
+token_classic = "ghp_xxxxxxxxxxxx"  # GitHub 个人访问令牌
+proxy = "https://gh-proxy.com"       # 可选代理
+```
+
+- `token_classic`：GitHub 经典个人访问令牌，必须以 `ghp_` 开头
+- `proxy`：代理地址，用于替换 GitHub API 请求的域名（`github.com` → `gh-proxy.com`）
+
+认证头和代理由 `scripts/github_fetch_latest.lua` 自动处理。
+
+## 调试技巧
+
+如果包安装失败，可以查看错误信息定位问题：
+
+- **`no fetch_asset entry for os=xxx`**：`pkgs.json` 中缺少当前操作系统的 `arch` 配置
+- **`no asset matching xxx`**：正则表达式没有匹配到任何 Release asset，检查资产名和正则
+- **`GitHub API response missing tag_name`**：Release 没有 tag_name，检查仓库 Release 配置
+- **`digest mismatch`**：下载的文件与 GitHub API 返回的 digest 不一致，可能是网络问题或文件被篡改
+
+## 相关文档
+
+- [SCRIPTS.md](SCRIPTS.md) — Lua 脚本编写指南（获取源、安装后、卸载后脚本）
+- [README.md](README.md) — 项目主页

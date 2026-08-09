@@ -138,6 +138,10 @@ JSON array of package names for the `favorites` command.
 | SHA-512 | `sha512` |
 | MD5 | `md5` |
 
+## Writing a GitHub Source Package
+
+See [GITHUB_PKG.md](GITHUB_PKG.md) for a complete guide on writing `fetch_source: "github"` packages, including `pkgs.json` field reference, asset regex patterns, shim configuration, and the full install workflow.
+
 ## Extending with Lua Scripts
 
 `sjtf` supports custom fetch sources and post-install/uninstall scripts via Lua.
