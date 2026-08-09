@@ -678,7 +678,7 @@
     "shim": {
       "windows": {
         "symlink": {
-          "jcode.exe": "jcode.exe"
+          "jcode.exe": "jcode-windows-x86_64.exe"
         }
       }
     },
