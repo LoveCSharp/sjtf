@@ -404,6 +404,32 @@ internal static partial class Tools
     }
 
     /// <summary>
+    /// 当 URL 以 <c>https://github.com</c> 开头、且 <c>[github].proxy</c> 已配置时，
+    /// 将 proxy 作为前缀拼接在完整原始 URL 之前（结果形如 <c>https://gh-proxy.com/https://github.com/...</c>）；否则原样返回。
+    /// 仅在下载阶段被调用；其他 HTTP 请求（如 API 查询、pkgs.json 远程下载、aria2 二进制下载本身）不受影响。
+    ///
+    /// When the URL starts with <c>https://github.com</c> and <c>[github].proxy</c> is configured,
+    /// prepends the proxy to the full original URL (result: <c>https://gh-proxy.com/https://github.com/...</c>);
+    /// otherwise returns the URL unchanged.
+    /// Only invoked during the actual download step; other HTTP calls (API queries, remote pkgs.json
+    /// download, aria2 binary self-download) are not affected.
+    /// </summary>
+    /// <param name="url">原始 URL / Original URL.</param>
+    /// <returns>可能经过 GitHub proxy 重写的 URL / URL possibly rewritten via GitHub proxy.</returns>
+    public static string MaybeRewriteGithubUrl(string url)
+    {
+        if (url.StartsWith("https://github.com", StringComparison.OrdinalIgnoreCase))
+        {
+            var proxy = Config.LoadGithubProxy();
+            if (!string.IsNullOrEmpty(proxy))
+            {
+                return proxy.TrimEnd('/') + "/" + url;
+            }
+        }
+        return url;
+    }
+
+    /// <summary>
     /// 获取异常链中最内层的异常 / Get the innermost exception from an exception chain.
     /// </summary>
     /// <param name="ex">外层异常 / Outer exception.</param>
@@ -498,6 +524,8 @@ internal static partial class Tools
         int maxConnections, int splitCount, int minSplitSizeMB,
         CancellationToken ct = default)
     {
+        url = MaybeRewriteGithubUrl(url);
+
         maxConnections = Math.Clamp(maxConnections, 1, 16);
         splitCount = Math.Clamp(splitCount, 1, 16);
         minSplitSizeMB = Math.Clamp(minSplitSizeMB, 1, 1024);
@@ -537,89 +565,107 @@ internal static partial class Tools
         using var http = new HttpClient();
         http.DefaultRequestHeaders.UserAgent.ParseAdd(Config.LoadUserAgent());
 
-        using var headResp = await http.SendAsync(new HttpRequestMessage(HttpMethod.Head, url), ct);
-        headResp.EnsureSuccessStatusCode();
-
-        var totalSize = headResp.Content.Headers.ContentLength;
-        if (!totalSize.HasValue || totalSize.Value == 0)
-        {
-            await DownloadFileAsync(url, destFile, label, ct);
-            return;
-        }
-
-        var acceptRanges = headResp.Headers.AcceptRanges.Any(h => h.Equals("bytes", StringComparison.OrdinalIgnoreCase));
-        if (!acceptRanges)
-        {
-            await DownloadFileAsync(url, destFile, label, ct);
-            return;
-        }
-
-        var fileSize = totalSize.Value;
-        var minChunkBytes = (long)minSplitSizeMB * 1024 * 1024;
-
-        int actualConnections = Math.Min(splitCount, maxConnections);
-        if (fileSize < minChunkBytes * 2 || actualConnections < 2)
-        {
-            await DownloadFileAsync(url, destFile, label, ct);
-            return;
-        }
-
-        if (fileSize < minChunkBytes * actualConnections)
-        {
-            actualConnections = Math.Max(1, (int)(fileSize / minChunkBytes));
-        }
-        actualConnections = Math.Clamp(actualConnections, 1, 16);
-        if (actualConnections < 2)
-        {
-            await DownloadFileAsync(url, destFile, label, ct);
-            return;
-        }
-
-        var baseChunkSize = fileSize / actualConnections;
-        var remainder = fileSize % actualConnections;
-
-        var tempDir = Path.Combine(CacheDir(), $"{Path.GetFileName(destFile)}.parts_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-        Directory.CreateDirectory(tempDir);
-
+        HttpResponseMessage headResp;
         try
         {
-            var chunks = new (long Offset, long Length, string Path)[actualConnections];
-            for (int i = 0; i < actualConnections; i++)
-            {
-                var offset = i * baseChunkSize + Math.Min(i, (int)remainder);
-                var len = baseChunkSize + (i < remainder ? 1 : 0);
-                if (i == actualConnections - 1)
-                {
-                    len = fileSize - offset;
-                }
-                var chunkPath = Path.Combine(tempDir, $"chunk_{i:D4}");
-                chunks[i] = (offset, len, chunkPath);
-            }
-
-            using var progress = new ChunkProgress(label ?? "downloading", fileSize, actualConnections);
-            progress.StartProgressLoop();
-
-            var tasks = new Task[actualConnections];
-            for (int i = 0; i < actualConnections; i++)
-            {
-                var (offset, length, chunkPath) = chunks[i];
-                tasks[i] = DownloadChunkAsync(http, url, offset, length, chunkPath, progress, i, ct);
-            }
-
-            await Task.WhenAll(tasks).WaitAsync(ct);
-            progress.Complete();
-
-            await using var finalStream = File.Create(destFile);
-            for (int i = 0; i < actualConnections; i++)
-            {
-                await using var chunkStream = File.OpenRead(chunks[i].Path);
-                await chunkStream.CopyToAsync(finalStream);
-                await finalStream.FlushAsync();
-            }
+            headResp = await http.SendAsync(new HttpRequestMessage(HttpMethod.Head, url), ct);
         }
-        finally
+        catch (HttpRequestException)
         {
-            try { Directory.Delete(tempDir, recursive: true); } catch { }
+            await DownloadFileAsync(url, destFile, label, ct);
+            return;
+        }
+
+        if (!headResp.IsSuccessStatusCode)
+        {
+            headResp.Dispose();
+            await DownloadFileAsync(url, destFile, label, ct);
+            return;
+        }
+
+        using (headResp)
+        {
+            var totalSize = headResp.Content.Headers.ContentLength;
+            if (!totalSize.HasValue || totalSize.Value == 0)
+            {
+                await DownloadFileAsync(url, destFile, label, ct);
+                return;
+            }
+
+            var acceptRanges = headResp.Headers.AcceptRanges.Any(h => h.Equals("bytes", StringComparison.OrdinalIgnoreCase));
+            if (!acceptRanges)
+            {
+                await DownloadFileAsync(url, destFile, label, ct);
+                return;
+            }
+
+            var fileSize = totalSize.Value;
+            var minChunkBytes = (long)minSplitSizeMB * 1024 * 1024;
+
+            int actualConnections = Math.Min(splitCount, maxConnections);
+            if (fileSize < minChunkBytes * 2 || actualConnections < 2)
+            {
+                await DownloadFileAsync(url, destFile, label, ct);
+                return;
+            }
+
+            if (fileSize < minChunkBytes * actualConnections)
+            {
+                actualConnections = Math.Max(1, (int)(fileSize / minChunkBytes));
+            }
+            actualConnections = Math.Clamp(actualConnections, 1, 16);
+            if (actualConnections < 2)
+            {
+                await DownloadFileAsync(url, destFile, label, ct);
+                return;
+            }
+
+            var baseChunkSize = fileSize / actualConnections;
+            var remainder = fileSize % actualConnections;
+
+            var tempDir = Path.Combine(CacheDir(), $"{Path.GetFileName(destFile)}.parts_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+            Directory.CreateDirectory(tempDir);
+
+            try
+            {
+                var chunks = new (long Offset, long Length, string Path)[actualConnections];
+                for (int i = 0; i < actualConnections; i++)
+                {
+                    var offset = i * baseChunkSize + Math.Min(i, (int)remainder);
+                    var len = baseChunkSize + (i < remainder ? 1 : 0);
+                    if (i == actualConnections - 1)
+                    {
+                        len = fileSize - offset;
+                    }
+                    var chunkPath = Path.Combine(tempDir, $"chunk_{i:D4}");
+                    chunks[i] = (offset, len, chunkPath);
+                }
+
+                using var progress = new ChunkProgress(label ?? "downloading", fileSize, actualConnections);
+                progress.StartProgressLoop();
+
+                var tasks = new Task[actualConnections];
+                for (int i = 0; i < actualConnections; i++)
+                {
+                    var (offset, length, chunkPath) = chunks[i];
+                    tasks[i] = DownloadChunkAsync(http, url, offset, length, chunkPath, progress, i, ct);
+                }
+
+                await Task.WhenAll(tasks).WaitAsync(ct);
+                progress.Complete();
+
+                await using var finalStream = File.Create(destFile);
+                for (int i = 0; i < actualConnections; i++)
+                {
+                    await using var chunkStream = File.OpenRead(chunks[i].Path);
+                    await chunkStream.CopyToAsync(finalStream);
+                    await finalStream.FlushAsync();
+                }
+            }
+            finally
+            {
+                try { Directory.Delete(tempDir, recursive: true); } catch { }
+            }
         }
     }
 
