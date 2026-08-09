@@ -499,7 +499,7 @@ catch (OperationCanceledException)
         throw new InvalidOperationException($"package \"{name}\" not found in pkgs.json");
     }
 
-    var installDirRel = InstallHelpers.ReadRequiredString(pkg, "install_dir", name);
+    var installDirRel = InstallHelpers.ReadRequiredString(pkg, "pkg_install_relative_dir", name);
     var installRoot = Config.LoadInstallDir();
     var installFull = Path.Combine(installRoot, installDirRel);
     var os = Arch.CurrentOs();
