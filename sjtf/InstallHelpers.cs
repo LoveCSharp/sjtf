@@ -55,6 +55,7 @@ internal static class InstallHelpers
                 return dlPath;
             }
 
+            try { File.Delete(dlPath); } catch { }
             throw new InvalidOperationException($"{name}: {plan.DigestAlgorithm} digest mismatch (expected {plan.ExpectedDigest}, got {actualDigest})");
         }
         catch (OperationCanceledException)
