@@ -14,6 +14,7 @@ internal class LuaBindings
 {
     private readonly Lua _lua;
     public string? PackageName { get; set; }
+    private static readonly HttpClient _http = new HttpClient();
 
     public LuaBindings(Lua lua)
     {
@@ -52,8 +53,7 @@ internal class LuaBindings
             }
         }
 
-        using var http = new HttpClient();
-        using var resp = http.SendAsync(req).GetAwaiter().GetResult();
+        using var resp = _http.SendAsync(req).GetAwaiter().GetResult();
         resp.EnsureSuccessStatusCode();
         return resp.Content.ReadAsStringAsync().GetAwaiter().GetResult();
     }
