@@ -168,39 +168,27 @@ internal static class InstallHelpers
     /// <param name="installFull">完整安装目录 / Full installation directory.</param>
     public static void CreateSymlinks(string name, JsonObject pkg, string installRoot, string installFull)
     {
-        if (!Config.LoadCreateSymlink())
-        {
-            Console.WriteLine($"{name}: shim creation disabled by config");
-            return;
-        }
-
         var symRoot = Path.Combine(installRoot, "shims");
         Directory.CreateDirectory(symRoot);
 
-        if (pkg.TryGetPropertyValue("shim", out var shimNode) && shimNode is JsonObject shimObj)
+        var os = Arch.CurrentOs();
+
+        if (!pkg.TryGetPropertyValue("shim", out var shimNode) || shimNode is not JsonObject shimObj)
+            return;
+
+        if (!shimObj.TryGetPropertyValue(os, out var osNode) || osNode is not JsonObject osObj)
+            return;
+
+        if (osObj.TryGetPropertyValue("symlink", out var symlinkNode) && symlinkNode is JsonArray symlinkArr)
         {
-            if (shimObj.TryGetPropertyValue("symlink", out var symlinkNode) && symlinkNode is JsonArray symlinkArr)
+            foreach (var item in symlinkArr)
             {
-                foreach (var item in symlinkArr)
-                {
-                    if (item is not JsonValue val || val.GetValueKind() != JsonValueKind.String) continue;
-                    var targetRel = val.GetValue<string>() ?? "";
-                    if (string.IsNullOrEmpty(targetRel)) continue;
-                    var linkName = Path.GetFileName(targetRel);
-                    if (string.IsNullOrEmpty(linkName)) continue;
-                    var linkPath = Path.Combine(symRoot, linkName);
-                    var targetFull = Path.Combine(installFull, targetRel);
-                    Console.WriteLine($"{name}: shim {linkPath} -> {targetFull}");
-                    Tools.CreateSymlink(linkPath, targetFull);
-                }
-            }
-        }
-        else if (pkg.TryGetPropertyValue("symlinks", out var symNode) && symNode is JsonObject symObj)
-        {
-            foreach (var kv in symObj)
-            {
-                var linkPath = Path.Combine(symRoot, kv.Key);
-                var targetRel = kv.Value?.GetValueKind() == JsonValueKind.String ? kv.Value.GetValue<string>() : "";
+                if (item is not JsonValue val || val.GetValueKind() != JsonValueKind.String) continue;
+                var targetRel = val.GetValue<string>() ?? "";
+                if (string.IsNullOrEmpty(targetRel)) continue;
+                var linkName = Path.GetFileName(targetRel);
+                if (string.IsNullOrEmpty(linkName)) continue;
+                var linkPath = Path.Combine(symRoot, linkName);
                 var targetFull = Path.Combine(installFull, targetRel);
                 Console.WriteLine($"{name}: shim {linkPath} -> {targetFull}");
                 Tools.CreateSymlink(linkPath, targetFull);

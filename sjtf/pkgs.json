@@ -12,9 +12,11 @@
     },
     "install_dir": "langs\\fnm",
     "shim": {
-      "symlink": [
-        "fnm.exe"
-      ]
+      "windows": {
+        "symlink": [
+          "fnm.exe"
+        ]
+      }
     },
     "fetch_source": "github"
   },
@@ -31,11 +33,13 @@
     },
     "install_dir": "langs\\uv",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "uv.exe",
         "uvw.exe",
         "uvx.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -52,9 +56,11 @@
     },
     "install_dir": "langs\\g\\bin",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "g.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -71,9 +77,11 @@
     },
     "install_dir": "cli\\nushell",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "nu.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -90,9 +98,11 @@
     },
     "install_dir": "cli\\zellij",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "zellij.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -109,9 +119,11 @@
     },
     "install_dir": "cli\\oh-my-posh",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "oh-my-posh.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -128,9 +140,11 @@
     },
     "install_dir": "cli\\starship",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "starship.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -147,9 +161,11 @@
     },
     "install_dir": "cli\\coreutils",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "coreutils.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -166,10 +182,12 @@
     },
     "install_dir": "cli\\yazi",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "yazi.exe",
         "ya.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -186,9 +204,11 @@
     },
     "install_dir": "cli\\lf",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "lf.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -205,9 +225,11 @@
     },
     "install_dir": "cli\\fzf",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "fzf.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -224,9 +246,11 @@
     },
     "install_dir": "cli\\zoxide",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "zoxide.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -243,9 +267,11 @@
     },
     "install_dir": "cli\\fd",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "fd.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -262,9 +288,11 @@
     },
     "install_dir": "cli\\sd",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "sd.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -281,9 +309,11 @@
     },
     "install_dir": "cli\\ripgrep",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "rg.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -300,9 +330,11 @@
     },
     "install_dir": "cli\\eza",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "eza.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -319,9 +351,11 @@
     },
     "install_dir": "cli\\dust",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "dust.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -338,9 +372,11 @@
     },
     "install_dir": "cli\\duf",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "duf.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -357,9 +393,11 @@
     },
     "install_dir": "cli\\bat",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "bat.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -376,9 +414,11 @@
     },
     "install_dir": "cli\\jq",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "jq.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -395,9 +435,11 @@
     },
     "install_dir": "cli\\xh",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "xh.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -414,9 +456,11 @@
     },
     "install_dir": "cli\\bottom",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "btm.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -433,9 +477,11 @@
     },
     "install_dir": "cli\\procs",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "procs.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -452,9 +498,11 @@
     },
     "install_dir": "cli\\carapace",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "carapace.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -474,9 +522,11 @@
     },
     "install_dir": "editor\\zed",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "Zed.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -508,9 +558,11 @@
     },
     "install_dir": "editor\\edit",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "edit.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -543,9 +595,11 @@
     },
     "install_dir": "vcs\\git",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "cmd\\git.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -562,9 +616,11 @@
     },
     "install_dir": "ai\\opencode",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "opencode.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -581,9 +637,11 @@
     },
     "install_dir": "ai\\pi",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "pi.exe"
       ]
+      }
     },
     "fetch_source": "github"
   },
@@ -600,9 +658,11 @@
     },
     "install_dir": "ai\\rtk",
     "shim": {
-      "symlink": [
+      "windows": {
+        "symlink": [
         "rtk.exe"
       ]
+      }
     },
     "fetch_source": "github"
   }

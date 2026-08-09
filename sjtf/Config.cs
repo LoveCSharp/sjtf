@@ -38,12 +38,6 @@ public sealed class SjtfGeneral
     /// </summary>
     [JsonPropertyName("install_dir")]
     public string InstallDir { get; set; } = "";
-
-    /// <summary>
-    /// 是否创建符号链接 / Whether to create symbolic links.
-    /// </summary>
-    [JsonPropertyName("create_symlink")]
-    public bool CreateSymlink { get; set; } = true;
 }
 
 /// <summary>
@@ -334,7 +328,6 @@ internal static class Config
 
         var content = @"[general]
 install_dir = ""D:\\sjtf_pkgs""
-create_symlink = true
 
 [pkgs]
 remote_url = ""https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json""
@@ -357,9 +350,4 @@ user_agent = ""Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHT
 ";
         File.WriteAllText(path, content);
     }
-
-    /// <summary>
-    /// 从配置中加载是否创建符号链接 / Load create-symlink setting from config.
-    /// </summary>
-    public static bool LoadCreateSymlink() => LoadDoc()?.General.CreateSymlink ?? true;
 }
