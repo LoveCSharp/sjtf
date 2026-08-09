@@ -61,6 +61,13 @@ internal static class Aria2
             return null;
         }
 
+        // GitHub proxy：仅当 URL 以 https://github.com 开头、且 [github].proxy 已配置时拼接前缀
+        var proxy = Config.LoadGithubProxy();
+        if (!string.IsNullOrEmpty(proxy) && url.StartsWith("https://github.com", StringComparison.OrdinalIgnoreCase))
+        {
+            url = proxy.TrimEnd('/') + "/" + url;
+        }
+
         Console.WriteLine($"aria2: downloading: {url}");
 
         var zipPath = localPath + ".zip";
