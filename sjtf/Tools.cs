@@ -404,32 +404,6 @@ internal static partial class Tools
     }
 
     /// <summary>
-    /// 当 URL 以 <c>https://github.com</c> 开头、且 <c>[github].proxy</c> 已配置时，
-    /// 将 proxy 作为前缀拼接在完整原始 URL 之前（结果形如 <c>https://gh-proxy.com/https://github.com/...</c>）；否则原样返回。
-    /// 仅在下载阶段被调用；其他 HTTP 请求（如 API 查询、pkgs.json 远程下载、aria2 二进制下载本身）不受影响。
-    ///
-    /// When the URL starts with <c>https://github.com</c> and <c>[github].proxy</c> is configured,
-    /// prepends the proxy to the full original URL (result: <c>https://gh-proxy.com/https://github.com/...</c>);
-    /// otherwise returns the URL unchanged.
-    /// Only invoked during the actual download step; other HTTP calls (API queries, remote pkgs.json
-    /// download, aria2 binary self-download) are not affected.
-    /// </summary>
-    /// <param name="url">原始 URL / Original URL.</param>
-    /// <returns>可能经过 GitHub proxy 重写的 URL / URL possibly rewritten via GitHub proxy.</returns>
-    public static string MaybeRewriteGithubUrl(string url)
-    {
-        if (url.StartsWith("https://github.com", StringComparison.OrdinalIgnoreCase))
-        {
-            var proxy = Config.LoadGithubProxy();
-            if (!string.IsNullOrEmpty(proxy))
-            {
-                return proxy.TrimEnd('/') + "/" + url;
-            }
-        }
-        return url;
-    }
-
-    /// <summary>
     /// 获取异常链中最内层的异常 / Get the innermost exception from an exception chain.
     /// </summary>
     /// <param name="ex">外层异常 / Outer exception.</param>
@@ -524,8 +498,6 @@ internal static partial class Tools
         int maxConnections, int splitCount, int minSplitSizeMB,
         CancellationToken ct = default)
     {
-        url = MaybeRewriteGithubUrl(url);
-
         maxConnections = Math.Clamp(maxConnections, 1, 16);
         splitCount = Math.Clamp(splitCount, 1, 16);
         minSplitSizeMB = Math.Clamp(minSplitSizeMB, 1, 1024);

@@ -63,16 +63,6 @@ internal static class Aria2
 
         Console.WriteLine($"aria2: downloading from {url}...");
 
-        if (url.StartsWith("https://github.com", StringComparison.OrdinalIgnoreCase))
-        {
-            var proxy = Config.LoadGithubProxy();
-            if (!string.IsNullOrEmpty(proxy))
-            {
-                url = proxy.TrimEnd('/') + "/" + url;
-                Console.WriteLine($"aria2: using GitHub proxy: {proxy}");
-            }
-        }
-
         var zipPath = localPath + ".zip";
         try
         {

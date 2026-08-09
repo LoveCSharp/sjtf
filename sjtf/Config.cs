@@ -223,15 +223,6 @@ internal static class Config
     }
 
     /// <summary>
-    /// 从配置中加载 GitHub 代理地址 / Load GitHub proxy address from config.
-    /// </summary>
-    public static string LoadGithubProxy()
-    {
-        var proxy = LoadDoc()?.Github?.Proxy;
-        return string.IsNullOrEmpty(proxy) ? "" : proxy;
-    }
-
-    /// <summary>
     /// 从配置中加载远程 pkgs.json 地址 / Load remote pkgs.json URL from config.
     /// </summary>
     public static string LoadPkgsRemoteUrl()
