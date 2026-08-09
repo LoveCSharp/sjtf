@@ -502,6 +502,7 @@ catch (OperationCanceledException)
     var installDirRel = InstallHelpers.ReadRequiredString(pkg, "install_dir", name);
     var installRoot = Config.LoadInstallDir();
     var installFull = Path.Combine(installRoot, installDirRel);
+    var os = Arch.CurrentOs();
 
     // Get package type and fetch_asset / 获取包类型和 fetch_asset
     var pkgType = "portable-compressed-archive";
@@ -516,20 +517,39 @@ catch (OperationCanceledException)
     // Delete shims first / 先删除 shim 符号链接
     if (pkg.TryGetPropertyValue("shim", out var shimNode) && shimNode is JsonObject shimObj)
     {
-        if (shimObj.TryGetPropertyValue("symlink", out var symlinkNode) && symlinkNode is JsonArray symlinkArr)
+        if (shimObj.TryGetPropertyValue(os, out var osNode) && osNode is JsonObject osObj)
         {
-            var symRoot = Path.Combine(installRoot, "shims");
-            foreach (var item in symlinkArr)
+            if (osObj.TryGetPropertyValue("symlink", out var symlinkNode) && symlinkNode is JsonArray symlinkArr)
             {
-                if (item is not JsonValue val || val.GetValueKind() != JsonValueKind.String) continue;
-                var targetRel = val.GetValue<string>() ?? "";
-                var linkName = Path.GetFileName(targetRel);
-                if (string.IsNullOrEmpty(linkName)) continue;
-                var linkPath = Path.Combine(symRoot, linkName);
-                if (File.Exists(linkPath))
+                var symRoot = Path.Combine(installRoot, "shims");
+                foreach (var item in symlinkArr)
                 {
-                    Console.WriteLine($"{name}: removing shim {linkPath}");
-                    File.Delete(linkPath);
+                    if (item is not JsonValue val || val.GetValueKind() != JsonValueKind.String) continue;
+                    var targetRel = val.GetValue<string>() ?? "";
+                    var linkName = Path.GetFileName(targetRel);
+                    if (string.IsNullOrEmpty(linkName)) continue;
+                    var linkPath = Path.Combine(symRoot, linkName);
+                    if (File.Exists(linkPath))
+                    {
+                        Console.WriteLine($"{name}: removing shim {linkPath}");
+                        File.Delete(linkPath);
+                    }
+                }
+            }
+
+            if (osObj.TryGetPropertyValue("cmd", out var cmdNode) && cmdNode is JsonObject cmdObj)
+            {
+                var symRoot = Path.Combine(installRoot, "shims");
+                foreach (var kv in cmdObj)
+                {
+                    var cmdName = kv.Key;
+                    if (string.IsNullOrEmpty(cmdName)) continue;
+                    var cmdPath = Path.Combine(symRoot, cmdName);
+                    if (File.Exists(cmdPath))
+                    {
+                        Console.WriteLine($"{name}: removing shim {cmdPath}");
+                        File.Delete(cmdPath);
+                    }
                 }
             }
         }

@@ -194,6 +194,21 @@ internal static class InstallHelpers
                 Tools.CreateSymlink(linkPath, targetFull);
             }
         }
+
+        if (osObj.TryGetPropertyValue("cmd", out var cmdNode) && cmdNode is JsonObject cmdObj)
+        {
+            foreach (var kv in cmdObj)
+            {
+                var cmdName = kv.Key;
+                if (string.IsNullOrEmpty(cmdName)) continue;
+                var cmdContent = kv.Value?.GetValue<string>() ?? "";
+                if (string.IsNullOrEmpty(cmdContent)) continue;
+                var cmdPath = Path.Combine(symRoot, cmdName);
+                var replaced = cmdContent.Replace("{INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase);
+                Console.WriteLine($"{name}: shim {cmdPath}");
+                File.WriteAllText(cmdPath, replaced, System.Text.Encoding.UTF8);
+            }
+        }
     }
 
     /// <summary>
