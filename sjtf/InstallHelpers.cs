@@ -197,20 +197,22 @@ internal static class InstallHelpers
 
         if (osObj.TryGetPropertyValue("cmd", out var cmdNode) && cmdNode is JsonObject cmdObj)
         {
+            var pkgDir = installFull;
+            if (cmdObj.TryGetPropertyValue("pkg_dir", out var pkgDirNode) && pkgDirNode is JsonValue pkgDirVal && pkgDirVal.GetValueKind() == JsonValueKind.String)
+            {
+                var pkgDirRel = pkgDirVal.GetValue<string>() ?? "";
+                if (!string.IsNullOrEmpty(pkgDirRel))
+                    pkgDir = Path.Combine(installFull, pkgDirRel);
+            }
+
             foreach (var kv in cmdObj)
             {
+                if (string.Equals(kv.Key, "pkg_dir", StringComparison.OrdinalIgnoreCase)) continue;
                 var cmdName = kv.Key;
                 if (string.IsNullOrEmpty(cmdName)) continue;
                 var cmdContent = kv.Value?.GetValue<string>() ?? "";
                 if (string.IsNullOrEmpty(cmdContent)) continue;
                 var cmdPath = Path.Combine(symRoot, cmdName);
-                var pkgDir = installFull;
-                if (cmdObj.TryGetPropertyValue("pkg_dir", out var pkgDirNode) && pkgDirNode is JsonValue pkgDirVal && pkgDirVal.GetValueKind() == JsonValueKind.String)
-                {
-                    var pkgDirRel = pkgDirVal.GetValue<string>() ?? "";
-                    if (!string.IsNullOrEmpty(pkgDirRel))
-                        pkgDir = Path.Combine(installFull, pkgDirRel);
-                }
                 var replaced = cmdContent.Replace("{PKG_DIR}", pkgDir, StringComparison.OrdinalIgnoreCase);
                 Console.WriteLine($"{name}: shim {cmdPath}");
                 File.WriteAllText(cmdPath, replaced, System.Text.Encoding.UTF8);

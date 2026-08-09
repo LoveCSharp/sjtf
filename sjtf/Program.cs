@@ -542,6 +542,7 @@ catch (OperationCanceledException)
                 var symRoot = Path.Combine(installRoot, "shims");
                 foreach (var kv in cmdObj)
                 {
+                    if (string.Equals(kv.Key, "pkg_dir", StringComparison.OrdinalIgnoreCase)) continue;
                     var cmdName = kv.Key;
                     if (string.IsNullOrEmpty(cmdName)) continue;
                     var cmdPath = Path.Combine(symRoot, cmdName);
