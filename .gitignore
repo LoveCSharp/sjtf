@@ -35,3 +35,6 @@ Thumbs.db
 # Ignore Piolium security audit files
 piolium-*/
 *.pi-log
+
+# OpenCode agent configuration (local only)
+AGENTS.md
