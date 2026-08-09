@@ -204,7 +204,14 @@ internal static class InstallHelpers
                 var cmdContent = kv.Value?.GetValue<string>() ?? "";
                 if (string.IsNullOrEmpty(cmdContent)) continue;
                 var cmdPath = Path.Combine(symRoot, cmdName);
-                var replaced = cmdContent.Replace("{PKG_DIR}", installFull, StringComparison.OrdinalIgnoreCase);
+                var pkgDir = installFull;
+                if (cmdObj.TryGetPropertyValue("pkg_dir", out var pkgDirNode) && pkgDirNode is JsonValue pkgDirVal && pkgDirVal.GetValueKind() == JsonValueKind.String)
+                {
+                    var pkgDirRel = pkgDirVal.GetValue<string>() ?? "";
+                    if (!string.IsNullOrEmpty(pkgDirRel))
+                        pkgDir = Path.Combine(installFull, pkgDirRel);
+                }
+                var replaced = cmdContent.Replace("{PKG_DIR}", pkgDir, StringComparison.OrdinalIgnoreCase);
                 Console.WriteLine($"{name}: shim {cmdPath}");
                 File.WriteAllText(cmdPath, replaced, System.Text.Encoding.UTF8);
             }
