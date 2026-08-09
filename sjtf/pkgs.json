@@ -551,6 +551,7 @@
         }
       }
     },
+    "after_install": true,
     "fetch_source": "update_code_visualstudio_com"
   },
   "edit": {
