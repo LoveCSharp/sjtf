@@ -507,6 +507,48 @@
     },
     "fetch_source": "github"
   },
+  "pueue": {
+    "description": "A command-line task management tool for sequential and parallel execution of long-running tasks",
+    "repo": "Nukesor/pueue",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*pueue-)(?=.*windows)(?=.*x86_64).*\\.exe$"
+        }
+      },
+      "type": "portable-exe"
+    },
+    "pkg_install_relative_dir": "cli\\pueue",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "pueue.exe": "pueue.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "pueued": {
+    "description": "A command-line task management tool for sequential and parallel execution of long-running tasks",
+    "repo": "Nukesor/pueue",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "(?=.*pueued-)(?=.*windows)(?=.*x86_64).*\\.exe$"
+        }
+      },
+      "type": "portable-exe"
+    },
+    "pkg_install_relative_dir": "cli\\pueue",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "pueued.exe": "pueued.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
   "zed": {
     "description": "High-performance multiplayer code editor from the creators of Atom",
     "repo": "zed-industries/zed",
