@@ -5,7 +5,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows).*\\.zip$"
+          "x86_64": "^(?=.*windows).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -26,7 +26,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -49,7 +49,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows)(?=.*amd64).*\\.zip$"
+          "x86_64": "^(?=.*windows)(?=.*amd64).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -70,7 +70,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+          "x86_64": "^(?=.*windows)(?=.*x86_64).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -92,7 +92,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*no-web)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": "^(?=.*no-web)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -113,7 +113,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows)(?=.*amd64).*\\.exe$"
+          "x86_64": "^(?=.*windows)(?=.*amd64).*\\.exe$"
         }
       },
       "type": "portable-exe"
@@ -134,7 +134,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -155,7 +155,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*x64).*\\.zip$"
+          "x86_64": "^(?=.*x64).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -176,7 +176,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows)(?=.*x86_64)(?=.*msvc).*\\.zip$"
+          "x86_64": "^(?=.*windows)(?=.*x86_64)(?=.*msvc).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -198,7 +198,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows)(?=.*amd64).*\\.zip$"
+          "x86_64": "^(?=.*windows)(?=.*amd64).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -219,7 +219,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows)(?=.*amd64).*\\.zip$"
+          "x86_64": "^(?=.*windows)(?=.*amd64).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -240,7 +240,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*x86_64)(?=.*windows).*\\.zip$"
+          "x86_64": "^(?=.*x86_64)(?=.*windows).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -261,7 +261,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -282,7 +282,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -303,7 +303,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -324,7 +324,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*gnu).*\\.zip$"
+          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*gnu).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -345,7 +345,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -366,7 +366,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+          "x86_64": "^(?=.*windows)(?=.*x86_64).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -387,7 +387,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -408,7 +408,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?!.*server)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": "^(?!.*server)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -429,7 +429,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*server)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": "^(?=.*server)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -450,7 +450,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows)(?=.*amd64).*\\.exe$"
+          "x86_64": "^(?=.*windows)(?=.*amd64).*\\.exe$"
         }
       },
       "type": "portable-exe"
@@ -471,7 +471,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+          "x86_64": "^(?=.*windows)(?=.*x86_64).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -492,7 +492,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -513,7 +513,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*x86_64)(?=.*windows).*\\.zip$"
+          "x86_64": "^(?=.*x86_64)(?=.*windows).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -534,7 +534,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*amd64)(?=.*windows).*\\.zip$"
+          "x86_64": "^(?=.*amd64)(?=.*windows).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -555,7 +555,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*pueue-)(?=.*windows)(?=.*x86_64).*\\.exe$"
+          "x86_64": "^(?=.*pueue-)(?=.*windows)(?=.*x86_64).*\\.exe$"
         }
       },
       "type": "portable-exe"
@@ -576,7 +576,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*pueued-)(?=.*windows)(?=.*x86_64).*\\.exe$"
+          "x86_64": "^(?=.*pueued-)(?=.*windows)(?=.*x86_64).*\\.exe$"
         }
       },
       "type": "portable-exe"
@@ -597,7 +597,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*x86_64).*\\.exe$"
+          "x86_64": "^(?=.*x86_64).*\\.exe$"
         }
       },
       "type": "installer",
@@ -644,7 +644,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+          "x86_64": "^(?=.*windows)(?=.*x86_64).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -665,7 +665,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*x64)(?=.*Portable).*\\.zip$"
+          "x86_64": "^(?=.*x64)(?=.*Portable).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -689,7 +689,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?i)(?=.*MinGit)(?=.*64-bit)(?!.*busybox).*\\.zip$"
+          "x86_64": "^(?i)(?=.*MinGit)(?=.*64-bit)(?!.*busybox).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -711,7 +711,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?i)(?=.*windows)(?=.*x64)(?!.*baseline).*\\.zip$"
+          "x86_64": "^(?i)(?=.*windows)(?=.*x64)(?!.*baseline).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -732,7 +732,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?i)(?=.*windows)(?=.*x64).*\\.zip$"
+          "x86_64": "^(?i)(?=.*windows)(?=.*x64).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
@@ -753,7 +753,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?i)(?=.*windows)(?=.*x86_64).*\\.tar.gz$"
+          "x86_64": "^(?i)(?=.*windows)(?=.*x86_64).*\\.tar.gz$"
         }
       },
       "type": "portable-compressed-archive"
@@ -774,7 +774,7 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?i)(?=.*windows)(?=.*x86_64)(?=.*msvc).*\\.zip$"
+          "x86_64": "^(?i)(?=.*windows)(?=.*x86_64)(?=.*msvc).*\\.zip$"
         }
       },
       "type": "portable-compressed-archive"
