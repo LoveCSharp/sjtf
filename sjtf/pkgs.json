@@ -630,6 +630,28 @@
     },
     "fetch_source": "github"
   },
+  "lapce": {
+    "description": "Lightning-fast And Powerful Code Editor",
+    "repo": "lapce/lapce",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": "^(?=.*windows)(?=.*portable).*\\.zip$"
+        }
+      },
+      "type": "portable-compressed-archive"
+    },
+    "pkg_install_relative_dir": "editor\\lapce",
+    "shim": {
+      "windows": {
+        "shell_script": {
+          "lapce.cmd": "@\"{PKG_INSTALL_DIR}\\lapce.exe\" %*",
+          "lapce.ps1": "& \"{PKG_INSTALL_DIR}\\lapce.exe\" @args"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
   "vscode": {
     "description": "Visual Studio Code - lightweight source code editor by Microsoft",
     "fetch_asset": {
