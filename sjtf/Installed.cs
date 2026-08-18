@@ -16,7 +16,7 @@ internal static class Installed
     /// <returns>包名到版本号的字典 / Dictionary of package names to version strings.</returns>
     public static Dictionary<string, string> Load()
     {
-        var path = Path.Combine(Tools.SjtfRoot(), "installed.json");
+        var path = Path.Combine(Paths.SjtfRoot(), "installed.json");
         if (!File.Exists(path))
         {
             var dir = Path.GetDirectoryName(path);
@@ -44,7 +44,7 @@ internal static class Installed
     /// <param name="installed">包名到版本号的字典 / Dictionary of package names to version strings.</param>
     public static void Save(Dictionary<string, string> installed)
     {
-        var path = Path.Combine(Tools.SjtfRoot(), "installed.json");
+        var path = Path.Combine(Paths.SjtfRoot(), "installed.json");
         var obj = new JsonObject();
         foreach (var kv in installed)
         {

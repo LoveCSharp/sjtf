@@ -14,16 +14,15 @@ internal static class Packages
     /// 从远程 URL 下载 pkgs.json 并覆盖本地文件 / Download pkgs.json from remote URL and overwrite local file.
     /// </summary>
     /// <param name="remoteUrl">远程 pkgs.json URL / Remote pkgs.json URL.</param>
-    /// <param name="ct">取消令牌 / Cancellation token.</param>
-    public static async Task UpdateRemoteAsync(string remoteUrl, CancellationToken ct = default)
+    public static async Task UpdateRemoteAsync(string remoteUrl)
     {
         if (string.IsNullOrEmpty(remoteUrl))
             throw new InvalidOperationException("remote_url is not set in config.toml [pkgs]");
 
-        var pkgsPath = Path.Combine(Tools.SjtfRoot(), "pkgs.json");
+        var pkgsPath = Path.Combine(Paths.SjtfRoot(), "pkgs.json");
         Console.WriteLine($"pkgs: fetching {remoteUrl}");
-        await Tools.DownloadFileAsync(remoteUrl, pkgsPath, "pkgs",
-            Config.LoadMaxConnectionPerServer(), Config.LoadSplit(), Config.LoadMinSplitSize(), ct);
+        await Downloader.DownloadFileAsync(remoteUrl, pkgsPath, "pkgs",
+            Config.LoadMaxConnectionPerServer(), Config.LoadSplit(), Config.LoadMinSplitSize());
         Console.WriteLine($"pkgs: updated {pkgsPath}");
     }
     /// <summary>
@@ -34,7 +33,7 @@ internal static class Packages
     /// <returns>包定义 JSON 对象 / Package definition JSON object.</returns>
     public static JsonObject Load()
     {
-        var path = Path.Combine(Tools.SjtfRoot(), "pkgs.json");
+        var path = Path.Combine(Paths.SjtfRoot(), "pkgs.json");
         if (!File.Exists(path))
         {
             var remoteUrl = Config.LoadPkgsRemoteUrl();

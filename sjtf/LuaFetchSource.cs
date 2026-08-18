@@ -27,9 +27,8 @@ internal sealed class LuaFetchSource : IFetchSource
     /// 异步解析包的下载计划和验证信息 / Asynchronously resolve download plan and verification info for a package.
     /// </summary>
     /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
-    /// <param name="ct">取消令牌 / Cancellation token.</param>
     /// <returns>下载计划 / Download plan.</returns>
-    public async Task<DownloadPlan> ResolveAsync(JsonObject pkg, string packageName, CancellationToken ct = default)
+    public async Task<DownloadPlan> ResolveAsync(JsonObject pkg, string packageName)
     {
         using var lua = new Lua();
 
@@ -43,11 +42,11 @@ internal sealed class LuaFetchSource : IFetchSource
         lua["os"] = Arch.CurrentOs();
         lua["arch"] = Arch.CurrentArch();
 
-        var scriptPath = Path.Combine(Tools.SjtfRoot(), "scripts", $"{_sourceName}_fetch_latest.lua");
+        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", $"{_sourceName}_fetch_latest.lua");
         if (!File.Exists(scriptPath))
             throw new InvalidOperationException($"lua script not found at {scriptPath}");
 
-        var scriptSource = await File.ReadAllTextAsync(scriptPath, ct);
+        var scriptSource = await File.ReadAllTextAsync(scriptPath);
         lua.DoString(scriptSource);
 
         var result = lua.GetTable("result") as LuaTable;

@@ -95,6 +95,12 @@ public sealed class SjtfDownload
 public sealed class SjtfAria2
 {
     /// <summary>
+    /// aria2 默认下载 URL（Windows x64）。当 [aria2] 段未配置且当前 OS/Arch 匹配 windows_x86_64 时使用。
+    /// Default aria2 download URL (Windows x64). Used when [aria2] is not configured and the current OS/Arch matches windows_x86_64.
+    /// </summary>
+    public const string DefaultUrl = "https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0-win-64bit-build1.zip";
+
+    /// <summary>
     /// aria2 二进制文件下载地址，键名为 "{os}_{arch}"（如 windows_x86_64）/ aria2 binary download URL, key is "{os}_{arch}" (e.g. windows_x86_64).
     /// </summary>
     [TomlPropertyName("windows_x86_64")]
@@ -112,7 +118,7 @@ public sealed class SjtfAria2
     public string? GetUrl(string os, string arch)
     {
         var key = $"{os}_{arch}";
-        return key switch
+        var configured = key switch
         {
             "windows_x86_64" => WindowsX86_64,
             "linux_x86_64" => LinuxX86_64,
@@ -120,6 +126,9 @@ public sealed class SjtfAria2
             "osx_x86_64" => OsxX86_64,
             _ => null
         };
+        if (!string.IsNullOrEmpty(configured)) return configured;
+        if (os == "windows" && arch == "x86_64") return DefaultUrl;
+        return null;
     }
 }
 
@@ -166,15 +175,9 @@ internal static class Config
     public const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0";
 
     /// <summary>
-    /// aria2 默认二进制下载 URL（Windows x64）。当 config.toml 中未配置 [aria2] 时使用。
-    /// Default aria2 binary download URL (Windows x64). Used when [aria2] is not configured in config.toml.
-    /// </summary>
-    public const string DefaultAria2WindowsX64Url = "https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0-win-64bit-build1.zip";
-
-    /// <summary>
     /// 获取 config.toml 的完整路径 / Get the full path of config.toml.
     /// </summary>
-    private static string ConfigPath() => Path.Combine(Tools.SjtfRoot(), "config.toml");
+    private static string ConfigPath() => Path.Combine(Paths.SjtfRoot(), "config.toml");
 
     private static SjtfConfig? _cachedDoc;
     private static long _cachedDocMtime;
@@ -280,18 +283,13 @@ internal static class Config
     public static bool LoadAria2Enable() => LoadDoc()?.Download.Aria2Enable ?? true;
 
     /// <summary>
-    /// 从配置中加载指定 OS/Arch 的 aria2 下载地址 / Load aria2 download URL for given OS/arch from config.
-    /// 若 config.toml 未配置，回退到内置默认值。
-    /// Falls back to built-in default if config.toml does not configure it.
+    /// 从配置中加载指定 OS/Arch 的 aria2 下载地址（含内置 fallback）/ Load aria2 download URL for given OS/arch from config (with built-in fallback).
+    /// fallback 集中在 <see cref="SjtfAria2.GetUrl"/>；此处仅做委托。
+    /// Fallback is centralized in <see cref="SjtfAria2.GetUrl"/>; this method just delegates.
     /// </summary>
     public static string? LoadAria2Url(string os, string arch)
     {
-        var url = LoadDoc()?.Aria2.GetUrl(os, arch);
-        if (!string.IsNullOrEmpty(url)) return url;
-
-        // Fallback when [aria2] section is missing in config.toml
-        if (os == "windows" && arch == "x86_64") return DefaultAria2WindowsX64Url;
-        return null;
+        return LoadDoc()?.Aria2.GetUrl(os, arch);
     }
 
     /// <summary>
@@ -381,7 +379,7 @@ split = 10                      # 1 ~ 16
 min_split_size = 1              # Chunk download size setting, unit: MB     1 ~ 1024
 
 [aria2]
-windows_x86_64 = ""{DefaultAria2WindowsX64Url}""
+windows_x86_64 = ""{SjtfAria2.DefaultUrl}""
 
 [github]
 token_classic = ""put your classic token here""

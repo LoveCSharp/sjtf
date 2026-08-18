@@ -29,9 +29,8 @@ internal static class InstallHelpers
     /// </summary>
     /// <param name="name">包名称 / Package name.</param>
     /// <param name="plan">下载计划 / Download plan.</param>
-    /// <param name="ct">取消令牌 / Cancellation token.</param>
     /// <returns>下载文件的本地路径 / Local path of the downloaded file.</returns>
-    public static async Task<string> DownloadAndVerifyAsync(string name, DownloadPlan plan, CancellationToken ct = default)
+    public static async Task<string> DownloadAndVerifyAsync(string name, DownloadPlan plan)
     {
         var maxConn = Config.LoadMaxConnectionPerServer();
         var splitCount = Config.LoadSplit();
@@ -39,17 +38,17 @@ internal static class InstallHelpers
 
         var ext = ExtractExtensionFromUrl(plan.DownloadUrl);
         var dlName = $"{name}-{Arch.CurrentOs()}-{Arch.CurrentArch()}-{plan.Version}{ext}";
-        var dlPath = Path.Combine(Tools.CacheDir(), dlName);
+        var dlPath = Path.Combine(Paths.CacheDir(), dlName);
 
         try
         {
             if (!File.Exists(dlPath))
             {
-                await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, $"{name}: downloading", maxConn, splitCount, minSplitMB, ct);
+                await Downloader.DownloadFileAsync(plan.DownloadUrl, dlPath, $"{name}: downloading", maxConn, splitCount, minSplitMB);
             }
 
             Console.WriteLine($"{name}: verifying {plan.DigestAlgorithm} digest...");
-            var actualDigest = await ComputeDigestAsync(dlPath, plan.DigestAlgorithm, ct);
+            var actualDigest = await ComputeDigestAsync(dlPath, plan.DigestAlgorithm);
             if (string.Equals(actualDigest, plan.ExpectedDigest, StringComparison.OrdinalIgnoreCase))
             {
                 return dlPath;
@@ -57,20 +56,15 @@ internal static class InstallHelpers
 
             try { File.Delete(dlPath); } catch { }
             Console.WriteLine($"{name}: digest mismatch, re-downloading...");
-            await Tools.DownloadFileAsync(plan.DownloadUrl, dlPath, $"{name}: downloading", maxConn, splitCount, minSplitMB, ct);
+            await Downloader.DownloadFileAsync(plan.DownloadUrl, dlPath, $"{name}: downloading", maxConn, splitCount, minSplitMB);
 
-            actualDigest = await ComputeDigestAsync(dlPath, plan.DigestAlgorithm, ct);
+            actualDigest = await ComputeDigestAsync(dlPath, plan.DigestAlgorithm);
             if (string.Equals(actualDigest, plan.ExpectedDigest, StringComparison.OrdinalIgnoreCase))
             {
                 return dlPath;
             }
 
             throw new InvalidOperationException($"{name}: {plan.DigestAlgorithm} digest mismatch after re-download (expected {plan.ExpectedDigest}, got {actualDigest})");
-        }
-        catch (OperationCanceledException)
-        {
-            Tools.CleanupPartialDownload(dlPath);
-            throw;
         }
         catch (Exception ex)
         {
@@ -119,15 +113,15 @@ internal static class InstallHelpers
     /// Computes the requested digest of a file as a lowercase hex string.
     /// Supported algorithms: sha256, sha1, sha512, md5.
     /// </summary>
-    public static async Task<string> ComputeDigestAsync(string path, string algorithm, CancellationToken ct = default)
+    public static async Task<string> ComputeDigestAsync(string path, string algorithm)
     {
         await using var stream = File.OpenRead(path);
         byte[] hash = algorithm.ToLowerInvariant() switch
         {
-            "sha256" => await SHA256.HashDataAsync(stream, ct),
-            "sha1" => await SHA1.HashDataAsync(stream, ct),
-            "sha512" => await SHA512.HashDataAsync(stream, ct),
-            "md5" => await MD5.HashDataAsync(stream, ct),
+            "sha256" => await SHA256.HashDataAsync(stream),
+            "sha1" => await SHA1.HashDataAsync(stream),
+            "sha512" => await SHA512.HashDataAsync(stream),
+            "md5" => await MD5.HashDataAsync(stream),
             _ => throw new InvalidOperationException($"unsupported digest algorithm \"{algorithm}\" (supported: sha256, sha1, sha512, md5)")
         };
         return Convert.ToHexString(hash).ToLowerInvariant();
@@ -151,7 +145,7 @@ internal static class InstallHelpers
         switch (pkgType)
         {
             case "portable-compressed-archive":
-                Tools.ExpandArchiveRealRoot(dlPath, installFull, $"{name}: extracting");
+                ArchiveExtractor.ExpandArchiveRealRoot(dlPath, installFull, $"{name}: extracting");
                 break;
             case "portable-exe":
                 var target = Path.Combine(installFull, $"{name}.exe");
@@ -245,7 +239,7 @@ internal static class InstallHelpers
 
         var os = Arch.CurrentOs();
         var arch = Arch.CurrentArch();
-        var scriptPath = Path.Combine(Tools.SjtfRoot(), "scripts", "after_install", os, arch, $"{name}.lua");
+        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "after_install", os, arch, $"{name}.lua");
         if (!File.Exists(scriptPath))
         {
             Console.Error.WriteLine($"{name}: after-install script not found at {scriptPath}");
@@ -289,7 +283,7 @@ internal static class InstallHelpers
 
         var os = Arch.CurrentOs();
         var arch = Arch.CurrentArch();
-        var scriptPath = Path.Combine(Tools.SjtfRoot(), "scripts", "after_uninstall", os, arch, $"{name}.lua");
+        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "after_uninstall", os, arch, $"{name}.lua");
         if (!File.Exists(scriptPath))
         {
             Console.Error.WriteLine($"{name}: after-uninstall script not found at {scriptPath}");

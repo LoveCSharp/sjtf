@@ -21,9 +21,8 @@ public interface IFetchSource
     /// </summary>
     /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
     /// <param name="packageName">包名称 / Package name.</param>
-    /// <param name="ct">取消令牌 / Cancellation token.</param>
     /// <returns>下载计划 / Download plan.</returns>
-    Task<DownloadPlan> ResolveAsync(JsonObject pkg, string packageName, CancellationToken ct = default);
+    Task<DownloadPlan> ResolveAsync(JsonObject pkg, string packageName);
 }
 
 /// <summary>

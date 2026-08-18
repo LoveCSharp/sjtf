@@ -19,7 +19,7 @@ internal static class LuaConverters
     /// <returns>Lua 表代码字符串 / Lua table code string.</returns>
     public static string LoadConfigLua()
     {
-        var path = Path.Combine(Tools.SjtfRoot(), "config.toml");
+        var path = Path.Combine(Paths.SjtfRoot(), "config.toml");
         if (!File.Exists(path))
             return "{}";
 

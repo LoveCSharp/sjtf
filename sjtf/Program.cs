@@ -7,13 +7,6 @@ using System.Text.Json.Nodes;
 Config.EnsureDefault();
 Config.EnsureSymlinkDir();
 
-var cts = new CancellationTokenSource();
-Console.CancelKeyPress += (_, e) =>
-{
-    e.Cancel = true;
-    cts.Cancel();
-};
-
 var rootCommand = new RootCommand("sjtf - command-line skeleton tool.");
 
 rootCommand.SetAction(_ =>
@@ -54,13 +47,8 @@ pkgUpdateCommand.SetAction(async _ =>
             return 1;
         }
 
-        await Packages.UpdateRemoteAsync(remoteUrl, cts.Token);
+        await Packages.UpdateRemoteAsync(remoteUrl);
         return 0;
-    }
-    catch (OperationCanceledException)
-    {
-        Console.Error.WriteLine("pkgs: update cancelled");
-        return 1;
     }
     catch (Exception ex)
     {
@@ -98,12 +86,7 @@ installCommand.SetAction(async parseResult =>
     {
         try
         {
-            await InstallOneAsync(name, skipIfUptodate: true, ct: cts.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            Console.Error.WriteLine($"{name}: cancelled");
-            anyError = true;
+            await InstallOneAsync(name, skipIfUptodate: true);
         }
         catch (Exception ex)
         {
@@ -134,12 +117,7 @@ uninstallCommand.SetAction(async parseResult =>
     {
         try
         {
-            await UninstallOneAsync(name, ct: cts.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            Console.Error.WriteLine($"{name}: cancelled");
-            anyError = true;
+            await UninstallOneAsync(name);
         }
         catch (Exception ex)
         {
@@ -196,12 +174,7 @@ upgradeCommand.SetAction(async parseResult =>
     {
         try
         {
-            await UpgradeOneAsync(name, ct: cts.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            Console.Error.WriteLine($"{name}: cancelled");
-            anyError = true;
+            await UpgradeOneAsync(name);
         }
         catch (Exception ex)
         {
@@ -220,7 +193,7 @@ var favoritesCommand = new Command("favorites", "Sync installed packages with fa
 };
 favoritesCommand.SetAction(async _ =>
 {
-    var path = Path.Combine(Tools.SjtfRoot(), "favorites.json");
+    var path = Path.Combine(Paths.SjtfRoot(), "favorites.json");
     if (!File.Exists(path))
     {
         Console.Error.WriteLine("favorites.json not found. Create it with a JSON array of package names.");
@@ -261,14 +234,9 @@ favoritesCommand.SetAction(async _ =>
         try
         {
             if (installed.ContainsKey(name))
-                await UpgradeOneAsync(name, ct: cts.Token);
+                await UpgradeOneAsync(name);
             else
-                await InstallOneAsync(name, skipIfUptodate: true, ct: cts.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            Console.Error.WriteLine($"{name}: cancelled");
-            anyError = true;
+                await InstallOneAsync(name, skipIfUptodate: true);
         }
         catch (Exception ex)
         {
@@ -284,12 +252,7 @@ favoritesCommand.SetAction(async _ =>
     {
         try
         {
-            await UninstallOneAsync(name, ct: cts.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            Console.Error.WriteLine($"{name}: cancelled");
-            anyError = true;
+            await UninstallOneAsync(name);
         }
         catch (Exception ex)
         {
@@ -303,14 +266,7 @@ favoritesCommand.SetAction(async _ =>
 });
 rootCommand.Subcommands.Add(favoritesCommand);
 
-try
-{
-    return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration(), cts.Token);
-}
-catch (OperationCanceledException)
-{
-    return 130;
-}
+return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
 
     /// <summary>
     /// 列出 pkgs.json 中定义的所有包 / List all packages defined in pkgs.json.
@@ -361,7 +317,7 @@ catch (OperationCanceledException)
     /// <returns>退出代码 / Exit code.</returns>
     static int ListInstalled()
     {
-        var installedPath = Path.Combine(Tools.SjtfRoot(), "installed.json");
+        var installedPath = Path.Combine(Paths.SjtfRoot(), "installed.json");
 
         if (!File.Exists(installedPath))
         {
@@ -433,8 +389,7 @@ catch (OperationCanceledException)
     /// </summary>
     /// <param name="name">包名称 / Package name.</param>
     /// <param name="skipIfUptodate">如果已是最新版本则跳过 / Skip if already up-to-date.</param>
-    /// <param name="ct">取消令牌 / Cancellation token.</param>
-    static async Task InstallOneAsync(string name, bool skipIfUptodate, CancellationToken ct = default)
+    static async Task InstallOneAsync(string name, bool skipIfUptodate)
     {
         var pkgs = Packages.Load();
         if (!pkgs.TryGetPropertyValue(name, out var pkgNode) || pkgNode is not JsonObject pkg)
@@ -451,11 +406,7 @@ catch (OperationCanceledException)
         DownloadPlan plan;
         try
         {
-            plan = await source.ResolveAsync(pkg, name, ct);
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
+            plan = await source.ResolveAsync(pkg, name);
         }
         catch (Exception ex)
         {
@@ -474,7 +425,7 @@ catch (OperationCanceledException)
             return;
         }
 
-        var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan, ct);
+        var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan);
 
         InstallHelpers.PlaceAsset(name, pkg, dlPath, installRoot, installFull);
         InstallHelpers.CreateSymlinks(name, pkg, installRoot, installFull);
@@ -489,8 +440,7 @@ catch (OperationCanceledException)
     /// 异步卸载单个包 / Asynchronously uninstall a single package.
     /// </summary>
     /// <param name="name">包名称 / Package name.</param>
-    /// <param name="ct">取消令牌 / Cancellation token.</param>
-    static async Task UninstallOneAsync(string name, CancellationToken ct = default)
+    static async Task UninstallOneAsync(string name)
     {
     var installed = Installed.Load();
     if (!installed.ContainsKey(name))
@@ -632,8 +582,7 @@ catch (OperationCanceledException)
     /// 异步升级单个包 / Asynchronously upgrade a single package.
     /// </summary>
     /// <param name="name">包名称 / Package name.</param>
-    /// <param name="ct">取消令牌 / Cancellation token.</param>
-    static async Task UpgradeOneAsync(string name, CancellationToken ct = default)
+    static async Task UpgradeOneAsync(string name)
     {
         var installed = Installed.Load();
         if (!installed.ContainsKey(name))
@@ -655,11 +604,7 @@ catch (OperationCanceledException)
         DownloadPlan plan;
         try
         {
-            plan = await source.ResolveAsync(pkg, name, ct);
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
+            plan = await source.ResolveAsync(pkg, name);
         }
         catch (Exception ex)
         {
@@ -681,7 +626,7 @@ catch (OperationCanceledException)
         var installFull = Path.Combine(installRoot, installDirRel);
         Directory.CreateDirectory(installFull);
 
-        var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan, ct);
+        var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan);
 
         InstallHelpers.PlaceAsset(name, pkg, dlPath, installRoot, installFull);
         InstallHelpers.CreateSymlinks(name, pkg, installRoot, installFull);
