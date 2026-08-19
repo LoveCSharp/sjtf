@@ -2,7 +2,7 @@
 
 [English](SCRIPTS.md) | [中文](SCRIPTS.zh_cn.md)
 
-`sjtf` supports three kinds of JavaScript scripts. Scripts are executed by the embedded [Jint](https://github.com/sebastienros/jint) engine with async/await enabled. All C# ↔ JS data exchange happens via JSON strings; scripts parse them with `JSON.parse(...)` and return values via `JSON.stringify(...)`.
+`sjtf` supports one fetch-source script plus six hook scripts (before/after × install/upgrade/uninstall). Scripts are executed by the embedded [Jint](https://github.com/sebastienros/jint) engine with async/await enabled. All C# ↔ JS data exchange happens via JSON strings; scripts parse them with `JSON.parse(...)` and return values via `JSON.stringify(...)`.
 
 ## Script Types Overview
 
@@ -26,14 +26,14 @@ scripts/
 │   ├── github_fetch_latest.js
 │   └── update_code_visualstudio_com_fetch_latest.js
 └── hooks/
-    ├── notepad3-windows-x86_64-before_install.js
-    ├── notepad3-windows-x86_64-after_install.js
-    ├── notepad3-windows-x86_64-before_upgrade.js
-    ├── notepad3-windows-x86_64-after_upgrade.js
-    ├── notepad3-windows-x86_64-before_uninstall.js
-    ├── notepad3-windows-x86_64-after_uninstall.js
+    ├── sd-windows-x86_64-before_install.js
+    ├── sd-windows-x86_64-after_install.js
+    ├── sd-windows-x86_64-before_upgrade.js
+    ├── sd-windows-x86_64-after_upgrade.js
+    ├── sd-windows-x86_64-before_uninstall.js
+    ├── sd-windows-x86_64-after_uninstall.js
     ├── vscode-windows-x86_64-after_install.js
-    └── vscode-windows-x86_64-after_uninstall.js
+    └── vscode-windows-x86_64-before_upgrade.js
 ```
 
 ## Globals Injected by C#

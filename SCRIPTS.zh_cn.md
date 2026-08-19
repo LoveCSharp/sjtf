@@ -2,7 +2,7 @@
 
 [English](SCRIPTS.md) | [中文](SCRIPTS.zh_cn.md)
 
-`sjtf` 支持三种 JavaScript 脚本。脚本由内嵌的 [Jint](https://github.com/sebastienros/jint) 引擎执行，开启了 async/await 支持。所有 C# ↔ JS 数据通过 JSON 字符串交换：脚本内部用 `JSON.parse(...)` 解析，用 `JSON.stringify(...)` 返回值。
+`sjtf` 支持一种获取源脚本加上六种钩子脚本（前/后 × 安装/升级/卸载）。脚本由内嵌的 [Jint](https://github.com/sebastienros/jint) 引擎执行，开启了 async/await 支持。所有 C# ↔ JS 数据通过 JSON 字符串交换：脚本内部用 `JSON.parse(...)` 解析，用 `JSON.stringify(...)` 返回值。
 
 ## 脚本类型概览
 
@@ -26,14 +26,14 @@ scripts/
 │   ├── github_fetch_latest.js
 │   └── update_code_visualstudio_com_fetch_latest.js
 └── hooks/
-    ├── notepad3-windows-x86_64-before_install.js
-    ├── notepad3-windows-x86_64-after_install.js
-    ├── notepad3-windows-x86_64-before_upgrade.js
-    ├── notepad3-windows-x86_64-after_upgrade.js
-    ├── notepad3-windows-x86_64-before_uninstall.js
-    ├── notepad3-windows-x86_64-after_uninstall.js
+    ├── sd-windows-x86_64-before_install.js
+    ├── sd-windows-x86_64-after_install.js
+    ├── sd-windows-x86_64-before_upgrade.js
+    ├── sd-windows-x86_64-after_upgrade.js
+    ├── sd-windows-x86_64-before_uninstall.js
+    ├── sd-windows-x86_64-after_uninstall.js
     ├── vscode-windows-x86_64-after_install.js
-    └── vscode-windows-x86_64-after_uninstall.js
+    └── vscode-windows-x86_64-before_upgrade.js
 ```
 
 ## C# 注入的全局变量

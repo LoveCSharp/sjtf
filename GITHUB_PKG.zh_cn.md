@@ -20,14 +20,17 @@
 ```json
 {
   "fnm": {
+    "description": "Fast and simple Node.js version manager",
     "repo": "Schniz/fnm",
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*x86_64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "langs\\fnm",
     "shim": {
@@ -63,31 +66,42 @@ https://api.github.com/repos/Schniz/fnm/releases/latest
 
 #### `fetch_asset.arch`（必需）
 
-按操作系统和架构分层的正则表达式映射。
+按操作系统和架构分层的映射，每个叶节点是一个对象，包含 `file` 和 `type`，以及 `installer` 的可选字段：
 
 ```json
 "arch": {
   "windows": {
-    "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+    "x86_64": {
+      "file": "^(?=.*windows)(?=.*x86_64).*\\.zip$",
+      "type": "portable-compressed-archive"
+    }
   },
   "linux": {
-    "x86_64": "(?=.*linux)(?=.*x86_64).*\\.tar.gz$"
+    "x86_64": {
+      "file": "^(?=.*linux)(?=.*x86_64).*\\.tar.gz$",
+      "type": "portable-compressed-archive"
+    }
   },
   "macos": {
-    "aarch64": "(?=.*macos)(?=.*aarch64).*\\.zip$"
+    "aarch64": {
+      "file": "^(?=.*macos)(?=.*aarch64).*\\.zip$",
+      "type": "portable-compressed-archive"
+    }
   }
 }
 ```
 
-结构为 `fetch_asset.arch[os][arch] = regex_pattern`：
+结构：`fetch_asset.arch[os][arch]` 是一个对象，字段如下：
 
-| 层级 | 值 | 说明 |
-|------|-----|------|
-| `os` | `windows` / `linux` / `macos` | 操作系统 |
-| `arch` | `x86_64` / `aarch64` / `arm` | 架构 |
-| 值 | JavaScript 正则表达式字符串 | 用于匹配资产文件名 |
-
-正则表达式使用 JavaScript `RegExp` 语法，匹配资产列表中的 `name` 字段。第一个匹配成功的资产将被使用。
+| 字段 | 说明 |
+|------|------|
+| `os` | `windows` / `linux` / `macos` — 操作系统 |
+| `arch` | `x86_64` / `aarch64` / `arm` — 架构 |
+| `file` | 资产 URL（源返回静态下载链接时）或用于匹配 release 资产 `name` 的 JavaScript 正则。非 URL 源使用 JavaScript `RegExp` 语法，命中首个匹配项。 |
+| `type` | 下表中的包类型之一 |
+| `install_params` | （可选，仅 `installer`）安装程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符 |
+| `uninstall_program` | （可选，仅 `installer`）卸载程序文件名，相对于安装目录 |
+| `uninstall_params` | （可选，仅 `installer`）卸载程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符 |
 
 #### `fetch_asset.type`（必需）
 
@@ -96,7 +110,7 @@ https://api.github.com/repos/Schniz/fnm/releases/latest
 | 类型 | 说明 |
 |------|------|
 | `portable-compressed-archive` | ZIP/TAR.GZ/7Z 压缩包，自动解压到安装目录 |
-| `portable-exe` | 独立可执行文件，直接复制到安装目录 |
+| `portable-executable` | 独立可执行文件，直接复制到安装目录 |
 | `installer` | 安装程序，执行 `install_params` 指定的参数 |
 
 ### `pkg_install_relative_dir`（必需）
@@ -185,11 +199,15 @@ Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
 4. 提取 `browser_download_url` 作为下载地址
 5. 提取 `digest` 作为摘要（GitHub API 返回的资产 digest 格式为 `sha256:abc123...`）
 
-### 安装后 / 卸载后钩子
+### 安装/升级/卸载的前后钩子
 
-钩子按路径**自动检测**：把 JavaScript 文件放到约定路径下 `sjtf` 就会执行，无需在 `pkgs.json` 中配置任何字段。
+钩子按路径**自动检测**：把 JavaScript 文件放到约定路径下 `sjtf` 就会执行，无需在 `pkgs.json` 中配置任何字段。六种钩子彼此独立——任一文件缺失时静默跳过。
 
+- 安装前：`scripts/hooks/{name}-{os}-{arch}-before_install.js`
 - 安装后：`scripts/hooks/{name}-{os}-{arch}-after_install.js`
+- 升级前：`scripts/hooks/{name}-{os}-{arch}-before_upgrade.js`
+- 升级后：`scripts/hooks/{name}-{os}-{arch}-after_upgrade.js`
+- 卸载前：`scripts/hooks/{name}-{os}-{arch}-before_uninstall.js`
 - 卸载后：`scripts/hooks/{name}-{os}-{arch}-after_uninstall.js`
 
 完整的钩子编写指南见 [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md)。
@@ -210,9 +228,9 @@ Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
    - 不匹配则立即删除文件并重新下载一次
    - 再次不匹配则报错
 
-4. **安装**：根据 `fetch_asset.type` 处理
+4. **安装**：根据 `fetch_asset.arch.{os}.{arch}.type` 处理
    - `portable-compressed-archive`：解压到 `pkg_install_relative_dir`
-   - `portable-exe`：复制到 `pkg_install_relative_dir`
+   - `portable-executable`：复制到 `pkg_install_relative_dir`
    - `installer`：执行安装程序
 
 5. **创建 shim**：根据 `shim[os]` 创建符号链接或 shell 脚本
@@ -261,5 +279,5 @@ proxy = "https://gh-proxy.com"       # 可选代理
 
 ## 相关文档
 
-- [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md) — 脚本编写指南（获取源、安装后、卸载后钩子）
+- [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md) — 脚本编写指南（获取源、六种钩子）
 - [README.zh_cn.md](README.zh_cn.md) — 项目主页

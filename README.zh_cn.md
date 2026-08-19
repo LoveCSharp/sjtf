@@ -84,14 +84,17 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 ```json
 {
   "fnm": {
+    "description": "Fast and simple Node.js version manager",
     "repo": "Schniz/fnm",
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*x86_64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "langs\\fnm",
     "shim": {
@@ -132,16 +135,18 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 | 类型 | 说明 |
 |------|------|
 | `portable-compressed-archive` | ZIP/TAR.GZ/7Z 压缩包，自动解压到安装目录 |
-| `portable-exe` | 独立可执行文件，直接复制到安装目录 |
+| `portable-executable` | 独立可执行文件，直接复制到安装目录 |
 | `installer` | 安装程序，执行 `install_params` 指定的参数 |
 
-`installer` 类型支持以下字段：
+每个 `arch.{os}.{arch}` 条目是一个对象，包含 `file`（资产 URL 或正则）和 `type`，以及 `installer` 的可选字段：
 
 | 字段 | 说明 |
 |------|------|
-| `install_params` | 安装程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符 |
-| `uninstall_program` | 卸载程序文件名（相对于安装目录） |
-| `uninstall_params` | 卸载程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符 |
+| `file` | 资产 URL（静态端点）或用于匹配 release 资产名的 JavaScript 正则 |
+| `type` | 上表中的包类型之一 |
+| `install_params` | 安装程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符（仅 `installer`） |
+| `uninstall_program` | 卸载程序文件名（相对于安装目录，仅 `installer`） |
+| `uninstall_params` | 卸载程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符（仅 `installer`） |
 
 #### 安装前/后、升级前/后、卸载前/后脚本
 

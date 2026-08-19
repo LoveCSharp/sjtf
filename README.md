@@ -84,14 +84,17 @@ Package definitions. Use `sjtf packages update` to download the latest version f
 ```json
 {
   "fnm": {
+    "description": "Fast and simple Node.js version manager",
     "repo": "Schniz/fnm",
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*x86_64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "langs\\fnm",
     "shim": {
@@ -132,16 +135,18 @@ Package definitions. Use `sjtf packages update` to download the latest version f
 | Type | Description |
 |------|-------------|
 | `portable-compressed-archive` | ZIP/TAR.GZ/7Z archive, automatically extracted to install directory |
-| `portable-exe` | Standalone executable, copied directly to install directory |
+| `portable-executable` | Standalone executable, copied directly to install directory |
 | `installer` | Installer executable, runs with arguments specified by `install_params` |
 
-`installer` type supports the following fields:
+Each `arch.{os}.{arch}` entry is an object carrying `file` (asset URL or regex) and `type`, plus optional `installer` fields:
 
 | Field | Description |
 |------|-------------|
-| `install_params` | Installer arguments, supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders |
-| `uninstall_program` | Uninstaller program file name (relative to install directory) |
-| `uninstall_params` | Uninstaller arguments, supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders |
+| `file` | Asset URL (for static endpoints) or JavaScript regex matched against the release asset name |
+| `type` | One of the package types above |
+| `install_params` | Installer arguments, supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders (`installer` only) |
+| `uninstall_program` | Uninstaller program file name (relative to install directory, `installer` only) |
+| `uninstall_params` | Uninstaller arguments, supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders (`installer` only) |
 
 #### Pre/post-install, pre/post-upgrade, pre/post-uninstall scripts
 

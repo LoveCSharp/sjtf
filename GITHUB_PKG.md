@@ -20,14 +20,17 @@ Here is a complete package definition (using `fnm` as an example):
 ```json
 {
   "fnm": {
+    "description": "Fast and simple Node.js version manager",
     "repo": "Schniz/fnm",
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*x86_64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "langs\\fnm",
     "shim": {
@@ -63,31 +66,42 @@ Asset matching configuration for selecting the correct file from a GitHub Releas
 
 #### `fetch_asset.arch` (required)
 
-A nested map of regular expressions keyed by OS and architecture.
+A nested map keyed by OS and architecture. Each leaf value is an object carrying `file` and `type`, plus optional `installer` fields:
 
 ```json
 "arch": {
   "windows": {
-    "x86_64": "(?=.*windows)(?=.*x86_64).*\\.zip$"
+    "x86_64": {
+      "file": "^(?=.*windows)(?=.*x86_64).*\\.zip$",
+      "type": "portable-compressed-archive"
+    }
   },
   "linux": {
-    "x86_64": "(?=.*linux)(?=.*x86_64).*\\.tar.gz$"
+    "x86_64": {
+      "file": "^(?=.*linux)(?=.*x86_64).*\\.tar.gz$",
+      "type": "portable-compressed-archive"
+    }
   },
   "macos": {
-    "aarch64": "(?=.*macos)(?=.*aarch64).*\\.zip$"
+    "aarch64": {
+      "file": "^(?=.*macos)(?=.*aarch64).*\\.zip$",
+      "type": "portable-compressed-archive"
+    }
   }
 }
 ```
 
-Structure: `fetch_asset.arch[os][arch] = regex_pattern`:
+Structure: `fetch_asset.arch[os][arch]` is an object with the following fields:
 
-| Level | Values | Description |
-|-------|--------|-------------|
-| `os` | `windows` / `linux` / `macos` | Operating system |
-| `arch` | `x86_64` / `aarch64` / `arm` | Architecture |
-| value | JavaScript regex string | Matches asset file names |
-
-Regular expressions use JavaScript `RegExp` syntax to match the `name` field of each asset in the release. The first matching asset is used.
+| Field | Description |
+|-------|-------------|
+| `os` | `windows` / `linux` / `macos` — operating system |
+| `arch` | `x86_64` / `aarch64` / `arm` — architecture |
+| `file` | Asset URL (when the source returns a static download link) **or** a JavaScript regex string matched against the release asset's `name`. For non-URL sources, JavaScript `RegExp` syntax is used; the first matching asset is selected. |
+| `type` | One of the package types below. |
+| `install_params` | (optional, `installer` only) Arguments passed to the installer. Supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders. |
+| `uninstall_program` | (optional, `installer` only) Uninstaller program file name, relative to the install directory. |
+| `uninstall_params` | (optional, `installer` only) Arguments passed to the uninstaller. Supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders. |
 
 #### `fetch_asset.type` (required)
 
@@ -96,7 +110,7 @@ Package type determining how the downloaded file is handled during installation:
 | Type | Description |
 |------|-------------|
 | `portable-compressed-archive` | ZIP/TAR.GZ/7Z archive, automatically extracted to install directory |
-| `portable-exe` | Standalone executable, copied directly to install directory |
+| `portable-executable` | Standalone executable, copied directly to install directory |
 | `installer` | Installer executable, runs with arguments specified by `install_params` |
 
 ### `pkg_install_relative_dir` (required)
@@ -186,11 +200,15 @@ This script:
 4. Extracts `browser_download_url` as the download URL
 5. Extracts `digest` for verification (GitHub API digest format: `sha256:abc123...`)
 
-### Post-install / post-uninstall hooks
+### Pre/post install, upgrade, and uninstall hooks
 
-Hooks are **auto-detected** by path. Drop a JavaScript file at the expected location and `sjtf` will run it; no `pkgs.json` field is required.
+Hooks are **auto-detected** by path. Drop a JavaScript file at the expected location and `sjtf` will run it; no `pkgs.json` field is required. The six hook kinds are independent — each one is silently skipped if its file is missing.
 
+- Before-install: `scripts/hooks/{name}-{os}-{arch}-before_install.js`
 - After-install: `scripts/hooks/{name}-{os}-{arch}-after_install.js`
+- Before-upgrade: `scripts/hooks/{name}-{os}-{arch}-before_upgrade.js`
+- After-upgrade: `scripts/hooks/{name}-{os}-{arch}-after_upgrade.js`
+- Before-uninstall: `scripts/hooks/{name}-{os}-{arch}-before_uninstall.js`
 - After-uninstall: `scripts/hooks/{name}-{os}-{arch}-after_uninstall.js`
 
 See [SCRIPTS.md](SCRIPTS.md) for the full hook authoring guide.
@@ -211,9 +229,9 @@ When a user runs `sjtf install fnm`:
    - Mismatch triggers immediate file deletion and one re-download
    - Second mismatch throws an error
 
-4. **Install**: Handles based on `fetch_asset.type`
+4. **Install**: Handles based on `fetch_asset.arch.{os}.{arch}.type`
    - `portable-compressed-archive`: Extract to `pkg_install_relative_dir`
-   - `portable-exe`: Copy to `pkg_install_relative_dir`
+   - `portable-executable`: Copy to `pkg_install_relative_dir`
    - `installer`: Run installer with `install_params`
 
 5. **Create shims**: Creates symlinks or shell scripts based on `shim[os]`
@@ -262,5 +280,5 @@ If package installation fails, check the error message:
 
 ## Related Documentation
 
-- [SCRIPTS.md](SCRIPTS.md) — Scripting Guide (fetch sources, after-install, after-uninstall hooks)
+- [SCRIPTS.md](SCRIPTS.md) — Scripting Guide (fetch sources, six hook kinds)
 - [README.md](README.md) — Project homepage
