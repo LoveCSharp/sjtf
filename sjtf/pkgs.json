@@ -1,14 +1,16 @@
-﻿{
+{
   "fnm": {
     "description": "Fast and simple Node.js version manager",
     "repo": "Schniz/fnm",
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*windows).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*windows).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "langs\\fnm",
     "shim": {
@@ -26,10 +28,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "langs\\uv",
     "shim": {
@@ -49,10 +53,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*windows)(?=.*amd64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*amd64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "langs\\g\\bin",
     "shim": {
@@ -70,10 +76,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*win)(?=.*x64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*win)(?=.*x64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\powershell",
     "fetch_source": "github"
@@ -84,17 +92,19 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*windows)(?=.*x86_64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*x86_64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\nushell",
     "shim": {
       "windows": {
         "shell_script": {
           "nu.cmd": "@\"{PKG_INSTALL_DIR}\\nu.exe\" %*",
-          "nu.ps1": "& \"{PKG_INSTALL_DIR}\\nu.exe\" @args"
+          "nu.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\nu.exe\" @args"
         }
       }
     },
@@ -106,10 +116,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*no-web)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*no-web)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\zellij",
     "shim": {
@@ -127,10 +139,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*windows)(?=.*amd64).*\\.exe$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*amd64).*\\.exe$",
+            "type": "portable-executable"
+          }
         }
-      },
-      "type": "portable-exe"
+      }
     },
     "pkg_install_relative_dir": "cli\\oh-my-posh",
     "shim": {
@@ -148,10 +162,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\starship",
     "shim": {
@@ -169,10 +185,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*x64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*x64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\coreutils",
     "shim": {
@@ -190,10 +208,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*windows)(?=.*x86_64)(?=.*msvc).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*x86_64)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\yazi",
     "shim": {
@@ -212,10 +232,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*windows)(?=.*amd64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*amd64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\lf",
     "shim": {
@@ -233,10 +255,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*windows)(?=.*amd64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*amd64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\fzf",
     "shim": {
@@ -254,10 +278,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*x86_64)(?=.*windows).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\zoxide",
     "shim": {
@@ -275,10 +301,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\fd",
     "shim": {
@@ -296,10 +324,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\sd",
     "shim": {
@@ -317,10 +347,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\ripgrep",
     "shim": {
@@ -338,10 +370,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*gnu).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*gnu).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\eza",
     "shim": {
@@ -359,10 +393,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\dust",
     "shim": {
@@ -380,10 +416,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*windows)(?=.*x86_64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*x86_64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\duf",
     "shim": {
@@ -401,10 +439,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\bat",
     "shim": {
@@ -422,10 +462,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?!.*server)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": {
+            "file": "^(?!.*server)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\atuin",
     "shim": {
@@ -443,10 +485,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*server)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*server)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\atuin",
     "shim": {
@@ -464,10 +508,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*windows)(?=.*amd64).*\\.exe$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*amd64).*\\.exe$",
+            "type": "portable-executable"
+          }
         }
-      },
-      "type": "portable-exe"
+      }
     },
     "pkg_install_relative_dir": "cli\\jq",
     "shim": {
@@ -485,10 +531,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*windows)(?=.*x86_64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*x86_64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\xh",
     "shim": {
@@ -506,10 +554,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\bottom",
     "shim": {
@@ -527,10 +577,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*x86_64)(?=.*windows).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\procs",
     "shim": {
@@ -548,10 +600,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*amd64)(?=.*windows).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*amd64)(?=.*windows).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\carapace",
     "shim": {
@@ -569,10 +623,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*pueue-)(?=.*windows)(?=.*x86_64).*\\.exe$"
+          "x86_64": {
+            "file": "^(?=.*pueue-)(?=.*windows)(?=.*x86_64).*\\.exe$",
+            "type": "portable-executable"
+          }
         }
-      },
-      "type": "portable-exe"
+      }
     },
     "pkg_install_relative_dir": "cli\\pueue",
     "shim": {
@@ -590,10 +646,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*pueued-)(?=.*windows)(?=.*x86_64).*\\.exe$"
+          "x86_64": {
+            "file": "^(?=.*pueued-)(?=.*windows)(?=.*x86_64).*\\.exe$",
+            "type": "portable-executable"
+          }
         }
-      },
-      "type": "portable-exe"
+      }
     },
     "pkg_install_relative_dir": "cli\\pueue",
     "shim": {
@@ -611,20 +669,22 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*x86_64).*\\.exe$"
+          "x86_64": {
+            "file": "^(?=.*x86_64).*\\.exe$",
+            "type": "installer",
+            "install_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /TASKS=\"!addtopath\" /DIR=\"{PKG_INSTALL_DIR}\"",
+            "uninstall_program": "unins000.exe",
+            "uninstall_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART"
+          }
         }
-      },
-      "type": "installer",
-      "install_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /TASKS=\"!addtopath\" /DIR=\"{PKG_INSTALL_DIR}\"",
-      "uninstall_program": "unins000.exe",
-      "uninstall_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART"
+      }
     },
     "pkg_install_relative_dir": "editor\\zed",
     "shim": {
       "windows": {
         "shell_script": {
           "zed.cmd": "@\"{PKG_INSTALL_DIR}\\bin\\zed.exe\" --user-data-dir \"{PKG_INSTALL_DIR}\\user-data\" %*",
-          "zed.ps1": "& \"{PKG_INSTALL_DIR}\\bin\\zed.exe\" --user-data-dir \"{PKG_INSTALL_DIR}\\user-data\" @args"
+          "zed.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\bin\\zed.exe\" --user-data-dir \"{PKG_INSTALL_DIR}\\user-data\" @args"
         }
       }
     },
@@ -636,17 +696,19 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*windows)(?=.*portable).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*portable).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "editor\\lapce",
     "shim": {
       "windows": {
         "shell_script": {
           "lapce.cmd": "@\"{PKG_INSTALL_DIR}\\lapce.exe\" %*",
-          "lapce.ps1": "& \"{PKG_INSTALL_DIR}\\lapce.exe\" @args"
+          "lapce.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\lapce.exe\" @args"
         }
       }
     },
@@ -657,21 +719,22 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "https://update.code.visualstudio.com/api/update/win32-x64-archive/stable/latest"
+          "x86_64": {
+            "file": "https://update.code.visualstudio.com/api/update/win32-x64-archive/stable/latest",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "editor\\vscode",
     "shim": {
       "windows": {
         "shell_script": {
           "code.cmd": "@\"{PKG_INSTALL_DIR}\\bin\\code.cmd\" %*",
-          "code.ps1": "& \"{PKG_INSTALL_DIR}\\bin\\code.cmd\" @args"
+          "code.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\bin\\code.cmd\" @args"
         }
       }
     },
-    "script_after_install": true,
     "fetch_source": "update_code_visualstudio_com"
   },
   "neovim": {
@@ -680,17 +743,19 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*win64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*win64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "editor\\nvim",
     "shim": {
       "windows": {
         "shell_script": {
           "nvm.cmd": "@\"{PKG_INSTALL_DIR}\\bin\\nvim.exe\" %*",
-          "nvm.ps1": "& \"{PKG_INSTALL_DIR}\\bin\\nvim.exe\" @args"
+          "nvm.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\bin\\nvim.exe\" @args"
         }
       }
     },
@@ -702,10 +767,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*windows)(?=.*x86_64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*x86_64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "editor\\edit",
     "shim": {
@@ -723,19 +790,21 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*x64)(?=.*Portable).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*x64)(?=.*Portable).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "editor\\notepad3",
     "shim": {
       "windows": {
         "shell_script": {
           "notepad3.cmd": "@\"{PKG_INSTALL_DIR}\\Notepad3.exe\" %*",
-          "notepad3.ps1": "& \"{PKG_INSTALL_DIR}\\Notepad3.exe\" @args",
+          "notepad3.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\Notepad3.exe\" @args",
           "n3.cmd": "@\"{PKG_INSTALL_DIR}\\Notepad3.exe\" %*",
-          "n3.ps1": "& \"{PKG_INSTALL_DIR}\\Notepad3.exe\" @args"
+          "n3.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\Notepad3.exe\" @args"
         }
       }
     },
@@ -747,19 +816,21 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?=.*HD)(?=.*zh-Hans)(?=.*x64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?=.*HD)(?=.*zh-Hans)(?=.*x64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "editor\\notepad4",
     "shim": {
       "windows": {
         "shell_script": {
           "notepad4.cmd": "@\"{PKG_INSTALL_DIR}\\Notepad4.exe\" %*",
-          "notepad4.ps1": "& \"{PKG_INSTALL_DIR}\\Notepad4.exe\" @args",
+          "notepad4.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\Notepad4.exe\" @args",
           "n4.cmd": "@\"{PKG_INSTALL_DIR}\\Notepad4.exe\" %*",
-          "n4.ps1": "& \"{PKG_INSTALL_DIR}\\Notepad4.exe\" @args"
+          "n4.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\Notepad4.exe\" @args"
         }
       }
     },
@@ -771,17 +842,19 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?i)(?=.*MinGit)(?=.*64-bit)(?!.*busybox).*\\.zip$"
+          "x86_64": {
+            "file": "^(?i)(?=.*MinGit)(?=.*64-bit)(?!.*busybox).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "vcs\\git",
     "shim": {
       "windows": {
         "shell_script": {
           "git.cmd": "@\"{PKG_INSTALL_DIR}\\cmd\\git.exe\" %*",
-          "git.ps1": "& \"{PKG_INSTALL_DIR}\\cmd\\git.exe\" @args"
+          "git.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\cmd\\git.exe\" @args"
         }
       }
     },
@@ -793,10 +866,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?i)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$"
+          "x86_64": {
+            "file": "^(?i)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\delta",
     "shim": {
@@ -814,10 +889,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?i)(?=.*x86_64)(?=.*windows).*\\.zip$"
+          "x86_64": {
+            "file": "^(?i)(?=.*x86_64)(?=.*windows).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\lazygit",
     "shim": {
@@ -835,10 +912,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?i)(?=.*x86_64)(?=.*windows)(?=.*gnu).*\\.zip$"
+          "x86_64": {
+            "file": "^(?i)(?=.*x86_64)(?=.*windows)(?=.*gnu).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\ziggity",
     "shim": {
@@ -856,10 +935,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?i)(?=.*win).*\\.tar.gz$"
+          "x86_64": {
+            "file": "^(?i)(?=.*win).*\\.tar.gz$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "cli\\gitui",
     "shim": {
@@ -877,10 +958,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?i)(?=.*windows)(?=.*x64)(?!.*baseline).*\\.zip$"
+          "x86_64": {
+            "file": "^(?i)(?=.*windows)(?=.*x64)(?!.*baseline).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "ai\\opencode",
     "shim": {
@@ -898,10 +981,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?i)(?=.*windows)(?=.*x64).*\\.zip$"
+          "x86_64": {
+            "file": "^(?i)(?=.*windows)(?=.*x64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "ai\\pi",
     "shim": {
@@ -919,10 +1004,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?i)(?=.*windows)(?=.*x86_64).*\\.tar.gz$"
+          "x86_64": {
+            "file": "^(?i)(?=.*windows)(?=.*x86_64).*\\.tar.gz$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "ai\\jcode",
     "shim": {
@@ -940,10 +1027,12 @@
     "fetch_asset": {
       "arch": {
         "windows": {
-          "x86_64": "^(?i)(?=.*windows)(?=.*x86_64)(?=.*msvc).*\\.zip$"
+          "x86_64": {
+            "file": "^(?i)(?=.*windows)(?=.*x86_64)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
-      },
-      "type": "portable-compressed-archive"
+      }
     },
     "pkg_install_relative_dir": "ai\\rtk",
     "shim": {

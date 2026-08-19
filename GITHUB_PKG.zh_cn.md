@@ -9,9 +9,9 @@
 基于 GitHub 的包需要两个部分：
 
 1. **`pkgs.json` 中的包定义**：描述包的基本信息、资产匹配规则、安装目录和 shim 配置
-2. **`fetch_source` 指向 `github`**：使用内置的 `scripts/github_fetch_latest.lua` 自动从 GitHub Releases API 获取最新版本
+2. **`fetch_source` 指向 `github`**：使用内置的 `scripts/fetch/github_fetch_latest.js` 自动从 GitHub Releases API 获取最新版本
 
-`sjtf` 内置了对 GitHub Releases API 的支持，无需编写自定义 Lua 脚本即可使用。
+`sjtf` 内置了对 GitHub Releases API 的支持，无需编写自定义 JavaScript 脚本即可使用。
 
 ## 完整示例
 
@@ -85,9 +85,9 @@ https://api.github.com/repos/Schniz/fnm/releases/latest
 |------|-----|------|
 | `os` | `windows` / `linux` / `macos` | 操作系统 |
 | `arch` | `x86_64` / `aarch64` / `arm` | 架构 |
-| 值 | Lua 正则表达式字符串 | 用于匹配资产文件名 |
+| 值 | JavaScript 正则表达式字符串 | 用于匹配资产文件名 |
 
-正则表达式使用 Lua 语法（PCRE 风格），匹配资产列表中的 `name` 字段。第一个匹配成功的资产将被使用。
+正则表达式使用 JavaScript `RegExp` 语法，匹配资产列表中的 `name` 字段。第一个匹配成功的资产将被使用。
 
 #### `fetch_asset.type`（必需）
 
@@ -176,7 +176,7 @@ Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
 "fetch_source": "github"
 ```
 
-对应脚本路径：`scripts/github_fetch_latest.lua`
+对应脚本路径：`scripts/fetch/github_fetch_latest.js`
 
 该脚本会：
 1. 调用 `https://api.github.com/repos/{repo}/releases/latest`
@@ -185,27 +185,20 @@ Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
 4. 提取 `browser_download_url` 作为下载地址
 5. 提取 `digest` 作为摘要（GitHub API 返回的资产 digest 格式为 `sha256:abc123...`）
 
-### `script_after_install`（可选）
+### 安装后 / 卸载后钩子
 
-设为 `true` 时，安装完成后执行 `scripts/after_install/{os}/{arch}/{name}.lua`。
+钩子按路径**自动检测**：把 JavaScript 文件放到约定路径下 `sjtf` 就会执行，无需在 `pkgs.json` 中配置任何字段。
 
-```json
-"script_after_install": true
-```
+- 安装后：`scripts/hooks/{name}-{os}-{arch}-after_install.js`
+- 卸载后：`scripts/hooks/{name}-{os}-{arch}-after_uninstall.js`
 
-### `script_after_uninstall`（可选）
-
-设为 `true` 时，卸载完成后执行 `scripts/after_uninstall/{os}/{arch}/{name}.lua`。
-
-```json
-"script_after_uninstall": true
-```
+完整的钩子编写指南见 [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md)。
 
 ## 工作流程
 
 当用户执行 `sjtf install fnm` 时：
 
-1. **版本获取**：执行 `scripts/github_fetch_latest.lua`
+1. **版本获取**：执行 `scripts/fetch/github_fetch_latest.js`
    - 调用 GitHub API 获取最新 Release
    - 匹配资产正则，提取下载 URL 和版本号
    - 返回 `DownloadPlan{Version, DownloadUrl, DigestAlgorithm, ExpectedDigest}`
@@ -224,7 +217,7 @@ Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
 
 5. **创建 shim**：根据 `shim[os]` 创建符号链接或 shell 脚本
 
-6. **安装后脚本**（可选）：执行 `after_install` Lua 脚本
+6. **安装后钩子**（自动检测）：如果存在 `scripts/hooks/{name}-{os}-{arch}-after_install.js` 则执行
 
 ## 正则表达式示例
 
@@ -255,7 +248,7 @@ proxy = "https://gh-proxy.com"       # 可选代理
 - `token_classic`：GitHub 经典个人访问令牌，必须以 `ghp_` 开头
 - `proxy`：代理地址，用于替换 GitHub API 请求的域名（`github.com` → `gh-proxy.com`）
 
-认证头和代理由 `scripts/github_fetch_latest.lua` 自动处理。
+认证头和代理由 `scripts/fetch/github_fetch_latest.js` 自动处理。
 
 ## 调试技巧
 
@@ -268,5 +261,5 @@ proxy = "https://gh-proxy.com"       # 可选代理
 
 ## 相关文档
 
-- [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md) — Lua 脚本编写指南（获取源、安装后、卸载后脚本）
+- [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md) — 脚本编写指南（获取源、安装后、卸载后钩子）
 - [README.zh_cn.md](README.zh_cn.md) — 项目主页

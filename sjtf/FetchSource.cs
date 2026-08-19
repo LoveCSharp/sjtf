@@ -44,8 +44,8 @@ internal static class FetchSources
 {
     private static readonly Dictionary<string, IFetchSource> _all = new()
     {
-        ["github"] = new LuaFetchSource("github"),
-        ["update_code_visualstudio_com"] = new LuaFetchSource("update_code_visualstudio_com"),
+        ["github"] = new ScriptFetchSource("github"),
+        ["update_code_visualstudio_com"] = new ScriptFetchSource("update_code_visualstudio_com"),
     };
 
     /// <summary>

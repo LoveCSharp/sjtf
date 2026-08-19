@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using NLua;
 
 namespace Sjtf;
 
@@ -138,8 +137,17 @@ internal static class InstallHelpers
     {
         if (!pkg.TryGetPropertyValue("fetch_asset", out var fetchNode) || fetchNode is not JsonObject fetch)
             throw new InvalidOperationException($"{name}: fetch_asset missing");
-        if (!fetch.TryGetPropertyValue("type", out var typeNode) || typeNode is not JsonValue typeVal || typeVal.GetValueKind() != JsonValueKind.String)
-            throw new InvalidOperationException($"{name}: fetch_asset.type missing");
+        if (!fetch.TryGetPropertyValue("arch", out var archNode) || archNode is not JsonObject archObj)
+            throw new InvalidOperationException($"{name}: fetch_asset.arch missing");
+
+        var os = Arch.CurrentOs();
+        var arch = Arch.CurrentArch();
+        if (!archObj.TryGetPropertyValue(os, out var osNode) || osNode is not JsonObject osObj)
+            throw new InvalidOperationException($"{name}: no entry for os={os}");
+        if (!osObj.TryGetPropertyValue(arch, out var archEntry) || archEntry is not JsonObject archEntryObj)
+            throw new InvalidOperationException($"{name}: no entry for arch={arch}");
+        if (!archEntryObj.TryGetPropertyValue("type", out var typeNode) || typeNode is not JsonValue typeVal || typeVal.GetValueKind() != JsonValueKind.String)
+            throw new InvalidOperationException($"{name}: fetch_asset.arch.{os}.{arch}.type missing");
         var pkgType = typeVal.GetValue<string>();
 
         switch (pkgType)
@@ -147,14 +155,14 @@ internal static class InstallHelpers
             case "portable-compressed-archive":
                 ArchiveExtractor.ExpandArchiveRealRoot(dlPath, installFull, $"{name}: extracting");
                 break;
-            case "portable-exe":
+            case "portable-executable":
                 var target = Path.Combine(installFull, $"{name}.exe");
                 Console.WriteLine($"{name}: placing exe at {target}...");
                 File.Copy(dlPath, target, overwrite: true);
                 break;
             case "installer":
                 var installParams = "";
-                if (fetch.TryGetPropertyValue("install_params", out var paramsNode) && paramsNode is JsonValue paramsVal && paramsVal.GetValueKind() == JsonValueKind.String)
+                if (archEntryObj.TryGetPropertyValue("install_params", out var paramsNode) && paramsNode is JsonValue paramsVal && paramsVal.GetValueKind() == JsonValueKind.String)
                     installParams = paramsVal.GetValue<string>();
                 installParams = installParams.Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase)
                                             .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
@@ -180,7 +188,7 @@ internal static class InstallHelpers
     /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
     /// <param name="installRoot">安装根目录 / Installation root directory.</param>
     /// <param name="installFull">完整安装目录 / Full installation directory.</param>
-    public static void CreateSymlinks(string name, JsonObject pkg, string installRoot, string installFull)
+    public static void CreateShims(string name, JsonObject pkg, string installRoot, string installFull)
     {
         var symRoot = Path.Combine(installRoot, "shims");
         Directory.CreateDirectory(symRoot);
@@ -193,9 +201,9 @@ internal static class InstallHelpers
         if (!shimObj.TryGetPropertyValue(os, out var osNode) || osNode is not JsonObject osObj)
             return;
 
-        if (osObj.TryGetPropertyValue("symlink", out var symlinkNode) && symlinkNode is JsonObject symlinkObj)
+        if (osObj.TryGetPropertyValue("symlink", out var linkNode) && linkNode is JsonObject linkObj)
         {
-            foreach (var kv in symlinkObj)
+            foreach (var kv in linkObj)
             {
                 var linkName = kv.Key;
                 if (string.IsNullOrEmpty(linkName)) continue;
@@ -226,88 +234,194 @@ internal static class InstallHelpers
     }
 
     /// <summary>
-    /// 运行安装后 Lua 脚本 / Run the after-install Lua script.
+    /// 运行安装前 JS 脚本 / Run the before-install JavaScript script.
     /// </summary>
     /// <param name="name">包名称 / Package name.</param>
     /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
     /// <param name="installRoot">安装根目录 / Installation root directory.</param>
     /// <param name="installFull">完整安装目录 / Full installation directory.</param>
-    public static void RunAfterInstallScript(string name, JsonObject pkg, string installRoot, string installFull)
+    public static async Task RunBeforeInstallScript(string name, JsonObject pkg, string installRoot, string installFull)
     {
-        if (!pkg.TryGetPropertyValue("script_after_install", out var scriptNode) || scriptNode is not JsonValue scriptVal || scriptVal.GetValueKind() != JsonValueKind.True)
-            return;
-
         var os = Arch.CurrentOs();
         var arch = Arch.CurrentArch();
-        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "after_install", os, arch, $"{name}.lua");
+        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-before_install.js");
         if (!File.Exists(scriptPath))
-        {
-            Console.Error.WriteLine($"{name}: after-install script not found at {scriptPath}");
             return;
-        }
+
+        Console.WriteLine($"{name}: running before-install script");
+
+        Directory.CreateDirectory(Path.Combine(installRoot, "shims"));
+
+        var scriptSource = await File.ReadAllTextAsync(scriptPath);
+
+        var engine = ScriptEngine.Create($"before_install/{name}");
+        engine.SetValue("pkgJSON", pkg.ToJsonString());
+        engine.SetValue("configJSON", ScriptConverters.LoadConfigJson());
+        engine.SetValue("os", os);
+        engine.SetValue("arch", arch);
+        engine.SetValue("installDir", installFull);
+        engine.SetValue("installRoot", installRoot);
+
+        engine.Execute(scriptSource);
+        await ScriptEngine.InvokeAsync(engine, "beforeInstall");
+    }
+
+    /// <summary>
+    /// 在升级前运行 JS 钩子 / Run the before-upgrade JS hook.
+    /// </summary>
+    /// <param name="name">包名称 / Package name.</param>
+    /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
+    /// <param name="installRoot">安装根目录 / Installation root directory.</param>
+    /// <param name="installFull">完整安装目录 / Full installation directory.</param>
+    public static async Task RunBeforeUpgradeScript(string name, JsonObject pkg, string installRoot, string installFull)
+    {
+        var os = Arch.CurrentOs();
+        var arch = Arch.CurrentArch();
+        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-before_upgrade.js");
+
+        if (!File.Exists(scriptPath))
+            return;
+
+        Console.WriteLine($"{name}: running before-upgrade script");
+        Directory.CreateDirectory(Path.Combine(installRoot, "shims"));
+
+        var scriptSource = await File.ReadAllTextAsync(scriptPath);
+        var engine = ScriptEngine.Create($"before_upgrade/{name}");
+        engine.SetValue("pkgJSON", pkg.ToJsonString());
+        engine.SetValue("configJSON", ScriptConverters.LoadConfigJson());
+        engine.SetValue("os", os);
+        engine.SetValue("arch", arch);
+        engine.SetValue("installDir", installFull);
+        engine.SetValue("installRoot", installRoot);
+
+        engine.Execute(scriptSource);
+        await ScriptEngine.InvokeAsync(engine, "beforeUpgrade");
+    }
+
+    /// <summary>
+    /// 运行安装后 JS 脚本 / Run the after-install JavaScript script.
+    /// </summary>
+    /// <param name="name">包名称 / Package name.</param>
+    /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
+    /// <param name="installRoot">安装根目录 / Installation root directory.</param>
+    /// <param name="installFull">完整安装目录 / Full installation directory.</param>
+    public static async Task RunAfterInstallScript(string name, JsonObject pkg, string installRoot, string installFull)
+    {
+        var os = Arch.CurrentOs();
+        var arch = Arch.CurrentArch();
+        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-after_install.js");
+        if (!File.Exists(scriptPath))
+            return;
 
         Console.WriteLine($"{name}: running after-install script");
 
         Directory.CreateDirectory(Path.Combine(installRoot, "shims"));
 
-        using var lua = new Lua();
+        var scriptSource = await File.ReadAllTextAsync(scriptPath);
 
-        var bindings = new LuaBindings(lua);
-        lua.RegisterFunction("http_get", bindings, typeof(LuaBindings).GetMethod(nameof(LuaBindings.HttpGet)));
-        lua.RegisterFunction("json_decode", bindings, typeof(LuaBindings).GetMethod(nameof(LuaBindings.JsonDecode)));
-        lua.RegisterFunction("regex_match", bindings, typeof(LuaBindings).GetMethod(nameof(LuaBindings.RegexMatch)));
-        lua.RegisterFunction("create_directory", bindings, typeof(LuaBindings).GetMethod(nameof(LuaBindings.CreateDirectory)));
+        var engine = ScriptEngine.Create($"after_install/{name}");
+        engine.SetValue("pkgJSON", pkg.ToJsonString());
+        engine.SetValue("configJSON", ScriptConverters.LoadConfigJson());
+        engine.SetValue("os", os);
+        engine.SetValue("arch", arch);
+        engine.SetValue("installDir", installFull);
+        engine.SetValue("installRoot", installRoot);
 
-        lua.DoString("pkg = " + LuaConverters.JsonObjectToLua(pkg));
-        lua.DoString("config = " + LuaConverters.LoadConfigLua());
-        lua["os"] = os;
-        lua["arch"] = arch;
-        lua["install_dir"] = installFull;
-        lua["install_root"] = installRoot;
-
-        var scriptSource = File.ReadAllText(scriptPath);
-        lua.DoString(scriptSource);
+        engine.Execute(scriptSource);
+        await ScriptEngine.InvokeAsync(engine, "afterInstall");
     }
 
     /// <summary>
-    /// 运行卸载后 Lua 脚本 / Run the after-uninstall Lua script.
+    /// 在升级完成后运行 JS 钩子 / Run the after-upgrade JS hook.
     /// </summary>
     /// <param name="name">包名称 / Package name.</param>
     /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
     /// <param name="installRoot">安装根目录 / Installation root directory.</param>
     /// <param name="installFull">完整安装目录 / Full installation directory.</param>
-    public static void RunAfterUninstallScript(string name, JsonObject pkg, string installRoot, string installFull)
+    public static async Task RunAfterUpgradeScript(string name, JsonObject pkg, string installRoot, string installFull)
     {
-        if (!pkg.TryGetPropertyValue("script_after_uninstall", out var scriptNode) || scriptNode is not JsonValue scriptVal || scriptVal.GetValueKind() != JsonValueKind.True)
-            return;
-
         var os = Arch.CurrentOs();
         var arch = Arch.CurrentArch();
-        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "after_uninstall", os, arch, $"{name}.lua");
+        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-after_upgrade.js");
+
         if (!File.Exists(scriptPath))
-        {
-            Console.Error.WriteLine($"{name}: after-uninstall script not found at {scriptPath}");
             return;
-        }
+
+        Console.WriteLine($"{name}: running after-upgrade script");
+        Directory.CreateDirectory(Path.Combine(installRoot, "shims"));
+
+        var scriptSource = await File.ReadAllTextAsync(scriptPath);
+        var engine = ScriptEngine.Create($"after_upgrade/{name}");
+        engine.SetValue("pkgJSON", pkg.ToJsonString());
+        engine.SetValue("configJSON", ScriptConverters.LoadConfigJson());
+        engine.SetValue("os", os);
+        engine.SetValue("arch", arch);
+        engine.SetValue("installDir", installFull);
+        engine.SetValue("installRoot", installRoot);
+
+        engine.Execute(scriptSource);
+        await ScriptEngine.InvokeAsync(engine, "afterUpgrade");
+    }
+
+    /// <summary>
+    /// 运行卸载后 JS 脚本 / Run the after-uninstall JavaScript script.
+    /// </summary>
+    /// <param name="name">包名称 / Package name.</param>
+    /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
+    /// <param name="installRoot">安装根目录 / Installation root directory.</param>
+    /// <param name="installFull">完整安装目录 / Full installation directory.</param>
+    public static async Task RunAfterUninstallScript(string name, JsonObject pkg, string installRoot, string installFull)
+    {
+        var os = Arch.CurrentOs();
+        var arch = Arch.CurrentArch();
+        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-after_uninstall.js");
+        if (!File.Exists(scriptPath))
+            return;
 
         Console.WriteLine($"{name}: running after-uninstall script");
 
-        using var lua = new Lua();
+        var scriptSource = await File.ReadAllTextAsync(scriptPath);
 
-        var bindings = new LuaBindings(lua);
-        lua.RegisterFunction("http_get", bindings, typeof(LuaBindings).GetMethod(nameof(LuaBindings.HttpGet)));
-        lua.RegisterFunction("json_decode", bindings, typeof(LuaBindings).GetMethod(nameof(LuaBindings.JsonDecode)));
-        lua.RegisterFunction("regex_match", bindings, typeof(LuaBindings).GetMethod(nameof(LuaBindings.RegexMatch)));
-        lua.RegisterFunction("remove_file", bindings, typeof(LuaBindings).GetMethod(nameof(LuaBindings.RemoveFile)));
+        var engine = ScriptEngine.Create($"after_uninstall/{name}");
+        engine.SetValue("pkgJSON", pkg.ToJsonString());
+        engine.SetValue("configJSON", ScriptConverters.LoadConfigJson());
+        engine.SetValue("os", os);
+        engine.SetValue("arch", arch);
+        engine.SetValue("installDir", installFull);
+        engine.SetValue("installRoot", installRoot);
 
-        lua.DoString("pkg = " + LuaConverters.JsonObjectToLua(pkg));
-        lua.DoString("config = " + LuaConverters.LoadConfigLua());
-        lua["os"] = os;
-        lua["arch"] = arch;
-        lua["install_dir"] = installFull;
-        lua["install_root"] = installRoot;
+        engine.Execute(scriptSource);
+        await ScriptEngine.InvokeAsync(engine, "afterUninstall");
+    }
 
-        var scriptSource = File.ReadAllText(scriptPath);
-        lua.DoString(scriptSource);
+    /// <summary>
+    /// 在卸载前运行 JS 钩子 / Run the before-uninstall JS hook.
+    /// </summary>
+    /// <param name="name">包名称 / Package name.</param>
+    /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
+    /// <param name="installRoot">安装根目录 / Installation root directory.</param>
+    /// <param name="installFull">完整安装目录 / Full installation directory.</param>
+    public static async Task RunBeforeUninstallScript(string name, JsonObject pkg, string installRoot, string installFull)
+    {
+        var os = Arch.CurrentOs();
+        var arch = Arch.CurrentArch();
+        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-before_uninstall.js");
+
+        if (!File.Exists(scriptPath))
+            return;
+
+        Console.WriteLine($"{name}: running before-uninstall script");
+
+        var scriptSource = await File.ReadAllTextAsync(scriptPath);
+        var engine = ScriptEngine.Create($"before_uninstall/{name}");
+        engine.SetValue("pkgJSON", pkg.ToJsonString());
+        engine.SetValue("configJSON", ScriptConverters.LoadConfigJson());
+        engine.SetValue("os", os);
+        engine.SetValue("arch", arch);
+        engine.SetValue("installDir", installFull);
+        engine.SetValue("installRoot", installRoot);
+
+        engine.Execute(scriptSource);
+        await ScriptEngine.InvokeAsync(engine, "beforeUninstall");
     }
 }

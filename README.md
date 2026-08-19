@@ -10,10 +10,11 @@ A portable CLI package manager that downloads, verifies, and manages command-lin
 ## Features
 
 - 🚀 Install/uninstall/upgrade CLI tools with a single command
-- 🔍 Lua script-based extensible version resolution
+- 🔍 JavaScript-script-based extensible version resolution
 - ✅ SHA-256/SHA-1/SHA-512/MD5 digest verification
 - 🔗 Automatic shim/symlink creation
 - 🌐 Multi-platform: Windows, Linux, macOS
+- 🪝 Pre/post-install, pre/post-upgrade, pre/post-uninstall JS hooks
 - 🏗️ Native AOT compilation support
 
 ## Quick Start
@@ -142,9 +143,9 @@ Package definitions. Use `sjtf packages update` to download the latest version f
 | `uninstall_program` | Uninstaller program file name (relative to install directory) |
 | `uninstall_params` | Uninstaller arguments, supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders |
 
-#### Post-install / post-uninstall scripts
+#### Pre/post-install, pre/post-upgrade, pre/post-uninstall scripts
 
-Set `script_after_install: true` or `script_after_uninstall: true` to run Lua scripts after installation or uninstallation. See [SCRIPTS.md](SCRIPTS.md) for details.
+Drop JavaScript hooks in `scripts/hooks/{name}-{os}-{arch}-before_install.js` (or `-after_install.js` / `-before_upgrade.js` / `-after_upgrade.js` / `-before_uninstall.js` / `-after_uninstall.js`) and they will run automatically. The six hook kinds are independent — each fires only on its own operation, and is silently skipped when its file is missing. See [SCRIPTS.md](SCRIPTS.md) for details.
 
 ### `installed.json`
 
@@ -185,13 +186,17 @@ JSON array of package names for the `favorites` command.
 
 See [GITHUB_PKG.md](GITHUB_PKG.md) for a complete guide on writing `fetch_source: "github"` packages, including `pkgs.json` field reference, asset regex patterns, shim configuration, and the full install workflow.
 
-## Extending with Lua Scripts
+## Extending with JavaScript Scripts
 
-`sjtf` supports custom fetch sources and post-install/uninstall scripts via Lua.
+`sjtf` supports custom fetch sources and post-install/uninstall hooks via JavaScript.
 
-- **Fetch sources**: `scripts/{fetch_source}_fetch_latest.lua`
-- **Post-install scripts**: `scripts/after_install/{os}/{arch}/{name}.lua`
-- **Post-uninstall scripts**: `scripts/after_uninstall/{os}/{arch}/{name}.lua`
+- **Fetch sources**: `scripts/fetch/{fetch_source}_fetch_latest.js`
+- **Before-install hooks**: `scripts/hooks/{name}-{os}-{arch}-before_install.js`
+- **After-install hooks**: `scripts/hooks/{name}-{os}-{arch}-after_install.js`
+- **Before-upgrade hooks**: `scripts/hooks/{name}-{os}-{arch}-before_upgrade.js`
+- **After-upgrade hooks**: `scripts/hooks/{name}-{os}-{arch}-after_upgrade.js`
+- **Before-uninstall hooks**: `scripts/hooks/{name}-{os}-{arch}-before_uninstall.js`
+- **After-uninstall hooks**: `scripts/hooks/{name}-{os}-{arch}-after_uninstall.js`
 
 See [SCRIPTS.md](SCRIPTS.md) for detailed documentation.
 

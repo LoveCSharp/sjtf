@@ -72,8 +72,10 @@ internal static class Packages
 
         if (!archObj.TryGetPropertyValue(os, out var osNode) || osNode is not JsonObject osObj)
             throw new InvalidOperationException($"no entry for os={os}");
-        if (!osObj.TryGetPropertyValue(arch, out var reNode) || reNode is not JsonValue reVal || reVal.GetValueKind() != JsonValueKind.String)
+        if (!osObj.TryGetPropertyValue(arch, out var reNode) || reNode is not JsonObject reObj)
             throw new InvalidOperationException($"no entry for arch={arch}");
-        return reVal.GetValue<string>();
+        if (!reObj.TryGetPropertyValue("file", out var fileNode) || fileNode is not JsonValue fileVal || fileVal.GetValueKind() != JsonValueKind.String)
+            throw new InvalidOperationException($"no \"file\" entry for arch={arch}");
+        return fileVal.GetValue<string>();
     }
 }

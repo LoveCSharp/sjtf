@@ -9,9 +9,9 @@ This document provides a detailed guide on creating an sjtf package definition t
 A GitHub-based package requires two parts:
 
 1. **Package definition in `pkgs.json`**: Describes the package's basic info, asset matching rules, install directory, and shim configuration
-2. **`fetch_source` set to `github`**: Uses the built-in `scripts/github_fetch_latest.lua` to automatically fetch the latest version from GitHub Releases API
+2. **`fetch_source` set to `github`**: Uses the built-in `scripts/fetch/github_fetch_latest.js` to automatically fetch the latest version from GitHub Releases API
 
-`sjtf` has built-in support for GitHub Releases API, so no custom Lua scripts are needed.
+`sjtf` has built-in support for GitHub Releases API, so no custom JavaScript scripts are needed.
 
 ## Complete Example
 
@@ -85,9 +85,9 @@ Structure: `fetch_asset.arch[os][arch] = regex_pattern`:
 |-------|--------|-------------|
 | `os` | `windows` / `linux` / `macos` | Operating system |
 | `arch` | `x86_64` / `aarch64` / `arm` | Architecture |
-| value | Lua regex string | Matches asset file names |
+| value | JavaScript regex string | Matches asset file names |
 
-Regular expressions use Lua (PCRE-style) syntax to match the `name` field of each asset in the release. The first matching asset is used.
+Regular expressions use JavaScript `RegExp` syntax to match the `name` field of each asset in the release. The first matching asset is used.
 
 #### `fetch_asset.type` (required)
 
@@ -177,7 +177,7 @@ Specifies the version fetch source. For GitHub Releases, use the built-in `githu
 "fetch_source": "github"
 ```
 
-Corresponding script: `scripts/github_fetch_latest.lua`
+Corresponding script: `scripts/fetch/github_fetch_latest.js`
 
 This script:
 1. Calls `https://api.github.com/repos/{repo}/releases/latest`
@@ -186,27 +186,20 @@ This script:
 4. Extracts `browser_download_url` as the download URL
 5. Extracts `digest` for verification (GitHub API digest format: `sha256:abc123...`)
 
-### `script_after_install` (optional)
+### Post-install / post-uninstall hooks
 
-Set to `true` to execute `scripts/after_install/{os}/{arch}/{name}.lua` after installation.
+Hooks are **auto-detected** by path. Drop a JavaScript file at the expected location and `sjtf` will run it; no `pkgs.json` field is required.
 
-```json
-"script_after_install": true
-```
+- After-install: `scripts/hooks/{name}-{os}-{arch}-after_install.js`
+- After-uninstall: `scripts/hooks/{name}-{os}-{arch}-after_uninstall.js`
 
-### `script_after_uninstall` (optional)
-
-Set to `true` to execute `scripts/after_uninstall/{os}/{arch}/{name}.lua` after uninstallation.
-
-```json
-"script_after_uninstall": true
-```
+See [SCRIPTS.md](SCRIPTS.md) for the full hook authoring guide.
 
 ## Workflow
 
 When a user runs `sjtf install fnm`:
 
-1. **Version fetch**: Executes `scripts/github_fetch_latest.lua`
+1. **Version fetch**: Executes `scripts/fetch/github_fetch_latest.js`
    - Calls GitHub API for the latest Release
    - Matches asset regex, extracts download URL and version
    - Returns `DownloadPlan{Version, DownloadUrl, DigestAlgorithm, ExpectedDigest}`
@@ -225,7 +218,7 @@ When a user runs `sjtf install fnm`:
 
 5. **Create shims**: Creates symlinks or shell scripts based on `shim[os]`
 
-6. **After-install script** (optional): Executes `after_install` Lua script
+6. **After-install hook** (auto-detected): Executes `scripts/hooks/{name}-{os}-{arch}-after_install.js` if present
 
 ## Regex Examples
 
@@ -256,7 +249,7 @@ proxy = "https://gh-proxy.com"       # Optional proxy
 - `token_classic`: GitHub classic personal access token, must start with `ghp_`
 - `proxy`: Proxy URL, replaces the domain in GitHub API requests (`github.com` -> `gh-proxy.com`)
 
-Auth headers and proxy are handled automatically by `scripts/github_fetch_latest.lua`.
+Auth headers and proxy are handled automatically by `scripts/fetch/github_fetch_latest.js`.
 
 ## Debugging
 
@@ -269,5 +262,5 @@ If package installation fails, check the error message:
 
 ## Related Documentation
 
-- [SCRIPTS.md](SCRIPTS.md) — Lua Scripting Guide (fetch sources, after-install, after-uninstall scripts)
+- [SCRIPTS.md](SCRIPTS.md) — Scripting Guide (fetch sources, after-install, after-uninstall hooks)
 - [README.md](README.md) — Project homepage

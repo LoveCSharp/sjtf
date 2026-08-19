@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLua" Version="1.7.9" />
+    <PackageReference Include="Jint" Version="4.16.0" />
     <PackageReference Include="SharpCompress" Version="0.50.4" />
     <PackageReference Include="Spectre.Console" Version="0.57.2" />
     <PackageReference Include="System.CommandLine" Version="2.0.10" />

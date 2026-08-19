@@ -10,10 +10,11 @@
 ## 功能特性
 
 - 🚀 一键安装/卸载/升级命令行工具
-- 🔍 基于 Lua 脚本的可扩展版本获取
+- 🔍 基于 JavaScript 脚本的可扩展版本获取
 - ✅ SHA-256/SHA-1/SHA-512/MD5 摘要校验
 - 🔗 自动创建 shim（符号链接 / shell 脚本）
 - 🌐 跨平台：Windows、Linux、macOS
+- 🪝 安装/升级前后、卸载前后共六种 JS 钩子
 - 🏗️ 支持 Native AOT 编译
 
 ## 快速开始
@@ -142,9 +143,9 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 | `uninstall_program` | 卸载程序文件名（相对于安装目录） |
 | `uninstall_params` | 卸载程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符 |
 
-#### 安装后 / 卸载后脚本
+#### 安装前/后、升级前/后、卸载前/后脚本
 
-设置 `script_after_install: true` 或 `script_after_uninstall: true` 可在安装或卸载完成后执行 Lua 脚本。详见 [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md)。
+将 JavaScript 钩子放到 `scripts/hooks/{name}-{os}-{arch}-before_install.js`（或 `-after_install.js` / `-before_upgrade.js` / `-after_upgrade.js` / `-before_uninstall.js` / `-after_uninstall.js`）即可自动执行。六种钩子彼此独立——各自仅在对应操作时触发，文件缺失时静默跳过。详见 [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md)。
 
 ### `installed.json`
 
@@ -185,13 +186,17 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 
 详见 [GITHUB_PKG.zh_cn.md](GITHUB_PKG.zh_cn.md)，了解如何编写 `fetch_source: "github"` 的包，包括 `pkgs.json` 字段说明、资产正则匹配、shim 配置以及完整安装流程。
 
-## 使用 Lua 脚本扩展
+## 使用 JavaScript 脚本扩展
 
-`sjtf` 支持通过 Lua 脚本自定义获取源和安装/卸载后处理。
+`sjtf` 支持通过 JavaScript 脚本自定义获取源和安装/卸载后处理。
 
-- **获取源脚本**：`scripts/{fetch_source}_fetch_latest.lua`
-- **安装后脚本**：`scripts/after_install/{os}/{arch}/{name}.lua`
-- **卸载后脚本**：`scripts/after_uninstall/{os}/{arch}/{name}.lua`
+- **获取源脚本**：`scripts/fetch/{fetch_source}_fetch_latest.js`
+- **安装前钩子**：`scripts/hooks/{name}-{os}-{arch}-before_install.js`
+- **安装后钩子**：`scripts/hooks/{name}-{os}-{arch}-after_install.js`
+- **升级前钩子**：`scripts/hooks/{name}-{os}-{arch}-before_upgrade.js`
+- **升级后钩子**：`scripts/hooks/{name}-{os}-{arch}-after_upgrade.js`
+- **卸载前钩子**：`scripts/hooks/{name}-{os}-{arch}-before_uninstall.js`
+- **卸载后钩子**：`scripts/hooks/{name}-{os}-{arch}-after_uninstall.js`
 
 详见 [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md)。
 

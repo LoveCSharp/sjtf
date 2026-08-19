@@ -427,9 +427,10 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
 
         var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan);
 
+        await InstallHelpers.RunBeforeInstallScript(name, pkg, installRoot, installFull);
         InstallHelpers.PlaceAsset(name, pkg, dlPath, installRoot, installFull);
-        InstallHelpers.CreateSymlinks(name, pkg, installRoot, installFull);
-        InstallHelpers.RunAfterInstallScript(name, pkg, installRoot, installFull);
+        InstallHelpers.CreateShims(name, pkg, installRoot, installFull);
+        await InstallHelpers.RunAfterInstallScript(name, pkg, installRoot, installFull);
 
         installed[name] = plan.Version;
         Installed.Save(installed);
@@ -460,14 +461,26 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
     var installFull = Path.Combine(installRoot, installDirRel);
     var os = Arch.CurrentOs();
 
+    // before_uninstall 钩子（删除前执行，给脚本机会关闭进程/备份数据）
+    await InstallHelpers.RunBeforeUninstallScript(name, pkg, installRoot, installFull);
+
     // Get package type and fetch_asset / 获取包类型和 fetch_asset
     var pkgType = "portable-compressed-archive";
-    JsonObject? fetch = null;
-    if (pkg.TryGetPropertyValue("fetch_asset", out var fetchNode) && fetchNode is JsonObject fetchObj)
+    JsonObject? archEntry = null;
+    if (pkg.TryGetPropertyValue("fetch_asset", out var fetchNode) && fetchNode is JsonObject fetch)
     {
-        fetch = fetchObj;
-        if (fetch.TryGetPropertyValue("type", out var typeNode) && typeNode is JsonValue typeVal && typeVal.GetValueKind() == JsonValueKind.String)
-            pkgType = typeVal.GetValue<string>();
+        if (fetch.TryGetPropertyValue("arch", out var archNode) && archNode is JsonObject archObj)
+        {
+            var currentOs = Arch.CurrentOs();
+            var currentArch = Arch.CurrentArch();
+            if (archObj.TryGetPropertyValue(currentOs, out var osNode) && osNode is JsonObject osObj
+                && osObj.TryGetPropertyValue(currentArch, out var archNodeEntry) && archNodeEntry is JsonObject archEntryObj)
+            {
+                archEntry = archEntryObj;
+                if (archEntryObj.TryGetPropertyValue("type", out var typeNode) && typeNode is JsonValue typeVal && typeVal.GetValueKind() == JsonValueKind.String)
+                    pkgType = typeVal.GetValue<string>();
+            }
+        }
     }
 
     // Delete shims first / 先删除 shim 符号链接
@@ -526,11 +539,11 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
     {
         // For installer type, run uninstall program / 对于安装程序类型，运行卸载程序
         var uninstallProgram = "";
-        if (fetch != null && fetch.TryGetPropertyValue("uninstall_program", out var upNode) && upNode is JsonValue upVal && upVal.GetValueKind() == JsonValueKind.String)
+        if (archEntry != null && archEntry.TryGetPropertyValue("uninstall_program", out var upNode) && upNode is JsonValue upVal && upVal.GetValueKind() == JsonValueKind.String)
             uninstallProgram = upVal.GetValue<string>();
 
         var uninstallParams = "";
-        if (fetch != null && fetch.TryGetPropertyValue("uninstall_params", out var paramsNode) && paramsNode is JsonValue paramsVal && paramsVal.GetValueKind() == JsonValueKind.String)
+        if (archEntry != null && archEntry.TryGetPropertyValue("uninstall_params", out var paramsNode) && paramsNode is JsonValue paramsVal && paramsVal.GetValueKind() == JsonValueKind.String)
             uninstallParams = paramsVal.GetValue<string>();
 
         if (!string.IsNullOrEmpty(uninstallParams))
@@ -570,7 +583,7 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
         }
     }
 
-    InstallHelpers.RunAfterUninstallScript(name, pkg, installRoot, installFull);
+    await InstallHelpers.RunAfterUninstallScript(name, pkg, installRoot, installFull);
 
     // Remove from installed.json / 从 installed.json 中移除
     installed.Remove(name);
@@ -628,9 +641,10 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
 
         var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan);
 
+        await InstallHelpers.RunBeforeUpgradeScript(name, pkg, installRoot, installFull);
         InstallHelpers.PlaceAsset(name, pkg, dlPath, installRoot, installFull);
-        InstallHelpers.CreateSymlinks(name, pkg, installRoot, installFull);
-        InstallHelpers.RunAfterInstallScript(name, pkg, installRoot, installFull);
+        InstallHelpers.CreateShims(name, pkg, installRoot, installFull);
+        await InstallHelpers.RunAfterUpgradeScript(name, pkg, installRoot, installFull);
 
         installed[name] = plan.Version;
         Installed.Save(installed);
