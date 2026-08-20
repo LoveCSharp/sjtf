@@ -352,9 +352,14 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
             var entries = new List<(string Name, string Version, string Description)>();
             foreach (var prop in doc.RootElement.EnumerateObject())
             {
-                var version = prop.Value.ValueKind == JsonValueKind.String
-                    ? prop.Value.GetString() ?? ""
-                    : prop.Value.GetRawText();
+                var version = prop.Value.ValueKind switch
+                {
+                    JsonValueKind.String => prop.Value.GetString() ?? "",
+                    JsonValueKind.Object => prop.Value.TryGetProperty("version", out var verNode) && verNode.ValueKind == JsonValueKind.String
+                        ? verNode.GetString() ?? ""
+                        : "",
+                    _ => prop.Value.GetRawText()
+                };
                 descriptions.TryGetValue(prop.Name, out var description);
                 entries.Add((prop.Name, version, description ?? ""));
             }
@@ -419,8 +424,20 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
         var installRoot = Config.LoadInstallDir();
         var installFull = Path.Combine(installRoot, installDirRel);
         Directory.CreateDirectory(installFull);
-        if (skipIfUptodate && installed.TryGetValue(name, out var currentVer) && currentVer == plan.Version)
+        if (skipIfUptodate && installed.TryGetValue(name, out var currentInfo) && currentInfo.Version == plan.Version)
         {
+            // 即使跳过也用新 plan 更新 type / uninstall 字段（迁移场景）
+            var needsUpdate = currentInfo.Type != plan.Type
+                || (plan.Type == "installer"
+                    && (currentInfo.UninstallProgram != plan.UninstallProgram
+                        || currentInfo.UninstallParams != plan.UninstallParams));
+            if (needsUpdate)
+            {
+                installed[name] = plan.Type == "installer"
+                    ? new InstalledInfo(currentInfo.Version, plan.Type, plan.UninstallProgram, plan.UninstallParams)
+                    : new InstalledInfo(currentInfo.Version, plan.Type);
+                Installed.Save(installed);
+            }
             Console.WriteLine($"{name}: {plan.Version} is already installed, skipping");
             return;
         }
@@ -428,11 +445,13 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
         var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan);
 
         await InstallHelpers.RunBeforeInstallScript(name, pkg, installRoot, installFull);
-        InstallHelpers.PlaceAsset(name, pkg, dlPath, installRoot, installFull);
+        InstallHelpers.PlaceAsset(name, pkg, plan, dlPath, installRoot, installFull);
         InstallHelpers.CreateShims(name, pkg, installRoot, installFull);
         await InstallHelpers.RunAfterInstallScript(name, pkg, installRoot, installFull);
 
-        installed[name] = plan.Version;
+        installed[name] = plan.Type == "installer"
+            ? new InstalledInfo(plan.Version, plan.Type, plan.UninstallProgram, plan.UninstallParams)
+            : new InstalledInfo(plan.Version, plan.Type);
         Installed.Save(installed);
         Console.WriteLine($"{name}: installed {plan.Version}");
     }
@@ -464,24 +483,17 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
     // before_uninstall 钩子（删除前执行，给脚本机会关闭进程/备份数据）
     await InstallHelpers.RunBeforeUninstallScript(name, pkg, installRoot, installFull);
 
-    // Get package type and fetch_asset / 获取包类型和 fetch_asset
-    var pkgType = "portable-compressed-archive";
-    JsonObject? archEntry = null;
-    if (pkg.TryGetPropertyValue("fetch_asset", out var fetchNode) && fetchNode is JsonObject fetch)
-    {
-        if (fetch.TryGetPropertyValue("arch", out var archNode) && archNode is JsonObject archObj)
-        {
-            var currentOs = Arch.CurrentOs();
-            var currentArch = Arch.CurrentArch();
-            if (archObj.TryGetPropertyValue(currentOs, out var osNode) && osNode is JsonObject osObj
-                && osObj.TryGetPropertyValue(currentArch, out var archNodeEntry) && archNodeEntry is JsonObject archEntryObj)
-            {
-                archEntry = archEntryObj;
-                if (archEntryObj.TryGetPropertyValue("type", out var typeNode) && typeNode is JsonValue typeVal && typeVal.GetValueKind() == JsonValueKind.String)
-                    pkgType = typeVal.GetValue<string>();
-            }
-        }
-    }
+    // 包类型从 installed.json 读取（严格模式：缺失时直接报错）
+    // Package type comes from installed.json (strict: error when missing).
+    if (!installed.TryGetValue(name, out var installedInfo))
+        throw new InvalidOperationException($"{name}: not in installed.json");
+
+    if (string.IsNullOrEmpty(installedInfo.Type))
+        throw new InvalidOperationException(
+            $"{name}: installed.json has no recorded type (likely installed before type tracking was added). " +
+            $"Run 'sjtf install {name}' to refresh the record, then retry.");
+
+    var pkgType = installedInfo.Type;
 
     // Delete shims first / 先删除 shim 符号链接
     if (pkg.TryGetPropertyValue("shim", out var shimNode) && shimNode is JsonObject shimObj)
@@ -537,40 +549,40 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
 
     if (pkgType == "installer")
     {
-        // For installer type, run uninstall program / 对于安装程序类型，运行卸载程序
-        var uninstallProgram = "";
-        if (archEntry != null && archEntry.TryGetPropertyValue("uninstall_program", out var upNode) && upNode is JsonValue upVal && upVal.GetValueKind() == JsonValueKind.String)
-            uninstallProgram = upVal.GetValue<string>();
+        // uninstall_program 必须从 installed.json 读取（不再 fallback 到 pkgs.json）。
+        // 值由 JS 在 fetch 时替换 {PKG_INSTALL_DIR} 占位符；pkgs.json 作者应显式指定占位符。
+        // 程序不再自动将相对路径前缀 installFull —— 按原值直接调用。
+        // uninstall_program is read from installed.json (no fallback to pkgs.json).
+        // {PKG_INSTALL_DIR} is substituted by JS at fetch time; pkgs.json authors must
+        // explicitly use the placeholder. No auto-prefixing of relative paths.
+        var uninstallProgram = installedInfo.UninstallProgram;
+        var uninstallParams = installedInfo.UninstallParams;
 
-        var uninstallParams = "";
-        if (archEntry != null && archEntry.TryGetPropertyValue("uninstall_params", out var paramsNode) && paramsNode is JsonValue paramsVal && paramsVal.GetValueKind() == JsonValueKind.String)
-            uninstallParams = paramsVal.GetValue<string>();
+        if (string.IsNullOrEmpty(uninstallProgram))
+            throw new InvalidOperationException(
+                $"{name}: installed.json has no recorded uninstall_program " +
+                $"(likely installed before uninstall fields were persisted). " +
+                $"Run 'sjtf install {name}' to refresh the record, then retry.");
 
-        if (!string.IsNullOrEmpty(uninstallParams))
+        uninstallParams = uninstallParams
+            .Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase)
+            .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
+
+        if (File.Exists(uninstallProgram))
         {
-            uninstallParams = uninstallParams.Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase)
-                                            .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
+            Console.WriteLine($"{name}: running uninstaller {uninstallProgram} {uninstallParams}");
+            var psi = new System.Diagnostics.ProcessStartInfo(uninstallProgram, uninstallParams)
+            {
+                UseShellExecute = false
+            };
+            var proc = System.Diagnostics.Process.Start(psi);
+            proc?.WaitForExit();
+            if (proc?.ExitCode != 0)
+                Console.Error.WriteLine($"{name}: uninstaller exited with code {proc?.ExitCode}");
         }
-
-        if (!string.IsNullOrEmpty(uninstallProgram))
+        else
         {
-            var uninstallExe = Path.Combine(installFull, uninstallProgram);
-            if (File.Exists(uninstallExe))
-            {
-                Console.WriteLine($"{name}: running uninstaller {uninstallExe} {uninstallParams}");
-                var psi = new System.Diagnostics.ProcessStartInfo(uninstallExe, uninstallParams)
-                {
-                    UseShellExecute = false
-                };
-                var proc = System.Diagnostics.Process.Start(psi);
-                proc?.WaitForExit();
-                if (proc?.ExitCode != 0)
-                    Console.Error.WriteLine($"{name}: uninstaller exited with code {proc?.ExitCode}");
-            }
-            else
-            {
-                Console.Error.WriteLine($"{name}: uninstaller not found at {uninstallExe}");
-            }
+            Console.Error.WriteLine($"{name}: uninstaller not found at {uninstallProgram}");
         }
     }
     else
@@ -626,13 +638,13 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
             return;
         }
 
-        if (installed[name] == plan.Version)
+        if (installed[name].Version == plan.Version)
         {
             Console.WriteLine($"{name}: {plan.Version} is already the latest version");
             return;
         }
 
-        Console.WriteLine($"{name}: upgrading from {installed[name]} to {plan.Version}");
+        Console.WriteLine($"{name}: upgrading from {installed[name].Version} to {plan.Version}");
 
         var installDirRel = InstallHelpers.ReadRequiredString(pkg, "pkg_install_relative_dir", name);
         var installRoot = Config.LoadInstallDir();
@@ -642,11 +654,13 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
         var dlPath = await InstallHelpers.DownloadAndVerifyAsync(name, plan);
 
         await InstallHelpers.RunBeforeUpgradeScript(name, pkg, installRoot, installFull);
-        InstallHelpers.PlaceAsset(name, pkg, dlPath, installRoot, installFull);
+        InstallHelpers.PlaceAsset(name, pkg, plan, dlPath, installRoot, installFull);
         InstallHelpers.CreateShims(name, pkg, installRoot, installFull);
         await InstallHelpers.RunAfterUpgradeScript(name, pkg, installRoot, installFull);
 
-        installed[name] = plan.Version;
+        installed[name] = plan.Type == "installer"
+            ? new InstalledInfo(plan.Version, plan.Type, plan.UninstallProgram, plan.UninstallParams)
+            : new InstalledInfo(plan.Version, plan.Type);
         Installed.Save(installed);
         Console.WriteLine($"{name}: upgraded to {plan.Version}");
     }
