@@ -242,26 +242,41 @@ internal static class HttpFileDownloader
     }
 
     /// <summary>
+    /// 通过 HTTP HEAD（实际用 GET + ResponseHeadersRead 避免部分服务器不支持 HEAD）探测 URL，
+    /// 从 <c>Content-Disposition</c> 头提取建议的下载文件名。
+    /// 仅返回头部中的文件名（不含扩展名或不含路径），失败返回 <c>null</c>。
+    ///
+    /// Peek the URL via GET with <c>HttpCompletionOption.ResponseHeadersRead</c>
+    /// (HEAD is unreliable; some servers return 405) and extract the suggested
+    /// filename from the <c>Content-Disposition</c> header. Returns null on
+    /// failure or when the header is absent.
+    /// </summary>
+    /// <param name="url">要探测的 URL / URL to peek.</param>
+    /// <returns>建议的文件名（含扩展名）或 null / Suggested filename or null.</returns>
+    public static string? PeekFilename(string url)
+    {
+        try
+        {
+            using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+            http.DefaultRequestHeaders.UserAgent.ParseAdd(Config.LoadUserAgent());
+            using var req = new HttpRequestMessage(HttpMethod.Get, url);
+            using var resp = http.Send(req, HttpCompletionOption.ResponseHeadersRead);
+            if (!resp.IsSuccessStatusCode) return null;
+            return ExtractFilenameFromContentDisposition(resp);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// 推导落地路径：Content-Disposition 文件名 → URL 扩展名 → baseName。
     /// Resolve the on-disk path from Content-Disposition filename, then URL extension, then baseName.
     /// </summary>
     private static string ResolveDestFile(string url, string destDir, string baseName)
     {
-        string? filename = null;
-        try
-        {
-            using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
-            http.DefaultRequestHeaders.UserAgent.ParseAdd(Config.LoadUserAgent());
-            using var headReq = new HttpRequestMessage(HttpMethod.Head, url);
-            using var headResp = http.Send(headReq);
-            if (headResp.IsSuccessStatusCode)
-            {
-                filename = ExtractFilenameFromContentDisposition(headResp);
-            }
-        }
-        catch
-        {
-        }
+        var filename = PeekFilename(url);
 
         if (string.IsNullOrEmpty(filename))
         {

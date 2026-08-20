@@ -35,7 +35,16 @@ internal static class InstallHelpers
         var splitCount = Config.LoadSplit();
         var minSplitMB = Config.LoadMinSplitSize();
 
-        var ext = ExtractExtensionFromUrl(plan.DownloadUrl);
+        // 先用 HTTP 探测 Content-Disposition 头拿到建议文件名，再用其扩展名；
+        // 探测失败或无扩展名时 fallback 到 URL 扩展名。
+        // Peek Content-Disposition header to get the suggested filename; fall back
+        // to URL extension if the header is absent or has no extension.
+        var suggestedName = HttpFileDownloader.PeekFilename(plan.DownloadUrl);
+        var ext = "";
+        if (!string.IsNullOrEmpty(suggestedName))
+            ext = ExtractExtensionFromFilename(suggestedName);
+        if (string.IsNullOrEmpty(ext))
+            ext = ExtractExtensionFromUrl(plan.DownloadUrl);
         var dlName = $"{name}-{Arch.CurrentOs()}-{Arch.CurrentArch()}-{plan.Version}{ext}";
         var dlPath = Path.Combine(Paths.CacheDir(), dlName);
 
@@ -73,6 +82,47 @@ internal static class InstallHelpers
     }
 
     /// <summary>
+    /// 从文件名（含路径或仅 basename）中提取扩展名。
+    /// 处理 `.tar.gz` / `.tar.bz2` / `.tar.xz` / `.tar.zst` / `.tar.lz` / `.tar.lzma`
+    /// 等 tar 复合扩展名（返回 `.tar.<ext>` 而非仅 `<ext>`）。
+    /// 同时兼容大小写（`.tar.GZ` / `.tar.Bz2` 等）。
+    ///
+    /// Extract extension from a filename (with or without path).
+    /// Recognises compound tar extensions such as `.tar.gz`, `.tar.bz2`, `.tar.xz`,
+    /// `.tar.zst`, `.tar.lz`, `.tar.lzma` and similar (returns `.tar.<ext>` rather
+    /// than just `<ext>`). Case-insensitive matching.
+    /// </summary>
+    public static string ExtractExtensionFromFilename(string filename)
+    {
+        if (string.IsNullOrEmpty(filename)) return "";
+
+        var qs = filename.IndexOf('?');
+        if (qs >= 0) filename = filename[..qs];
+        var hash = filename.IndexOf('#');
+        if (hash >= 0) filename = filename[..hash];
+
+        var dot = filename.LastIndexOf('.');
+        if (dot <= 0 || dot >= filename.Length - 1) return "";
+
+        var ext = filename[dot..];
+
+        var knownTarCompression = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ".gz", ".bz2", ".xz", ".zst", ".lz", ".lzma",
+            ".br", ".z", ".lzo", ".lrz", ".sz", ".lz4"
+        };
+
+        if (knownTarCompression.Contains(ext) && dot >= 4)
+        {
+            var prefix = filename[(dot - 4)..dot];
+            if (prefix.Equals(".tar", StringComparison.OrdinalIgnoreCase))
+                return filename[(dot - 4)..];
+        }
+
+        return ext;
+    }
+
+    /// <summary>
     /// 从 URL 的最后路径段中提取文件扩展名（包括前导点）。
     /// 先剥离查询字符串和片段。当 URL 没有扩展名或路径组件时返回空字符串。
     ///
@@ -82,6 +132,8 @@ internal static class InstallHelpers
     /// </summary>
     public static string ExtractExtensionFromUrl(string url)
     {
+        if (string.IsNullOrEmpty(url)) return "";
+
         var qs = url.IndexOf('?');
         if (qs >= 0) url = url[..qs];
         var hash = url.IndexOf('#');
@@ -91,18 +143,7 @@ internal static class InstallHelpers
         if (lastSlash < 0 || lastSlash == url.Length - 1) return "";
         var filename = url[(lastSlash + 1)..];
 
-        var dot = filename.LastIndexOf('.');
-        if (dot <= 0) return "";
-
-        var ext = filename[dot..];
-        if (ext.Equals(".gz", StringComparison.OrdinalIgnoreCase) && dot >= 4)
-        {
-            var prefix = filename[(dot - 4)..dot];
-            if (prefix.Equals(".tar", StringComparison.OrdinalIgnoreCase))
-                return filename[(dot - 4)..];
-        }
-
-        return ext;
+        return ExtractExtensionFromFilename(filename);
     }
 
     /// <summary>
@@ -131,24 +172,12 @@ internal static class InstallHelpers
     /// </summary>
     /// <param name="name">包名称 / Package name.</param>
     /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
+    /// <param name="plan">下载计划（提供 type 和 install_params）/ Download plan (supplies type and install_params).</param>
     /// <param name="dlPath">已下载的文件路径 / Downloaded file path.</param>
     /// <param name="installFull">完整安装目录 / Full installation directory.</param>
-    public static void PlaceAsset(string name, JsonObject pkg, string dlPath, string installRoot, string installFull)
+    public static void PlaceAsset(string name, JsonObject pkg, DownloadPlan plan, string dlPath, string installRoot, string installFull)
     {
-        if (!pkg.TryGetPropertyValue("fetch_asset", out var fetchNode) || fetchNode is not JsonObject fetch)
-            throw new InvalidOperationException($"{name}: fetch_asset missing");
-        if (!fetch.TryGetPropertyValue("arch", out var archNode) || archNode is not JsonObject archObj)
-            throw new InvalidOperationException($"{name}: fetch_asset.arch missing");
-
-        var os = Arch.CurrentOs();
-        var arch = Arch.CurrentArch();
-        if (!archObj.TryGetPropertyValue(os, out var osNode) || osNode is not JsonObject osObj)
-            throw new InvalidOperationException($"{name}: no entry for os={os}");
-        if (!osObj.TryGetPropertyValue(arch, out var archEntry) || archEntry is not JsonObject archEntryObj)
-            throw new InvalidOperationException($"{name}: no entry for arch={arch}");
-        if (!archEntryObj.TryGetPropertyValue("type", out var typeNode) || typeNode is not JsonValue typeVal || typeVal.GetValueKind() != JsonValueKind.String)
-            throw new InvalidOperationException($"{name}: fetch_asset.arch.{os}.{arch}.type missing");
-        var pkgType = typeVal.GetValue<string>();
+        var pkgType = plan.Type;
 
         switch (pkgType)
         {
@@ -161,13 +190,15 @@ internal static class InstallHelpers
                 File.Copy(dlPath, target, overwrite: true);
                 break;
             case "installer":
-                var installParams = "";
-                if (archEntryObj.TryGetPropertyValue("install_params", out var paramsNode) && paramsNode is JsonValue paramsVal && paramsVal.GetValueKind() == JsonValueKind.String)
-                    installParams = paramsVal.GetValue<string>();
+                var installProgram = plan.InstallProgram;
+                if (installProgram == "{DOWNLOADED_CACHE_FILE_FULL_PATH}")
+                    installProgram = dlPath;
+
+                var installParams = plan.InstallParams;
                 installParams = installParams.Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase)
                                             .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
-                Console.WriteLine($"{name}: running installer {dlPath} {installParams}");
-                var psi = new System.Diagnostics.ProcessStartInfo(dlPath, installParams)
+                Console.WriteLine($"{name}: running installer {installProgram} {installParams}");
+                var psi = new System.Diagnostics.ProcessStartInfo(installProgram, installParams)
                 {
                     UseShellExecute = false
                 };
