@@ -328,17 +328,29 @@
             "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
             "type": "portable-compressed-archive"
           }
+        },
+        "linux": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*linux)(?=.*gnu).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\sd",
+    "pkg_install_relative_dir": "cli/sd",
     "shim": {
       "windows": {
         "symlink": {
           "sd.exe": "sd.exe"
         }
+      },
+      "linux": {
+        "symlink": {
+          "sd": "sd"
+        }
       }
     },
+    "file_mode_0755": ["sd"],
     "fetch_source": "github"
   },
   "ripgrep": {

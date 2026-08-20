@@ -244,6 +244,7 @@ internal static class InstallHelpers
                 var targetFull = Path.Combine(installFull, targetRel);
                 Console.WriteLine($"{name}: shim {linkPath} -> {targetFull}");
                 Tools.CreateSymlink(linkPath, targetFull);
+                SetExecutable(linkPath);
             }
         }
 
@@ -260,6 +261,71 @@ internal static class InstallHelpers
                                             .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
                 Console.WriteLine($"{name}: shim {scriptPath}");
                 File.WriteAllText(scriptPath, replaced, new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                SetExecutable(scriptPath);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 在 Linux / macOS 上给指定路径设置 0755 权限 / Set 0755 permissions on the given path on Linux / macOS.
+    /// Windows 上是 no-op（File.SetUnixFileMode 本身在 Windows 上无效，但显式 early-return 更清晰）。
+    /// No-op on Windows (File.SetUnixFileMode is itself a no-op there; the early-return is for clarity).
+    /// </summary>
+    /// <param name="path">目标路径 / Target path.</param>
+    private static void SetExecutable(string path)
+    {
+        if (!OperatingSystem.IsLinux() && !OperatingSystem.IsMacOS())
+            return;
+
+        File.SetUnixFileMode(path,
+            UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
+            UnixFileMode.GroupRead | UnixFileMode.GroupExecute |
+            UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
+    }
+
+    /// <summary>
+    /// 根据 pkg.file_mode_0755 给指定文件设置 0755 权限 / Set 0755 permissions on files listed in pkg.file_mode_0755.
+    /// 仅 Linux / macOS 上执行（Windows 上 SetUnixFileMode 是 no-op，但显式 early-return 避免无意义操作）。
+    /// Only runs on Linux / macOS (Windows is a no-op).
+    /// 路径相对于 installFull（安装目录）。时序：在 PlaceAsset 之后执行。
+    /// Paths are relative to installFull. Called after PlaceAsset.
+    /// </summary>
+    /// <param name="name">包名称 / Package name.</param>
+    /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
+    /// <param name="installFull">完整安装目录 / Full installation directory.</param>
+    public static void ApplyFilePermissions(string name, JsonObject pkg, string installFull)
+    {
+        if (!OperatingSystem.IsLinux() && !OperatingSystem.IsMacOS())
+            return;
+
+        if (!pkg.TryGetPropertyValue("file_mode_0755", out var fmNode) || fmNode is not JsonArray fmArray)
+            return;
+
+        foreach (var item in fmArray)
+        {
+            if (item is not JsonValue val || val.GetValueKind() != JsonValueKind.String)
+                continue;
+            var relPath = val.GetValue<string>();
+            if (string.IsNullOrEmpty(relPath)) continue;
+
+            var fullPath = Path.Combine(installFull, relPath);
+            if (!File.Exists(fullPath))
+            {
+                Console.Error.WriteLine($"{name}: warning: file_mode_0755 path not found: {fullPath}");
+                continue;
+            }
+
+            try
+            {
+                File.SetUnixFileMode(fullPath,
+                    UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
+                    UnixFileMode.GroupRead | UnixFileMode.GroupExecute |
+                    UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
+                Console.WriteLine($"{name}: chmod 0755 {fullPath}");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"{name}: warning: failed to chmod {fullPath}: {ex.Message}");
             }
         }
     }
