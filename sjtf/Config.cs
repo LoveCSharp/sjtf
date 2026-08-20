@@ -101,6 +101,12 @@ public sealed class SjtfAria2
     public const string DefaultUrl = "https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0-win-64bit-build1.zip";
 
     /// <summary>
+    /// aria2 默认下载 URL（Linux x64）。当 [aria2] 段未配置且当前 OS/Arch 匹配 linux_x86_64 时使用。
+    /// Default aria2 download URL (Linux x64). Used when [aria2] is not configured and the current OS/Arch matches linux_x86_64.
+    /// </summary>
+    public const string DefaultUrlLinuxX86_64 = "https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0.tar.gz";
+
+    /// <summary>
     /// aria2 二进制文件下载地址，键名为 "{os}_{arch}"（如 windows_x86_64）/ aria2 binary download URL, key is "{os}_{arch}" (e.g. windows_x86_64).
     /// </summary>
     [TomlPropertyName("windows_x86_64")]
@@ -127,8 +133,14 @@ public sealed class SjtfAria2
             _ => null
         };
         if (!string.IsNullOrEmpty(configured)) return configured;
-        if (os == "windows" && arch == "x86_64") return DefaultUrl;
-        return null;
+
+        // Fallback：内置默认 URL（按平台分发）
+        return key switch
+        {
+            "windows_x86_64" => DefaultUrl,
+            "linux_x86_64" => DefaultUrlLinuxX86_64,
+            _ => null
+        };
     }
 }
 
@@ -366,8 +378,32 @@ internal static class Config
         if (!string.IsNullOrEmpty(dir))
             Directory.CreateDirectory(dir);
 
+        // 根据 OS 选择默认 install_dir 和 aria2 镜像
+        var os = Arch.CurrentOs();
+        string installDir;
+        string aria2Section;
+
+        switch (os)
+        {
+            case "linux":
+                // Linux: ~/dev（已展开为绝对路径）
+                var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                installDir = Path.Combine(home, "dev");
+                aria2Section = $"linux_x86_64 = \"{SjtfAria2.DefaultUrlLinuxX86_64}\"";
+                break;
+            case "windows":
+                installDir = "D:\\sjtf_pkgs";
+                aria2Section = $"windows_x86_64 = \"{SjtfAria2.DefaultUrl}\"";
+                break;
+            default:
+                // macOS / unknown：保守回退到 Windows 默认
+                installDir = "D:\\sjtf_pkgs";
+                aria2Section = $"windows_x86_64 = \"{SjtfAria2.DefaultUrl}\"";
+                break;
+        }
+
         var content = $@"[general]
-install_dir = ""D:\\sjtf_pkgs""
+install_dir = ""{installDir}""
 
 [pkgs]
 remote_url = ""https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json""
@@ -379,7 +415,7 @@ split = 10                      # 1 ~ 16
 min_split_size = 1              # Chunk download size setting, unit: MB     1 ~ 1024
 
 [aria2]
-windows_x86_64 = ""{SjtfAria2.DefaultUrl}""
+{aria2Section}
 
 [github]
 token_classic = ""put your classic token here""
