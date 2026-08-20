@@ -695,8 +695,9 @@
           "x86_64": {
             "file": "^(?=.*x86_64).*\\.exe$",
             "type": "installer",
+            "install_program": "{DOWNLOADED_CACHE_FILE_FULL_PATH}",
             "install_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /TASKS=\"!addtopath\" /DIR=\"{PKG_INSTALL_DIR}\"",
-            "uninstall_program": "unins000.exe",
+            "uninstall_program": "{PKG_INSTALL_DIR}\\unins000.exe",
             "uninstall_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART"
           }
         }

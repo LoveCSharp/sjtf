@@ -4,6 +4,9 @@
 //   configJSON - JSON string parsed from config.toml
 //   os         - current OS string (windows/linux/macos)
 //   arch       - current architecture string (x86_64/aarch64/arm)
+//   installRoot - absolute install root directory (from config.toml)
+//   installFull - absolute path to the package's future install directory
+//                 (used to substitute {PKG_INSTALL_DIR} in uninstall_program)
 //
 // Functions exposed by C#:
 //   log(msg)               - print to stdout
@@ -12,7 +15,18 @@
 //   httpGetWithHeaders(url, headersJSON) -> Promise<string>
 //
 // Exports an async `fetch()` that returns a JSON-stringified DownloadPlan
-// (version / url / digest / digest_algorithm) to C#.
+// (version / url / digest / digest_algorithm) to C#, plus the install-time
+// metadata taken from fetch_asset.arch.{os}.{arch}:
+//   type              - required, one of portable-compressed-archive /
+//                       portable-executable / installer
+//   install_program   - executable to run (default empty string);
+//                       placeholder "{DOWNLOADED_CACHE_FILE_FULL_PATH}"
+//                       is replaced by C# at install time with the cache file path;
+//                       custom values are used verbatim
+//   install_params    - optional, arguments passed to an installer
+//   uninstall_program - absolute path to uninstaller (PKG_INSTALL_DIR already
+//                       substituted by JS before return)
+//   uninstall_params  - optional, arguments passed to the uninstaller
 
 async function fetch() {
     const pkg = JSON.parse(pkgJSON);
@@ -46,6 +60,26 @@ async function fetch() {
     const assetRe = assetEntry.file;
     if (typeof assetRe !== "string") {
         throw new Error("fetch_asset.arch." + os + "." + arch + ".file must be a string");
+    }
+
+    const installProgram = (typeof assetEntry.install_program === "string" && assetEntry.install_program !== "")
+        ? assetEntry.install_program
+        : "";
+
+    const uninstallProgramRaw = (typeof assetEntry.uninstall_program === "string")
+        ? assetEntry.uninstall_program
+        : "";
+
+    const uninstallProgram = uninstallProgramRaw.includes("{PKG_INSTALL_DIR}")
+        ? uninstallProgramRaw.replace("{PKG_INSTALL_DIR}", installFull)
+        : uninstallProgramRaw;
+
+    const uninstallParams = (typeof assetEntry.uninstall_params === "string")
+        ? assetEntry.uninstall_params
+        : "";
+
+    if (typeof assetEntry.type !== "string" || assetEntry.type === "") {
+        throw new Error("fetch_asset.arch." + os + "." + arch + ".type must be a non-empty string");
     }
 
     const githubConfig = (config && config.github) || {};
@@ -108,6 +142,11 @@ async function fetch() {
         version: tag,
         url: downloadUrl,
         digest: digest,
-        digest_algorithm: digestAlgorithm
+        digest_algorithm: digestAlgorithm,
+        type: assetEntry.type,
+        install_program: installProgram,
+        install_params: assetEntry.install_params || "",
+        uninstall_program: uninstallProgram,
+        uninstall_params: uninstallParams
     });
 }

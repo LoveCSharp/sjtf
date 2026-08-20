@@ -43,6 +43,14 @@ internal sealed class ScriptFetchSource : IFetchSource
         engine.SetValue("os", Arch.CurrentOs());
         engine.SetValue("arch", Arch.CurrentArch());
 
+        // 新增：用于 fetch 脚本中替换 {PKG_INSTALL_DIR}
+        var installDirRel = pkg["pkg_install_relative_dir"]?.GetValue<string>()
+            ?? throw new InvalidOperationException($"{packageName}: pkg_install_relative_dir missing");
+        var installRoot = Config.LoadInstallDir();
+        var installFull = Path.Combine(installRoot, installDirRel);
+        engine.SetValue("installRoot", installRoot);
+        engine.SetValue("installFull", installFull);
+
         engine.Execute(scriptSource);
 
         var result = await ScriptEngine.InvokeAsync(engine, "fetch");
@@ -65,6 +73,12 @@ internal sealed class ScriptFetchSource : IFetchSource
             DownloadUrl: parsed["url"]?.GetValue<string>()
                 ?? throw new InvalidOperationException("script result missing url"),
             DigestAlgorithm: parsed["digest_algorithm"]?.GetValue<string>() ?? "sha256",
-            ExpectedDigest: parsed["digest"]?.GetValue<string>() ?? "");
+            ExpectedDigest: parsed["digest"]?.GetValue<string>() ?? "",
+            Type: parsed["type"]?.GetValue<string>()
+                ?? throw new InvalidOperationException("script result missing type"),
+            InstallProgram: parsed["install_program"]?.GetValue<string>() ?? "",
+            InstallParams: parsed["install_params"]?.GetValue<string>() ?? "",
+            UninstallProgram: parsed["uninstall_program"]?.GetValue<string>() ?? "",
+            UninstallParams: parsed["uninstall_params"]?.GetValue<string>() ?? "");
     }
 }

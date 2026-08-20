@@ -34,11 +34,21 @@ public interface IFetchSource
 /// <param name="DownloadUrl">流程下载的完整URL。 / Fully-qualified URL the pipeline downloads from.</param>
 /// <param name="DigestAlgorithm">用于验证下载文件的摘要算法。 / Digest algorithm for verification.</param>
 /// <param name="ExpectedDigest">流程验证下载文件的十六进制摘要。 / Expected hex digest for verification.</param>
+/// <param name="Type">包类型（portable-compressed-archive / portable-executable / installer），由 fetch 脚本从 fetch_asset.arch.{os}.{arch}.type 返回，决定安装方式并记入 installed.json。 / Package type returned by the fetch script; drives PlaceAsset and is recorded in installed.json.</param>
+/// <param name="InstallProgram">installer 类型的安装程序。空字符串 = 按原值使用（可能为无效命令）；占位符 {DOWNLOADED_CACHE_FILE_FULL_PATH} → 替换为下载的 cache 文件路径；其他值（如自定义脚本路径）按原值使用。 / Installer executable. Empty string = used verbatim (may be an invalid command); placeholder {DOWNLOADED_CACHE_FILE_FULL_PATH} is replaced by PlaceAsset with the downloaded cache file path; other values (e.g. custom script) are used verbatim.</param>
+/// <param name="InstallParams">installer 类型的安装参数（支持 {PKG_INSTALL_DIR} / {INSTALL_DIR} 占位符）。 / Installer arguments (supports {PKG_INSTALL_DIR} / {INSTALL_DIR} placeholders).</param>
+/// <param name="UninstallProgram">installer 类型的卸载程序（绝对路径，已由 JS 用 installFull 替换 {PKG_INSTALL_DIR}）。 / Uninstaller executable; absolute path, with {PKG_INSTALL_DIR} already substituted by JS.</param>
+/// <param name="UninstallParams">installer 类型的卸载参数（按原值使用）。 / Uninstaller arguments (used verbatim).</param>
 public sealed record DownloadPlan(
     string Version,
     string DownloadUrl,
     string DigestAlgorithm,
-    string ExpectedDigest);
+    string ExpectedDigest,
+    string Type,
+    string InstallProgram = "",
+    string InstallParams = "",
+    string UninstallProgram = "",
+    string UninstallParams = "");
 
 internal static class FetchSources
 {
