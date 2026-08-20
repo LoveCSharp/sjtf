@@ -12,7 +12,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "langs\\fnm",
+    "pkg_install_relative_dir": "langs/fnm",
     "shim": {
       "windows": {
         "symlink": {
@@ -35,7 +35,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "langs\\uv",
+    "pkg_install_relative_dir": "langs/uv",
     "shim": {
       "windows": {
         "symlink": {
@@ -60,7 +60,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "langs\\g\\bin",
+    "pkg_install_relative_dir": "langs/g/bin",
     "shim": {
       "windows": {
         "symlink": {
@@ -83,7 +83,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\powershell",
+    "pkg_install_relative_dir": "cli/powershell",
     "fetch_source": "github"
   },
   "nushell": {
@@ -99,7 +99,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\nushell",
+    "pkg_install_relative_dir": "cli/nushell",
     "shim": {
       "windows": {
         "shell_script": {
@@ -123,7 +123,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\zellij",
+    "pkg_install_relative_dir": "cli/zellij",
     "shim": {
       "windows": {
         "symlink": {
@@ -146,7 +146,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\oh-my-posh",
+    "pkg_install_relative_dir": "cli/oh-my-posh",
     "shim": {
       "windows": {
         "symlink": {
@@ -169,7 +169,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\starship",
+    "pkg_install_relative_dir": "cli/starship",
     "shim": {
       "windows": {
         "symlink": {
@@ -192,7 +192,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\coreutils",
+    "pkg_install_relative_dir": "cli/coreutils",
     "shim": {
       "windows": {
         "symlink": {
@@ -215,7 +215,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\yazi",
+    "pkg_install_relative_dir": "cli/yazi",
     "shim": {
       "windows": {
         "symlink": {
@@ -239,7 +239,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\lf",
+    "pkg_install_relative_dir": "cli/lf",
     "shim": {
       "windows": {
         "symlink": {
@@ -262,7 +262,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\fzf",
+    "pkg_install_relative_dir": "cli/fzf",
     "shim": {
       "windows": {
         "symlink": {
@@ -285,7 +285,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\zoxide",
+    "pkg_install_relative_dir": "cli/zoxide",
     "shim": {
       "windows": {
         "symlink": {
@@ -308,7 +308,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\fd",
+    "pkg_install_relative_dir": "cli/fd",
     "shim": {
       "windows": {
         "symlink": {
@@ -366,7 +366,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\ripgrep",
+    "pkg_install_relative_dir": "cli/ripgrep",
     "shim": {
       "windows": {
         "symlink": {
@@ -389,7 +389,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\eza",
+    "pkg_install_relative_dir": "cli/eza",
     "shim": {
       "windows": {
         "symlink": {
@@ -412,7 +412,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\dust",
+    "pkg_install_relative_dir": "cli/dust",
     "shim": {
       "windows": {
         "symlink": {
@@ -435,7 +435,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\duf",
+    "pkg_install_relative_dir": "cli/duf",
     "shim": {
       "windows": {
         "symlink": {
@@ -458,7 +458,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\bat",
+    "pkg_install_relative_dir": "cli/bat",
     "shim": {
       "windows": {
         "symlink": {
@@ -481,7 +481,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\atuin",
+    "pkg_install_relative_dir": "cli/atuin",
     "shim": {
       "windows": {
         "symlink": {
@@ -504,7 +504,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\atuin",
+    "pkg_install_relative_dir": "cli/atuin",
     "shim": {
       "windows": {
         "symlink": {
@@ -527,7 +527,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\jq",
+    "pkg_install_relative_dir": "cli/jq",
     "shim": {
       "windows": {
         "symlink": {
@@ -550,7 +550,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\xh",
+    "pkg_install_relative_dir": "cli/xh",
     "shim": {
       "windows": {
         "symlink": {
@@ -573,7 +573,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\bottom",
+    "pkg_install_relative_dir": "cli/bottom",
     "shim": {
       "windows": {
         "symlink": {
@@ -596,7 +596,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\procs",
+    "pkg_install_relative_dir": "cli/procs",
     "shim": {
       "windows": {
         "symlink": {
@@ -619,7 +619,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\witr",
+    "pkg_install_relative_dir": "cli/witr",
     "shim": {
       "windows": {
         "symlink": {
@@ -642,7 +642,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\carapace",
+    "pkg_install_relative_dir": "cli/carapace",
     "shim": {
       "windows": {
         "symlink": {
@@ -665,7 +665,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\pueue",
+    "pkg_install_relative_dir": "cli/pueue",
     "shim": {
       "windows": {
         "symlink": {
@@ -688,7 +688,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\pueue",
+    "pkg_install_relative_dir": "cli/pueue",
     "shim": {
       "windows": {
         "symlink": {
@@ -715,7 +715,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "editor\\zed",
+    "pkg_install_relative_dir": "editor/zed",
     "shim": {
       "windows": {
         "shell_script": {
@@ -739,7 +739,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "editor\\lapce",
+    "pkg_install_relative_dir": "editor/lapce",
     "shim": {
       "windows": {
         "shell_script": {
@@ -762,7 +762,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "editor\\vscode",
+    "pkg_install_relative_dir": "editor/vscode",
     "shim": {
       "windows": {
         "shell_script": {
@@ -786,7 +786,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "editor\\nvim",
+    "pkg_install_relative_dir": "editor/nvim",
     "shim": {
       "windows": {
         "shell_script": {
@@ -810,7 +810,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "editor\\edit",
+    "pkg_install_relative_dir": "editor/edit",
     "shim": {
       "windows": {
         "symlink": {
@@ -833,7 +833,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "editor\\notepad3",
+    "pkg_install_relative_dir": "editor/notepad3",
     "shim": {
       "windows": {
         "shell_script": {
@@ -859,7 +859,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "editor\\notepad4",
+    "pkg_install_relative_dir": "editor/notepad4",
     "shim": {
       "windows": {
         "shell_script": {
@@ -885,7 +885,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "vcs\\git",
+    "pkg_install_relative_dir": "vcs/git",
     "shim": {
       "windows": {
         "shell_script": {
@@ -909,7 +909,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\delta",
+    "pkg_install_relative_dir": "cli/delta",
     "shim": {
       "windows": {
         "symlink": {
@@ -932,7 +932,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\lazygit",
+    "pkg_install_relative_dir": "cli/lazygit",
     "shim": {
       "windows": {
         "symlink": {
@@ -955,7 +955,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\ziggity",
+    "pkg_install_relative_dir": "cli/ziggity",
     "shim": {
       "windows": {
         "symlink": {
@@ -978,7 +978,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli\\gitui",
+    "pkg_install_relative_dir": "cli/gitui",
     "shim": {
       "windows": {
         "symlink": {
@@ -1001,7 +1001,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "ai\\opencode",
+    "pkg_install_relative_dir": "ai/opencode",
     "shim": {
       "windows": {
         "symlink": {
@@ -1024,7 +1024,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "ai\\pi",
+    "pkg_install_relative_dir": "ai/pi",
     "shim": {
       "windows": {
         "symlink": {
@@ -1047,7 +1047,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "ai\\jcode",
+    "pkg_install_relative_dir": "ai/jcode",
     "shim": {
       "windows": {
         "symlink": {
@@ -1070,7 +1070,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "ai\\rtk",
+    "pkg_install_relative_dir": "ai/rtk",
     "shim": {
       "windows": {
         "symlink": {
