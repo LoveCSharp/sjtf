@@ -231,7 +231,7 @@ When a user runs `sjtf install fnm`:
 1. **Version fetch**: Executes `scripts/fetch/github_fetch_latest.js`
    - Calls GitHub API for the latest Release
    - Matches asset regex, extracts download URL and version
-   - Returns `DownloadPlan{Version, DownloadUrl, DigestAlgorithm, ExpectedDigest}`
+   - Returns a JSON object with: `version` (required), `url` (required), `type` (required, from `fetch_asset.arch.{os}.{arch}.type`), plus optional `digest`, `digest_algorithm` (default `"sha256"`), `install_program`, `install_params`, `uninstall_program`, `uninstall_params` — all consumed by `ScriptFetchSource.cs` as `DownloadPlan`
 
 2. **Download**: Multi-threaded chunked download (or aria2c) to cache directory
    - Cache filename format: `{name}-{os}-{arch}-{version}.{ext}`

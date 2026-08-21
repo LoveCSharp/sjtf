@@ -96,12 +96,34 @@ The script must export an `async function fetch()` that returns a `JSON.stringif
 
 ```javascript
 return JSON.stringify({
-    version: "v1.2.3",       // Upstream version string, compared against installed.json
-    url: "https://...",      // Download URL
-    digest: "abc123...",     // Digest value (optional, defaults to empty string)
-    digest_algorithm: "sha256"  // Digest algorithm (optional, defaults to "sha256")
+    version: "v1.2.3",       // (required) Upstream version string, compared against installed.json
+    url: "https://...",      // (required) Download URL
+    type: "portable-compressed-archive",  // (required) Package type from fetch_asset.arch.{os}.{arch}.type
+    digest: "abc123...",     // (optional, default "") Digest value
+    digest_algorithm: "sha256",  // (optional, default "sha256") Digest algorithm
+    install_program: "",     // (optional, default "") Installer executable; placeholder {DOWNLOADED_CACHE_FILE_FULL_PATH} is replaced by C# with the cache file path at install time; custom values used verbatim
+    install_params: "",      // (optional, default "") Installer arguments; supports {PKG_INSTALL_DIR} and {INSTALL_DIR} placeholders
+    uninstall_program: "",   // (optional, default "") Uninstaller executable; {PKG_INSTALL_DIR} must be substituted by JS before return (using the installFull global) — C# does not rewrite it
+    uninstall_params: ""     // (optional, default "") Uninstaller arguments
 });
 ```
+
+Field reference:
+
+- **Required**: `version`, `url`, `type` (the `type` is normally copied verbatim from `fetch_asset.arch.{os}.{arch}.type` in `pkgs.json`).
+- **Optional**: all remaining fields default to `""` (empty string), and `digest_algorithm` defaults to `"sha256"`. Optional fields are typically read from `pkgs.json`'s `fetch_asset.arch.{os}.{arch}` and passed through.
+
+| Field | Required | Default | Description |
+|---|---|---|---|
+| `version` | yes | — | Upstream version string compared against `installed.json` |
+| `url` | yes | — | Download URL the pipeline fetches |
+| `type` | yes | — | Package type, copied from `fetch_asset.arch.{os}.{arch}.type` |
+| `digest` | no | `""` | Expected hex digest |
+| `digest_algorithm` | no | `"sha256"` | Digest algorithm identifier |
+| `install_program` | no | `""` | Installer executable (placeholder `{DOWNLOADED_CACHE_FILE_FULL_PATH}` replaced by C#) |
+| `install_params` | no | `""` | Installer arguments (supports `{PKG_INSTALL_DIR}` / `{INSTALL_DIR}`) |
+| `uninstall_program` | no | `""` | Uninstaller executable; `{PKG_INSTALL_DIR}` must be substituted by JS before return |
+| `uninstall_params` | no | `""` | Uninstaller arguments |
 
 ### Example: GitHub Releases
 
@@ -170,11 +192,32 @@ async function fetch() {
         downloadUrl = proxy + "/" + downloadUrl;
     }
 
+    const installProgram = (typeof assetEntry.install_program === "string" && assetEntry.install_program !== "")
+        ? assetEntry.install_program
+        : "";
+
+    const uninstallProgramRaw = (typeof assetEntry.uninstall_program === "string")
+        ? assetEntry.uninstall_program
+        : "";
+
+    const uninstallProgram = uninstallProgramRaw.includes("{PKG_INSTALL_DIR}")
+        ? uninstallProgramRaw.replace("{PKG_INSTALL_DIR}", installFull)
+        : uninstallProgramRaw;
+
+    const uninstallParams = (typeof assetEntry.uninstall_params === "string")
+        ? assetEntry.uninstall_params
+        : "";
+
     return JSON.stringify({
         version: tag,
         url: downloadUrl,
         digest: digest,
-        digest_algorithm: digestAlgorithm
+        digest_algorithm: digestAlgorithm,
+        type: assetEntry.type,
+        install_program: installProgram,
+        install_params: assetEntry.install_params || "",
+        uninstall_program: uninstallProgram,
+        uninstall_params: uninstallParams
     });
 }
 ```

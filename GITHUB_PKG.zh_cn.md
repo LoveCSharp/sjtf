@@ -230,7 +230,7 @@ Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
 1. **版本获取**：执行 `scripts/fetch/github_fetch_latest.js`
    - 调用 GitHub API 获取最新 Release
    - 匹配资产正则，提取下载 URL 和版本号
-   - 返回 `DownloadPlan{Version, DownloadUrl, DigestAlgorithm, ExpectedDigest}`
+   - 返回一个 JSON 对象，包含：`version`（必需）、`url`（必需）、`type`（必需，取自 `fetch_asset.arch.{os}.{arch}.type`），以及可选的 `digest`、`digest_algorithm`（默认 `"sha256"`）、`install_program`、`install_params`、`uninstall_program`、`uninstall_params` —— 全部由 `ScriptFetchSource.cs` 解析为 `DownloadPlan`
 
 2. **下载**：使用多线程分块下载（或 aria2c）到缓存目录
    - 缓存文件名格式：`{name}-{os}-{arch}-{version}.{ext}`

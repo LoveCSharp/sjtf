@@ -96,12 +96,34 @@ scripts/
 
 ```javascript
 return JSON.stringify({
-    version: "v1.2.3",       // 上游版本字符串，用于与 installed.json 比较
-    url: "https://...",      // 下载 URL
-    digest: "abc123...",     // 摘要值（可选，默认空字符串）
-    digest_algorithm: "sha256"  // 摘要算法（可选，默认 "sha256"）
+    version: "v1.2.3",       // （必需）上游版本字符串，用于与 installed.json 比较
+    url: "https://...",      // （必需）下载 URL
+    type: "portable-compressed-archive",  // （必需）包类型，取自 fetch_asset.arch.{os}.{arch}.type
+    digest: "abc123...",     // （可选，默认 ""）摘要值
+    digest_algorithm: "sha256",  // （可选，默认 "sha256"）摘要算法
+    install_program: "",     // （可选，默认 ""）安装程序可执行文件；占位符 {DOWNLOADED_CACHE_FILE_FULL_PATH} 由 C# 在安装时替换为缓存文件路径；自定义值按原值使用
+    install_params: "",      // （可选，默认 ""）安装程序参数；支持 {PKG_INSTALL_DIR} 和 {INSTALL_DIR} 占位符
+    uninstall_program: "",   // （可选，默认 ""）卸载程序可执行文件；{PKG_INSTALL_DIR} 必须由 JS 在返回前替换（使用 installFull 全局变量）—— C# 不会再做替换
+    uninstall_params: ""     // （可选，默认 ""）卸载程序参数
 });
 ```
+
+字段说明：
+
+- **必需**：`version`、`url`、`type`（`type` 一般直接从 `pkgs.json` 的 `fetch_asset.arch.{os}.{arch}.type` 透传）。
+- **可选**：其余字段默认空字符串 `""`，`digest_algorithm` 默认 `"sha256"`。可选字段通常从 `pkgs.json` 的 `fetch_asset.arch.{os}.{arch}` 读取后透传。
+
+| 字段 | 必需 | 默认值 | 说明 |
+|---|---|---|---|
+| `version` | 是 | — | 上游版本字符串，与 `installed.json` 比对 |
+| `url` | 是 | — | 流水线要下载的 URL |
+| `type` | 是 | — | 包类型，取自 `fetch_asset.arch.{os}.{arch}.type` |
+| `digest` | 否 | `""` | 期望的十六进制摘要 |
+| `digest_algorithm` | 否 | `"sha256"` | 摘要算法标识 |
+| `install_program` | 否 | `""` | 安装程序可执行文件（占位符 `{DOWNLOADED_CACHE_FILE_FULL_PATH}` 由 C# 替换） |
+| `install_params` | 否 | `""` | 安装程序参数（支持 `{PKG_INSTALL_DIR}` / `{INSTALL_DIR}`） |
+| `uninstall_program` | 否 | `""` | 卸载程序可执行文件；`{PKG_INSTALL_DIR}` 必须由 JS 在返回前替换 |
+| `uninstall_params` | 否 | `""` | 卸载程序参数 |
 
 ### 示例：GitHub Releases
 
@@ -170,11 +192,32 @@ async function fetch() {
         downloadUrl = proxy + "/" + downloadUrl;
     }
 
+    const installProgram = (typeof assetEntry.install_program === "string" && assetEntry.install_program !== "")
+        ? assetEntry.install_program
+        : "";
+
+    const uninstallProgramRaw = (typeof assetEntry.uninstall_program === "string")
+        ? assetEntry.uninstall_program
+        : "";
+
+    const uninstallProgram = uninstallProgramRaw.includes("{PKG_INSTALL_DIR}")
+        ? uninstallProgramRaw.replace("{PKG_INSTALL_DIR}", installFull)
+        : uninstallProgramRaw;
+
+    const uninstallParams = (typeof assetEntry.uninstall_params === "string")
+        ? assetEntry.uninstall_params
+        : "";
+
     return JSON.stringify({
         version: tag,
         url: downloadUrl,
         digest: digest,
-        digest_algorithm: digestAlgorithm
+        digest_algorithm: digestAlgorithm,
+        type: assetEntry.type,
+        install_program: installProgram,
+        install_params: assetEntry.install_params || "",
+        uninstall_program: uninstallProgram,
+        uninstall_params: uninstallParams
     });
 }
 ```
