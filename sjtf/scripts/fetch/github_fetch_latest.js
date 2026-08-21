@@ -112,7 +112,7 @@ async function fetch() {
 
     let matched = null;
     for (const asset of assets) {
-        if (new RegExp(assetRe).test(asset.name)) {
+        if (new RegExp(assetRe, "i").test(asset.name)) {
             matched = asset;
             break;
         }

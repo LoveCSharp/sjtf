@@ -879,7 +879,7 @@
       "arch": {
         "windows": {
           "x86_64": {
-            "file": "^(?i)(?=.*MinGit)(?=.*64-bit)(?!.*busybox).*\\.zip$",
+            "file": "^(?=.*MinGit)(?=.*64-bit)(?!.*busybox).*\\.zip$",
             "type": "portable-compressed-archive"
           }
         }
@@ -903,7 +903,7 @@
       "arch": {
         "windows": {
           "x86_64": {
-            "file": "^(?i)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
             "type": "portable-compressed-archive"
           }
         }
@@ -926,7 +926,7 @@
       "arch": {
         "windows": {
           "x86_64": {
-            "file": "^(?i)(?=.*x86_64)(?=.*windows).*\\.zip$",
+            "file": "^(?=.*x86_64)(?=.*windows).*\\.zip$",
             "type": "portable-compressed-archive"
           }
         }
@@ -949,7 +949,7 @@
       "arch": {
         "windows": {
           "x86_64": {
-            "file": "^(?i)(?=.*x86_64)(?=.*windows)(?=.*gnu).*\\.zip$",
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*gnu).*\\.zip$",
             "type": "portable-compressed-archive"
           }
         }
@@ -972,7 +972,7 @@
       "arch": {
         "windows": {
           "x86_64": {
-            "file": "^(?i)(?=.*win).*\\.tar.gz$",
+            "file": "^(?=.*win).*\\.tar.gz$",
             "type": "portable-compressed-archive"
           }
         }
@@ -995,7 +995,7 @@
       "arch": {
         "windows": {
           "x86_64": {
-            "file": "^(?i)(?=.*windows)(?=.*x64)(?!.*baseline).*\\.zip$",
+            "file": "^(?=.*windows)(?=.*x64)(?!.*baseline).*\\.zip$",
             "type": "portable-compressed-archive"
           }
         }
@@ -1018,7 +1018,7 @@
       "arch": {
         "windows": {
           "x86_64": {
-            "file": "^(?i)(?=.*windows)(?=.*x64).*\\.zip$",
+            "file": "^(?=.*windows)(?=.*x64).*\\.zip$",
             "type": "portable-compressed-archive"
           }
         }
@@ -1041,7 +1041,7 @@
       "arch": {
         "windows": {
           "x86_64": {
-            "file": "^(?i)(?=.*windows)(?=.*x86_64).*\\.tar.gz$",
+            "file": "^(?=.*windows)(?=.*x86_64).*\\.tar.gz$",
             "type": "portable-compressed-archive"
           }
         }
@@ -1064,7 +1064,7 @@
       "arch": {
         "windows": {
           "x86_64": {
-            "file": "^(?i)(?=.*windows)(?=.*x86_64)(?=.*msvc).*\\.zip$",
+            "file": "^(?=.*windows)(?=.*x86_64)(?=.*msvc).*\\.zip$",
             "type": "portable-compressed-archive"
           }
         }
