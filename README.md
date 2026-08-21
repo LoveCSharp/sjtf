@@ -3,6 +3,7 @@
 [English](README.md) | [中文](README.zh_cn.md)
 
 ![.NET](https://img.shields.io/badge/.NET-10.0-blue)
+![Version](https://img.shields.io/badge/version-0.0.3-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)
 
 A portable CLI package manager that downloads, verifies, and manages command-line tools from GitHub and other sources.
@@ -10,7 +11,7 @@ A portable CLI package manager that downloads, verifies, and manages command-lin
 ## Features
 
 - 🚀 Install/uninstall/upgrade CLI tools with a single command
-- 🔍 JavaScript-script-based extensible version resolution
+- 🔌 JavaScript-based extensible fetch sources via embedded [Jint](https://github.com/sebastienros/jint) (async/await enabled)
 - ✅ SHA-256/SHA-1/SHA-512/MD5 digest verification
 - 🔗 Automatic shim/symlink creation
 - 🌐 Multi-platform: Windows, Linux, macOS
@@ -32,16 +33,16 @@ sjtf --version        # Show version
 
 ## Commands
 
-| Command | Aliases | Description |
-|---------|---------|-------------|
-| `packages list` | `pkgs list`, `pkgs ls` | List packages defined in `pkgs.json` |
-| `packages update` | `pkgs update`, `pkgs up` | Download latest `pkgs.json` from remote |
-| `list` | `ls` | List installed packages |
-| `install` | `i` | Install one or more packages |
-| `uninstall` | `u`, `rm`, `remove` | Uninstall one or more packages |
-| `upgrade` | `up` | Upgrade installed packages to latest |
-| `favorites` | `favors` | Sync installed packages with `favorites.json` |
-| `--version` | | Show version information |
+| Command | Aliases | Arguments | Description |
+|---------|---------|-----------|-------------|
+| `packages list` | `pkgs list`, `pkgs ls` | — | List packages defined in `pkgs.json` |
+| `packages update` | `pkgs update`, `pkgs up` | — | Download latest `pkgs.json` from remote |
+| `list` | `ls` | — | List installed packages |
+| `install` | `i` | `<name...>` | Install one or more packages |
+| `uninstall` | `u`, `rm`, `remove` | `<name...>` | Uninstall one or more packages |
+| `upgrade` | `up` | `[<name...>] \| --all` | Upgrade installed packages to latest |
+| `favorites` | `favors` | — | Sync installed packages with `favorites.json` |
+| `--version` | | — | Show version information |
 
 ## Configuration Files
 
@@ -144,9 +145,20 @@ Each `arch.{os}.{arch}` entry is an object carrying `file` (asset URL or regex) 
 |------|-------------|
 | `file` | Asset URL (for static endpoints) or JavaScript regex matched against the release asset name |
 | `type` | One of the package types above |
+| `install_program` | Installer executable. Supports placeholder `{DOWNLOADED_CACHE_FILE_FULL_PATH}` (replaced by cache file absolute path); custom values used verbatim (`installer` only) |
 | `install_params` | Installer arguments, supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders (`installer` only) |
 | `uninstall_program` | Uninstaller program file name (relative to install directory, `installer` only) |
 | `uninstall_params` | Uninstaller arguments, supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders (`installer` only) |
+
+> **Note:** Packages using the `update_code_visualstudio_com` fetch source replace the `file` field with `stable_latest_info_url`, which points to the VS Code update metadata API (returns JSON with the real download URL, `productVersion`, and `sha256hash`). See the vscode entry in `sjtf/pkgs.json`.
+
+#### Package-level fields
+
+In addition to the per-arch `fetch_asset.arch.{os}.{arch}` entry, the following fields are set on the package root object:
+
+| Field | Description |
+|---|---|
+| `file_mode_0755` | (Linux/macOS only) Array of file paths (relative to `pkg_install_relative_dir`) that should be given `0755` permissions after install. Windows is a no-op. |
 
 #### Pre/post-install, pre/post-upgrade, pre/post-uninstall scripts
 
@@ -159,6 +171,8 @@ Auto-generated file tracking installed packages and their versions. Do not edit 
 ### `favorites.json`
 
 JSON array of package names for the `favorites` command.
+
+The full default list ships in `sjtf/favorites.json` (38 entries). An abridged example:
 
 ```json
 [
@@ -189,12 +203,13 @@ JSON array of package names for the `favorites` command.
 
 ## Writing a GitHub Source Package
 
-See [GITHUB_PKG.md](GITHUB_PKG.md) for a complete guide on writing `fetch_source: "github"` packages, including `pkgs.json` field reference, asset regex patterns, shim configuration, and the full install workflow.
+See [GITHUB_PKG.md](GITHUB_PKG.md) for a complete guide on writing `fetch_source: "github"` packages, including `pkgs.json` field reference, asset regex patterns, shim configuration, and the full install workflow. For non-GitHub sources such as the built-in VS Code update API, see [SCRIPTS.md](SCRIPTS.md).
 
 ## Extending with JavaScript Scripts
 
 `sjtf` supports custom fetch sources and post-install/uninstall hooks via JavaScript.
 
+- **Built-in fetch sources**: `github`, `update_code_visualstudio_com` (see [SCRIPTS.md](SCRIPTS.md) for adding custom sources)
 - **Fetch sources**: `scripts/fetch/{fetch_source}_fetch_latest.js`
 - **Before-install hooks**: `scripts/hooks/{name}-{os}-{arch}-before_install.js`
 - **After-install hooks**: `scripts/hooks/{name}-{os}-{arch}-after_install.js`

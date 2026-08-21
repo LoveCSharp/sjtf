@@ -756,7 +756,7 @@
       "arch": {
         "windows": {
           "x86_64": {
-            "file": "https://update.code.visualstudio.com/api/update/win32-x64-archive/stable/latest",
+            "stable_latest_info_url": "https://update.code.visualstudio.com/api/update/win32-x64-archive/stable/latest",
             "type": "portable-compressed-archive"
           }
         }

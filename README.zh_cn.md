@@ -3,6 +3,7 @@
 [English](README.md) | [中文](README.zh_cn.md)
 
 ![.NET](https://img.shields.io/badge/.NET-10.0-blue)
+![Version](https://img.shields.io/badge/version-0.0.3-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)
 
 一个便携式 CLI 包管理器，用于从 GitHub 和其他源下载、校验和管理命令行工具。
@@ -10,7 +11,7 @@
 ## 功能特性
 
 - 🚀 一键安装/卸载/升级命令行工具
-- 🔍 基于 JavaScript 脚本的可扩展版本获取
+- 🔌 基于 JavaScript 的可扩展获取源（内嵌 [Jint](https://github.com/sebastienros/jint)，支持 async/await）
 - ✅ SHA-256/SHA-1/SHA-512/MD5 摘要校验
 - 🔗 自动创建 shim（符号链接 / shell 脚本）
 - 🌐 跨平台：Windows、Linux、macOS
@@ -32,16 +33,16 @@ sjtf --version        # 显示版本号
 
 ## 命令
 
-| 命令 | 别名 | 说明 |
-|---------|---------|-------------|
-| `packages list` | `pkgs list`、`pkgs ls` | 列出 `pkgs.json` 中定义的所有包 |
-| `packages update` | `pkgs update`、`pkgs up` | 从远程下载最新的 `pkgs.json` |
-| `list` | `ls` | 列出已安装的包 |
-| `install` | `i` | 安装一个或多个包 |
-| `uninstall` | `u`、`rm`、`remove` | 卸载一个或多个包 |
-| `upgrade` | `up` | 升级已安装的包到最新版本 |
-| `favorites` | `favors` | 根据 `favorites.json` 同步已安装的包 |
-| `--version` | | 显示版本信息 |
+| 命令 | 别名 | 参数 | 说明 |
+|---------|---------|-----------|-------------|
+| `packages list` | `pkgs list`、`pkgs ls` | — | 列出 `pkgs.json` 中定义的所有包 |
+| `packages update` | `pkgs update`、`pkgs up` | — | 从远程下载最新的 `pkgs.json` |
+| `list` | `ls` | — | 列出已安装的包 |
+| `install` | `i` | `<name...>` | 安装一个或多个包 |
+| `uninstall` | `u`、`rm`、`remove` | `<name...>` | 卸载一个或多个包 |
+| `upgrade` | `up` | `[<name...>] \| --all` | 升级已安装的包到最新版本 |
+| `favorites` | `favors` | — | 根据 `favorites.json` 同步已安装的包 |
+| `--version` | | — | 显示版本信息 |
 
 ## 配置文件
 
@@ -144,9 +145,20 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 |------|------|
 | `file` | 资产 URL（静态端点）或用于匹配 release 资产名的 JavaScript 正则 |
 | `type` | 上表中的包类型之一 |
+| `install_program` | 安装程序可执行文件。支持占位符 `{DOWNLOADED_CACHE_FILE_FULL_PATH}`（替换为缓存文件绝对路径）；其他值按原值使用（仅 `installer`） |
 | `install_params` | 安装程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符（仅 `installer`） |
 | `uninstall_program` | 卸载程序文件名（相对于安装目录，仅 `installer`） |
 | `uninstall_params` | 卸载程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符（仅 `installer`） |
+
+> **注：** 使用 `update_code_visualstudio_com` fetch 源的包把 `file` 字段替换为 `stable_latest_info_url`，该字段指向 VS Code 的更新元数据 API（返回 JSON，含真实下载 URL、`productVersion` 和 `sha256hash`）。示例见 `sjtf/pkgs.json` 中的 vscode 条目。
+
+#### 包级字段
+
+除了 `fetch_asset.arch.{os}.{arch}` 下的字段外，包对象顶层还支持以下字段：
+
+| 字段 | 说明 |
+|---|---|
+| `file_mode_0755` | （仅 Linux/macOS）文件路径数组（相对于 `pkg_install_relative_dir`），安装完成后给这些文件设置 `0755` 权限。Windows 上为 no-op。 |
 
 #### 安装前/后、升级前/后、卸载前/后脚本
 
@@ -159,6 +171,8 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 ### `favorites.json`
 
 `favorites` 命令使用的 JSON 数组，包含包名列表。
+
+完整默认列表见 `sjtf/favorites.json`（38 个条目），以下为片段示例：
 
 ```json
 [
@@ -189,12 +203,13 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 
 ## 编写 GitHub 源包
 
-详见 [GITHUB_PKG.zh_cn.md](GITHUB_PKG.zh_cn.md)，了解如何编写 `fetch_source: "github"` 的包，包括 `pkgs.json` 字段说明、资产正则匹配、shim 配置以及完整安装流程。
+详见 [GITHUB_PKG.zh_cn.md](GITHUB_PKG.zh_cn.md)，了解如何编写 `fetch_source: "github"` 的包，包括 `pkgs.json` 字段说明、资产正则匹配、shim 配置以及完整安装流程。关于内置的 VS Code 更新 API 等非 GitHub 源，请参见 [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md)。
 
 ## 使用 JavaScript 脚本扩展
 
 `sjtf` 支持通过 JavaScript 脚本自定义获取源和安装/卸载后处理。
 
+- **内置获取源**：`github`、`update_code_visualstudio_com`（新增自定义源见 [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md)）
 - **获取源脚本**：`scripts/fetch/{fetch_source}_fetch_latest.js`
 - **安装前钩子**：`scripts/hooks/{name}-{os}-{arch}-before_install.js`
 - **安装后钩子**：`scripts/hooks/{name}-{os}-{arch}-after_install.js`

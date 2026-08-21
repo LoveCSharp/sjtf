@@ -99,9 +99,12 @@ https://api.github.com/repos/Schniz/fnm/releases/latest
 | `arch` | `x86_64` / `aarch64` / `arm` — 架构 |
 | `file` | 资产 URL（源返回静态下载链接时）或用于匹配 release 资产 `name` 的 JavaScript 正则。非 URL 源使用 JavaScript `RegExp` 语法，命中首个匹配项。 |
 | `type` | 下表中的包类型之一 |
+| `install_program` | （可选，仅 `installer`）安装程序可执行文件。支持占位符 `{DOWNLOADED_CACHE_FILE_FULL_PATH}`（C# 在安装时替换为缓存文件绝对路径）；其他值按原值使用。 |
 | `install_params` | （可选，仅 `installer`）安装程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符 |
 | `uninstall_program` | （可选，仅 `installer`）卸载程序文件名，相对于安装目录 |
 | `uninstall_params` | （可选，仅 `installer`）卸载程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符 |
+
+> **注：** 使用 `update_code_visualstudio_com` fetch 源的包把 `file` 字段替换为 `stable_latest_info_url`，该字段指向 VS Code 的更新元数据 API。API 返回 JSON，包含真实下载 URL、`productVersion` 和 `sha256hash`。示例见 `sjtf/pkgs.json` 中的 vscode 条目。
 
 #### `fetch_asset.type`（必需）
 
@@ -181,6 +184,14 @@ Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
 - `shims/fnm.ps1`：PowerShell 脚本
 
 文件以 UTF-8 无 BOM 格式写入。
+
+### 包级字段
+
+除了 `fetch_asset.arch.{os}.{arch}` 下的字段外，包对象顶层还支持以下字段：
+
+| 字段 | 说明 |
+|---|---|
+| `file_mode_0755` | （仅 Linux/macOS）文件路径数组（相对于 `pkg_install_relative_dir`），安装完成后给这些文件设置 `0755` 权限。Windows 上为 no-op。 |
 
 ### `fetch_source`（必需）
 

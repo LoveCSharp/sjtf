@@ -179,6 +179,35 @@ async function fetch() {
 }
 ```
 
+### Example: VS Code Update API
+
+```javascript
+// scripts/fetch/update_code_visualstudio_com_fetch_latest.js
+
+async function fetch() {
+    const pkg = JSON.parse(pkgJSON);
+
+    const entry = pkg.fetch_asset.arch[os] && pkg.fetch_asset.arch[os][arch];
+    if (!entry) throw new Error("no fetch_asset entry for os=" + os + " arch=" + arch);
+
+    // The "stable_latest_info_url" points to the VS Code update metadata API.
+    // The API returns JSON with the real download URL, productVersion, and sha256hash.
+    const updateUrl = entry.stable_latest_info_url;
+    if (typeof updateUrl !== "string") throw new Error("missing stable_latest_info_url");
+
+    const info = JSON.parse(await httpGet(updateUrl));
+    return JSON.stringify({
+        version: info.productVersion,
+        url: info.url,
+        digest: info.sha256hash || "",
+        digest_algorithm: "sha256",
+        type: entry.type
+    });
+}
+```
+
+> Each fetch-source script reads the fields dictated by its protocol. The `github` source reads `assetEntry.file` (a JavaScript regex); the `update_code_visualstudio_com` source reads `assetEntry.stable_latest_info_url` (a URL).
+
 ### Adding a New Fetch Source
 
 To support a new version source, create `scripts/fetch/{name}_fetch_latest.js` and set the package's `fetch_source` field in `pkgs.json` to `{name}`. No C# code changes are needed.

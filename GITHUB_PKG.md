@@ -99,9 +99,12 @@ Structure: `fetch_asset.arch[os][arch]` is an object with the following fields:
 | `arch` | `x86_64` / `aarch64` / `arm` — architecture |
 | `file` | Asset URL (when the source returns a static download link) **or** a JavaScript regex string matched against the release asset's `name`. For non-URL sources, JavaScript `RegExp` syntax is used; the first matching asset is selected. |
 | `type` | One of the package types below. |
+| `install_program` | (optional, `installer` only) Installer executable. Supports the placeholder `{DOWNLOADED_CACHE_FILE_FULL_PATH}` (replaced by C# at install time with the cache file's absolute path); custom values are used verbatim. |
 | `install_params` | (optional, `installer` only) Arguments passed to the installer. Supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders. |
 | `uninstall_program` | (optional, `installer` only) Uninstaller program file name, relative to the install directory. |
 | `uninstall_params` | (optional, `installer` only) Arguments passed to the uninstaller. Supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders. |
+
+> **Note:** Packages using the `update_code_visualstudio_com` fetch source replace the `file` field with `stable_latest_info_url`, which points to the VS Code update metadata API. The API returns JSON containing the real download URL, `productVersion` and `sha256hash`. See `sjtf/pkgs.json` (vscode entry) for an example.
 
 #### `fetch_asset.type` (required)
 
@@ -182,6 +185,14 @@ This creates:
 - `shims/fnm.ps1`: PowerShell script
 
 Files are written as UTF-8 without BOM.
+
+### Package-level fields
+
+In addition to the per-arch `fetch_asset.arch.{os}.{arch}` entry, the following fields are set on the package root object:
+
+| Field | Description |
+|---|---|
+| `file_mode_0755` | (Linux/macOS only) Array of file paths (relative to `pkg_install_relative_dir`) that should be given `0755` permissions after install. Windows is a no-op. |
 
 ### `fetch_source` (required)
 

@@ -179,6 +179,35 @@ async function fetch() {
 }
 ```
 
+### 示例：VS Code 更新 API
+
+```javascript
+// scripts/fetch/update_code_visualstudio_com_fetch_latest.js
+
+async function fetch() {
+    const pkg = JSON.parse(pkgJSON);
+
+    const entry = pkg.fetch_asset.arch[os] && pkg.fetch_asset.arch[os][arch];
+    if (!entry) throw new Error("no fetch_asset entry for os=" + os + " arch=" + arch);
+
+    // "stable_latest_info_url" 指向 VS Code 更新元数据 API。
+    // 该 API 返回包含真实下载 URL、productVersion 和 sha256hash 的 JSON。
+    const updateUrl = entry.stable_latest_info_url;
+    if (typeof updateUrl !== "string") throw new Error("missing stable_latest_info_url");
+
+    const info = JSON.parse(await httpGet(updateUrl));
+    return JSON.stringify({
+        version: info.productVersion,
+        url: info.url,
+        digest: info.sha256hash || "",
+        digest_algorithm: "sha256",
+        type: entry.type
+    });
+}
+```
+
+> 每个获取源脚本读取的字段取决于其协议。`github` 源读取 `assetEntry.file`（JavaScript 正则）；`update_code_visualstudio_com` 源读取 `assetEntry.stable_latest_info_url`（URL）。
+
 ### 新增自定义获取源
 
 要支持新的版本获取源，只需创建 `scripts/fetch/{name}_fetch_latest.js`，然后在 `pkgs.json` 中将包的 `fetch_source` 字段设置为 `{name}`，无需修改 C# 代码。

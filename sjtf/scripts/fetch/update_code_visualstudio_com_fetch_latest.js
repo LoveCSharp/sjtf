@@ -14,6 +14,10 @@
 // Exports an async `fetch()` that returns a JSON-stringified DownloadPlan
 // (version / url / digest / digest_algorithm) to C#, plus the install-time
 // metadata taken from fetch_asset.arch.{os}.{arch}:
+//   stable_latest_info_url
+//                     - required, URL to the VS Code update metadata API
+//                       (returns JSON containing the real download URL,
+//                       productVersion and sha256hash)
 //   type              - required, one of portable-compressed-archive /
 //                       portable-executable / installer
 //   install_program   - executable to run (default empty string);
@@ -48,9 +52,9 @@ async function fetch() {
         throw new Error("no fetch_asset entry for os=" + os + " arch=" + arch);
     }
 
-    const updateUrl = assetEntry.file;
+    const updateUrl = assetEntry.stable_latest_info_url;
     if (typeof updateUrl !== "string") {
-        throw new Error("fetch_asset.arch." + os + "." + arch + ".file must be a string");
+        throw new Error("fetch_asset.arch." + os + "." + arch + ".stable_latest_info_url must be a string");
     }
 
     if (typeof assetEntry.type !== "string" || assetEntry.type === "") {
