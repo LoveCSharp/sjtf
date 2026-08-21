@@ -392,12 +392,12 @@ internal static class Config
                 aria2Section = $"linux_x86_64 = \"{SjtfAria2.DefaultUrlLinuxX86_64}\"";
                 break;
             case "windows":
-                installDir = "D:\\sjtf_pkgs";
+                installDir = "D:\\\\sjtf_pkgs";
                 aria2Section = $"windows_x86_64 = \"{SjtfAria2.DefaultUrl}\"";
                 break;
             default:
                 // macOS / unknown：保守回退到 Windows 默认
-                installDir = "D:\\sjtf_pkgs";
+                installDir = "D:\\\\sjtf_pkgs";
                 aria2Section = $"windows_x86_64 = \"{SjtfAria2.DefaultUrl}\"";
                 break;
         }
