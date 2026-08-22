@@ -1,4 +1,4 @@
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 文件下载助手（aria2 调度入口）。底层 HTTP 下载逻辑下沉到 <see cref="HttpFileDownloader"/>。

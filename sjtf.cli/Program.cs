@@ -1,5 +1,5 @@
 ﻿using System.CommandLine;
-using Sjtf;
+using Sjtf.Cli;
 using Spectre.Console;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -193,7 +193,7 @@ var favoritesCommand = new Command("favorites", "Sync installed packages with fa
 };
 favoritesCommand.SetAction(async _ =>
 {
-    var path = Path.Combine(Paths.SjtfRoot(), "favorites.json");
+    var path = Path.Combine(Paths.SjtfCliRoot(), "favorites.json");
     if (!File.Exists(path))
     {
         Console.Error.WriteLine("favorites.json not found. Create it with a JSON array of package names.");
@@ -317,7 +317,7 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
     /// <returns>退出代码 / Exit code.</returns>
     static int ListInstalled()
     {
-        var installedPath = Path.Combine(Paths.SjtfRoot(), "installed.json");
+        var installedPath = Path.Combine(Paths.SjtfCliRoot(), "installed.json");
 
         if (!File.Exists(installedPath))
         {

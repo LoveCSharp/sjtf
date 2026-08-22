@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 单个已安装包的记录 / Record of a single installed package.
@@ -31,7 +31,7 @@ internal static class Installed
     /// <returns>包名到已安装信息的字典 / Dictionary of package names to installed info.</returns>
     public static Dictionary<string, InstalledInfo> Load()
     {
-        var path = Path.Combine(Paths.SjtfRoot(), "installed.json");
+        var path = Path.Combine(Paths.SjtfCliRoot(), "installed.json");
         if (!File.Exists(path))
         {
             var dir = Path.GetDirectoryName(path);
@@ -80,7 +80,7 @@ internal static class Installed
     /// <param name="installed">包名到已安装信息的字典 / Dictionary of package names to installed info.</param>
     public static void Save(Dictionary<string, InstalledInfo> installed)
     {
-        var path = Path.Combine(Paths.SjtfRoot(), "installed.json");
+        var path = Path.Combine(Paths.SjtfCliRoot(), "installed.json");
         var obj = new JsonObject();
         foreach (var kv in installed)
         {

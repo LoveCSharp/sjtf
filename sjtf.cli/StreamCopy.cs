@@ -1,4 +1,4 @@
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 带进度条/提示的流复制助手 / Stream copy helpers with progress bar / hint.

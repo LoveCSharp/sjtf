@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 纯 HTTP 文件下载助手（单线程 + Range 分块并发）。

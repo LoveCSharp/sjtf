@@ -4,7 +4,7 @@ using System.Text.Json.Nodes;
 using Jint;
 using Jint.Native;
 
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// Jint 脚本引擎工厂与共享 helpers / Jint script engine factory and shared helpers.

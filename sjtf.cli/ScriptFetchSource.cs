@@ -1,7 +1,7 @@
 using System.Text.Json.Nodes;
 using Jint;
 
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 基于 JS 脚本的资源获取源实现 / JavaScript-script-based fetch source implementation.
@@ -30,7 +30,7 @@ internal sealed class ScriptFetchSource : IFetchSource
     /// <returns>下载计划 / Download plan.</returns>
     public async Task<DownloadPlan> ResolveAsync(JsonObject pkg, string packageName)
     {
-        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "fetch", $"{_sourceName}_fetch_latest.js");
+        var scriptPath = Path.Combine(Paths.SjtfCliRoot(), "scripts", "fetch", $"{_sourceName}_fetch_latest.js");
         if (!File.Exists(scriptPath))
             throw new InvalidOperationException($"script not found at {scriptPath}");
 

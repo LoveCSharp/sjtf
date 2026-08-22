@@ -1,4 +1,4 @@
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 控制台进度输出助手（进度条与滑动速度计算）/ Console progress rendering helpers (progress bar and sliding speed).

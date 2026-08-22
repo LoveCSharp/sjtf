@@ -3,12 +3,12 @@ using Tomlyn;
 using Tomlyn.Model;
 using Tomlyn.Serialization;
 
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// HTTP 相关配置 / HTTP related configuration.
 /// </summary>
-public sealed class SjtfHttp
+public sealed class SjtfCliHttp
 {
     /// <summary>
     /// HTTP 请求 User-Agent / HTTP request User-Agent.
@@ -20,7 +20,7 @@ public sealed class SjtfHttp
 /// <summary>
 /// 通用配置 / General configuration.
 /// </summary>
-public sealed class SjtfGeneral
+public sealed class SjtfCliGeneral
 {
     /// <summary>
     /// 工具安装目录 / Tool installation directory.
@@ -32,7 +32,7 @@ public sealed class SjtfGeneral
 /// <summary>
 /// GitHub 相关配置 / GitHub related configuration.
 /// </summary>
-public sealed class SjtfGithub
+public sealed class SjtfCliGithub
 {
     /// <summary>
     /// GitHub 经典个人访问令牌 (ghp_...) / GitHub classic personal access token (ghp_...).
@@ -50,7 +50,7 @@ public sealed class SjtfGithub
 /// <summary>
 /// 包源配置 / Package source configuration.
 /// </summary>
-public sealed class SjtfPkgs
+public sealed class SjtfCliPkgs
 {
     /// <summary>
     /// 远程 pkgs.json 地址 / Remote pkgs.json URL.
@@ -62,7 +62,7 @@ public sealed class SjtfPkgs
 /// <summary>
 /// 下载配置 / Download configuration.
 /// </summary>
-public sealed class SjtfDownload
+public sealed class SjtfCliDownload
 {
     /// <summary>
     /// 每个服务器的最大连接数（线程数）/ Maximum connections per server (thread count). Range: 1 ~ 16.
@@ -92,7 +92,7 @@ public sealed class SjtfDownload
 /// <summary>
 /// aria2 配置 / aria2 configuration.
 /// </summary>
-public sealed class SjtfAria2
+public sealed class SjtfCliAria2
 {
     /// <summary>
     /// aria2 默认下载 URL（Windows x64）。当 [aria2] 段未配置且当前 OS/Arch 匹配 windows_x86_64 时使用。
@@ -147,35 +147,35 @@ public sealed class SjtfAria2
 /// <summary>
 /// sjtf 配置根模型 / sjtf configuration root model.
 /// </summary>
-public sealed class SjtfConfig
+public sealed class SjtfCliConfig
 {
     [TomlPropertyName("general")]
-    public SjtfGeneral General { get; set; } = new();
+    public SjtfCliGeneral General { get; set; } = new();
 
     [TomlPropertyName("github")]
-    public SjtfGithub Github { get; set; } = new();
+    public SjtfCliGithub Github { get; set; } = new();
 
     [TomlPropertyName("http")]
-    public SjtfHttp Http { get; set; } = new();
+    public SjtfCliHttp Http { get; set; } = new();
 
     [TomlPropertyName("pkgs")]
-    public SjtfPkgs Pkgs { get; set; } = new();
+    public SjtfCliPkgs Pkgs { get; set; } = new();
 
     [TomlPropertyName("download")]
-    public SjtfDownload Download { get; set; } = new();
+    public SjtfCliDownload Download { get; set; } = new();
 
     [TomlPropertyName("aria2")]
-    public SjtfAria2 Aria2 { get; set; } = new();
+    public SjtfCliAria2 Aria2 { get; set; } = new();
 }
 
-[TomlSerializable(typeof(SjtfConfig))]
-[TomlSerializable(typeof(SjtfGeneral))]
-[TomlSerializable(typeof(SjtfGithub))]
-[TomlSerializable(typeof(SjtfHttp))]
-[TomlSerializable(typeof(SjtfPkgs))]
-[TomlSerializable(typeof(SjtfDownload))]
-[TomlSerializable(typeof(SjtfAria2))]
-internal partial class SjtfConfigContext : TomlSerializerContext
+[TomlSerializable(typeof(SjtfCliConfig))]
+[TomlSerializable(typeof(SjtfCliGeneral))]
+[TomlSerializable(typeof(SjtfCliGithub))]
+[TomlSerializable(typeof(SjtfCliHttp))]
+[TomlSerializable(typeof(SjtfCliPkgs))]
+[TomlSerializable(typeof(SjtfCliDownload))]
+[TomlSerializable(typeof(SjtfCliAria2))]
+internal partial class SjtfCliConfigContext : TomlSerializerContext
 {
 }
 
@@ -189,9 +189,9 @@ internal static class Config
     /// <summary>
     /// 获取 config.toml 的完整路径 / Get the full path of config.toml.
     /// </summary>
-    private static string ConfigPath() => Path.Combine(Paths.SjtfRoot(), "config.toml");
+    private static string ConfigPath() => Path.Combine(Paths.SjtfCliRoot(), "config.toml");
 
-    private static SjtfConfig? _cachedDoc;
+    private static SjtfCliConfig? _cachedDoc;
     private static long _cachedDocMtime;
     private static readonly object _cacheLock = new();
 
@@ -201,7 +201,7 @@ internal static class Config
     /// <summary>
     /// 加载并反序列化 config.toml / Load and deserialize config.toml.
     /// </summary>
-    private static SjtfConfig? LoadDoc()
+    private static SjtfCliConfig? LoadDoc()
     {
         var path = ConfigPath();
         if (!File.Exists(path)) return null;
@@ -213,7 +213,7 @@ internal static class Config
             if (_cachedDoc != null && _cachedDocMtime == mtime)
                 return _cachedDoc;
 
-            var doc = TomlSerializer.Deserialize(File.ReadAllText(path), SjtfConfigContext.Default.SjtfConfig);
+            var doc = TomlSerializer.Deserialize(File.ReadAllText(path), SjtfCliConfigContext.Default.SjtfCliConfig);
             _cachedDoc = doc;
             _cachedDocMtime = mtime;
             return doc;
@@ -296,8 +296,8 @@ internal static class Config
 
     /// <summary>
     /// 从配置中加载指定 OS/Arch 的 aria2 下载地址（含内置 fallback）/ Load aria2 download URL for given OS/arch from config (with built-in fallback).
-    /// fallback 集中在 <see cref="SjtfAria2.GetUrl"/>；此处仅做委托。
-    /// Fallback is centralized in <see cref="SjtfAria2.GetUrl"/>; this method just delegates.
+    /// fallback 集中在 <see cref="SjtfCliAria2.GetUrl"/>；此处仅做委托。
+    /// Fallback is centralized in <see cref="SjtfCliAria2.GetUrl"/>; this method just delegates.
     /// </summary>
     public static string? LoadAria2Url(string os, string arch)
     {
@@ -389,16 +389,16 @@ internal static class Config
                 // Linux: ~/dev（已展开为绝对路径）
                 var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                 installDir = Path.Combine(home, "dev");
-                aria2Section = $"linux_x86_64 = \"{SjtfAria2.DefaultUrlLinuxX86_64}\"";
+                aria2Section = $"linux_x86_64 = \"{SjtfCliAria2.DefaultUrlLinuxX86_64}\"";
                 break;
             case "windows":
                 installDir = "D:\\\\sjtf_pkgs";
-                aria2Section = $"windows_x86_64 = \"{SjtfAria2.DefaultUrl}\"";
+                aria2Section = $"windows_x86_64 = \"{SjtfCliAria2.DefaultUrl}\"";
                 break;
             default:
                 // macOS / unknown：保守回退到 Windows 默认
                 installDir = "D:\\\\sjtf_pkgs";
-                aria2Section = $"windows_x86_64 = \"{SjtfAria2.DefaultUrl}\"";
+                aria2Section = $"windows_x86_64 = \"{SjtfCliAria2.DefaultUrl}\"";
                 break;
         }
 

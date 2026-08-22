@@ -1,4 +1,4 @@
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 路径解析助手（sjtf 根目录与缓存目录）/ Path resolution helpers (sjtf root and cache directories).
@@ -8,7 +8,7 @@ internal static class Paths
     /// <summary>
     /// 获取 sjtf 可执行文件所在的根目录 / Get the root directory where sjtf executable resides.
     /// </summary>
-    public static string SjtfRoot()
+    public static string SjtfCliRoot()
     {
         var path = Environment.ProcessPath
             ?? throw new InvalidOperationException("Cannot determine process path");
@@ -27,7 +27,7 @@ internal static class Paths
     /// </summary>
     public static string CacheDir()
     {
-        var d = Path.Combine(SjtfRoot(), "cache");
+        var d = Path.Combine(SjtfCliRoot(), "cache");
         Directory.CreateDirectory(d);
         return d;
     }

@@ -1,6 +1,6 @@
 using System.Text.Json.Nodes;
 
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 解析给定包"从哪里下载以及要验证什么"。

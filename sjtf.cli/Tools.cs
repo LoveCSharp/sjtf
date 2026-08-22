@@ -1,4 +1,4 @@
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 跨领域小工具助手（符号链接、异常处理、半成品清理）。

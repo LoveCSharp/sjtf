@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 操作系统和架构检测 / Operating system and architecture detection.

@@ -1,7 +1,7 @@
 using Tomlyn.Model;
 using Tomlyn.Serialization;
 
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// Tomlyn 序列化上下文，用于 TOML 反序列化。

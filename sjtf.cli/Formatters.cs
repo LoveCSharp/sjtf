@@ -1,4 +1,4 @@
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 格式化助手（字节数等人类可读表示）/ Formatting helpers (human-readable byte counts, etc.).

@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 internal static class InstallHelpers
 {
@@ -341,7 +341,7 @@ internal static class InstallHelpers
     {
         var os = Arch.CurrentOs();
         var arch = Arch.CurrentArch();
-        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-before_install.js");
+        var scriptPath = Path.Combine(Paths.SjtfCliRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-before_install.js");
         if (!File.Exists(scriptPath))
             return;
 
@@ -374,7 +374,7 @@ internal static class InstallHelpers
     {
         var os = Arch.CurrentOs();
         var arch = Arch.CurrentArch();
-        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-before_upgrade.js");
+        var scriptPath = Path.Combine(Paths.SjtfCliRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-before_upgrade.js");
 
         if (!File.Exists(scriptPath))
             return;
@@ -406,7 +406,7 @@ internal static class InstallHelpers
     {
         var os = Arch.CurrentOs();
         var arch = Arch.CurrentArch();
-        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-after_install.js");
+        var scriptPath = Path.Combine(Paths.SjtfCliRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-after_install.js");
         if (!File.Exists(scriptPath))
             return;
 
@@ -439,7 +439,7 @@ internal static class InstallHelpers
     {
         var os = Arch.CurrentOs();
         var arch = Arch.CurrentArch();
-        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-after_upgrade.js");
+        var scriptPath = Path.Combine(Paths.SjtfCliRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-after_upgrade.js");
 
         if (!File.Exists(scriptPath))
             return;
@@ -471,7 +471,7 @@ internal static class InstallHelpers
     {
         var os = Arch.CurrentOs();
         var arch = Arch.CurrentArch();
-        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-after_uninstall.js");
+        var scriptPath = Path.Combine(Paths.SjtfCliRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-after_uninstall.js");
         if (!File.Exists(scriptPath))
             return;
 
@@ -502,7 +502,7 @@ internal static class InstallHelpers
     {
         var os = Arch.CurrentOs();
         var arch = Arch.CurrentArch();
-        var scriptPath = Path.Combine(Paths.SjtfRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-before_uninstall.js");
+        var scriptPath = Path.Combine(Paths.SjtfCliRoot(), "scripts", "hooks", $"{name}-{os}-{arch}-before_uninstall.js");
 
         if (!File.Exists(scriptPath))
             return;

@@ -3,7 +3,7 @@ using System.Text.Json.Nodes;
 using Tomlyn;
 using Tomlyn.Model;
 
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 脚本引擎使用的转换器 / Converters used by the script engine.
@@ -21,7 +21,7 @@ internal static class ScriptConverters
     /// <returns>JSON 字符串 / JSON string.</returns>
     public static string LoadConfigJson()
     {
-        var path = Path.Combine(Paths.SjtfRoot(), "config.toml");
+        var path = Path.Combine(Paths.SjtfCliRoot(), "config.toml");
         if (!File.Exists(path)) return "{}";
 
         string raw;

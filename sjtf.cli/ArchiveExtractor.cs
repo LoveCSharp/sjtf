@@ -3,7 +3,7 @@ using SharpCompress.Archives;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 压缩包解压与目录复制助手 / Archive extraction and directory copy helpers.

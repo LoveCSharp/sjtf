@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// aria2 集成：查找/下载 aria2 二进制文件并执行下载任务。
@@ -29,7 +29,7 @@ internal static class Aria2
     /// <summary>
     /// 获取 tools 目录路径 / Get the tools directory path.
     /// </summary>
-    public static string ToolsDir() => Path.Combine(Paths.SjtfRoot(), "tools");
+    public static string ToolsDir() => Path.Combine(Paths.SjtfCliRoot(), "tools");
 
     /// <summary>
     /// 仅在 PATH / tools 目录中查找 aria2c，不发起任何下载。找不到返回 null。

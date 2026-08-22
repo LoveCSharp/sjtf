@@ -1,4 +1,4 @@
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 多线程分块下载进度聚合器（线程安全）/ Multi-thread chunk download progress aggregator (thread-safe).

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace Sjtf;
+namespace Sjtf.Cli;
 
 /// <summary>
 /// 包定义加载与解析 / Package definition loading and resolution.
@@ -19,7 +19,7 @@ internal static class Packages
         if (string.IsNullOrEmpty(remoteUrl))
             throw new InvalidOperationException("remote_url is not set in config.toml [pkgs]");
 
-        var pkgsPath = Path.Combine(Paths.SjtfRoot(), "pkgs.json");
+        var pkgsPath = Path.Combine(Paths.SjtfCliRoot(), "pkgs.json");
         Console.WriteLine($"pkgs: fetching {remoteUrl}");
         await Downloader.DownloadFileAsync(remoteUrl, pkgsPath, "pkgs",
             Config.LoadMaxConnectionPerServer(), Config.LoadSplit(), Config.LoadMinSplitSize());
@@ -33,7 +33,7 @@ internal static class Packages
     /// <returns>包定义 JSON 对象 / Package definition JSON object.</returns>
     public static JsonObject Load()
     {
-        var path = Path.Combine(Paths.SjtfRoot(), "pkgs.json");
+        var path = Path.Combine(Paths.SjtfCliRoot(), "pkgs.json");
         if (!File.Exists(path))
         {
             var remoteUrl = Config.LoadPkgsRemoteUrl();
