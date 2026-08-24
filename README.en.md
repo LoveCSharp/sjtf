@@ -281,3 +281,11 @@ This writes the merged JSON to both `sjtf.cli/data/pkgs.json` and `pkgs.json` (a
 MIT — see [LICENSE](LICENSE) for details.
 
 > This project uses [aria2](https://aria2.github.io/) as its multi-threaded download engine. aria2 is open-source software distributed under its own license.
+>
+> .NET runtime dependencies (NuGet, all MIT-licensed):
+>
+> - [Jint 4.16.0](https://github.com/sebastienros/jint) — embedded JavaScript engine
+> - [SharpCompress 0.50.4](https://github.com/adamhathcock/sharpcompress) — ZIP / TAR.GZ / 7Z archive handling
+> - [Spectre.Console 0.57.2](https://github.com/spectreconsole/spectre.console) — terminal UI rendering
+> - [System.CommandLine 2.0.10](https://github.com/dotnet/command-line-api) — CLI argument parsing
+> - [Tomlyn 2.10.1](https://github.com/xen2/Tomlyn) — TOML parsing

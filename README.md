@@ -281,3 +281,11 @@ nu sjtf.pkgs/merge_json.nu
 MIT — 详见 [LICENSE](LICENSE) 文件。
 
 > 本项目使用 [aria2](https://aria2.github.io/) 作为多线程下载引擎，aria2 为开源软件，遵循其相应开源许可证。
+>
+> 运行时 .NET 依赖（NuGet，均为 MIT 许可证）：
+>
+> - [Jint 4.16.0](https://github.com/sebastienros/jint) — 内嵌 JavaScript 引擎
+> - [SharpCompress 0.50.4](https://github.com/adamhathcock/sharpcompress) — ZIP / TAR.GZ / 7Z 压缩包处理
+> - [Spectre.Console 0.57.2](https://github.com/spectreconsole/spectre.console) — 终端 UI 渲染
+> - [System.CommandLine 2.0.10](https://github.com/dotnet/command-line-api) — CLI 参数解析
+> - [Tomlyn 2.10.1](https://github.com/xen2/Tomlyn) — TOML 解析
