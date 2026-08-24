@@ -104,7 +104,7 @@ https://api.github.com/repos/Schniz/fnm/releases/latest
 | `uninstall_program` | （可选，仅 `installer`）卸载程序文件名，相对于安装目录 |
 | `uninstall_params` | （可选，仅 `installer`）卸载程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符 |
 
-> **注：** 使用 `update_code_visualstudio_com` fetch 源的包把 `file` 字段替换为 `stable_latest_info_url`，该字段指向 VS Code 的更新元数据 API。API 返回 JSON，包含真实下载 URL、`productVersion` 和 `sha256hash`。示例见 `sjtf/pkgs.json` 中的 vscode 条目。
+> **注：** 使用 `update_code_visualstudio_com` fetch 源的包把 `file` 字段替换为 `stable_latest_info_url`，该字段指向 VS Code 的更新元数据 API。API 返回 JSON，包含真实下载 URL、`productVersion` 和 `sha256hash`。示例见 `data/pkgs.json` 中的 vscode 条目——或其源码片段 `sjtf.pkgs/pkg‑fragments/` 下的对应文件。
 
 #### `fetch_asset.type`（必需）
 
@@ -222,6 +222,21 @@ Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
 - 卸载后：`scripts/hooks/{name}-{os}-{arch}-after_uninstall.js`
 
 完整的钩子编写指南见 [SCRIPTS.zh_cn.md](SCRIPTS.zh_cn.md)。
+
+## 使用 `pkgs_custom.json` 进行覆盖
+
+可选的 `data/pkgs_custom.json` 允许你在不修改 `pkgs.json` 的前提下，新增或覆盖包定义。加载时，`Packages.Load()` 会在内存中合并两个文件：
+
+- 若 `pkgs_custom.json` 缺失，则只使用 `pkgs.json`。
+- 同名包会被 `pkgs_custom.json` 中的条目**完全替换**（不做字段级合并，整个包对象被覆盖）。
+- 合并完全在内存中完成，`pkgs_custom.json` 永远不会被修改。
+- `sjtf packages update` 只刷新 `pkgs.json`，自定义内容会保留。
+
+典型用途：
+
+- 锁定特定版本的包（覆盖 `repo` 或资产规则）。
+- 自定义描述、安装目录或 shim 路径。
+- 添加私有包而无需 fork `pkgs.json`。
 
 ## 工作流程
 

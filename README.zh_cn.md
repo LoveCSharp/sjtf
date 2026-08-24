@@ -46,7 +46,11 @@ sjtf --version        # 显示版本号
 
 ## 配置文件
 
-`config.toml`、`pkgs.json`、`favorites.json`、`installed.json` 都位于可执行文件同级目录的 `data/` 子目录下。`pkgs.json` 和 `favorites.json` 在构建时拷贝进去；`config.toml` 和 `installed.json` 在首次运行时自动生成。
+`config.toml`、`pkgs.json`、`favorites.json`、`installed.json` 以及可选的 `pkgs_custom.json` 都位于可执行文件同级目录的 `data/` 子目录下：
+
+- `config.toml`、`installed.json`：运行时由程序自动生成到 `data/`
+- `pkgs.json`、`favorites.json`：构建/发布时从源码拷贝到 `data/`
+- `pkgs_custom.json`：可选，由构建/发布过程拷贝到 `data/`。加载时对 `pkgs.json` 进行覆盖（见「包定义」一节）。
 
 > **注意（Windows）：** 创建符号链接需要管理员权限或启用开发人员模式。否则 symlink 创建会失败。
 
@@ -112,6 +116,34 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 }
 ```
 
+#### `pkgs_custom.json`（可选覆盖层）
+
+你可以创建 `data/pkgs_custom.json` 来添加或覆盖包定义，而无需修改 `pkgs.json`。加载时，`Packages.Load()` 会在内存中合并两个文件：
+
+- 若 `pkgs_custom.json` 缺失，则只使用 `pkgs.json`。
+- 同名包会被 `pkgs_custom.json` 中的条目**完全替换**（不做字段级深合并，整个包对象被覆盖）。
+- 合并完全在内存中完成，`pkgs_custom.json` 永远不会被修改。
+- `sjtf packages update` 只刷新 `pkgs.json`，自定义内容会保留。
+
+示例 —— 覆盖 vscode 的 description：
+
+```json
+{
+  "vscode": {
+    "description": "我的定制版 VS Code",
+    "repo": "microsoft/vscode",
+    "fetch_asset": {
+      "arch": {
+        "windows": { "x86_64": { "file": "^(?=.*windows)(?=.*x64).*.zip$", "type": "portable-compressed-archive" } }
+      }
+    },
+    "pkg_install_relative_dir": "editor/vscode",
+    "shim": { "windows": { "shell_script": { "code.cmd": "@\"{PKG_INSTALL_DIR}\\bin\\code.cmd\" %*" } } },
+    "fetch_source": "github"
+  }
+}
+```
+
 #### shim 配置
 
 `shim` 按操作系统分层，仅在当前操作系统匹配时生效。
@@ -152,7 +184,7 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 | `uninstall_program` | 卸载程序文件名（相对于安装目录，仅 `installer`） |
 | `uninstall_params` | 卸载程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符（仅 `installer`） |
 
-> **注：** 使用 `update_code_visualstudio_com` fetch 源的包把 `file` 字段替换为 `stable_latest_info_url`，该字段指向 VS Code 的更新元数据 API（返回 JSON，含真实下载 URL、`productVersion` 和 `sha256hash`）。示例见 `sjtf/pkgs.json` 中的 vscode 条目。
+> **注：** 使用 `update_code_visualstudio_com` fetch 源的包把 `file` 字段替换为 `stable_latest_info_url`，该字段指向 VS Code 的更新元数据 API（返回 JSON，含真实下载 URL、`productVersion` 和 `sha256hash`）。示例见 `data/pkgs.json` 中的 vscode 条目（或其源码片段 `sjtf.pkgs/pkg‑fragments/` 下的对应文件）。
 
 #### 包级字段
 
@@ -228,6 +260,16 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 dotnet build
 dotnet publish -c Release -r win-x64 --self-contained
 ```
+
+### 仓库布局（面向包维护者）
+
+仓库根的 `pkgs.json` 与 `sjtf.cli/data/pkgs.json` 都是由 `sjtf.pkgs/pkg‑fragments/` 中的片段合并生成的。重新生成可执行：
+
+```bash
+nu sjtf.pkgs/merge_json.nu
+```
+
+脚本会把合并后的 JSON 同时写到 `sjtf.cli/data/pkgs.json` 和仓库根的 `pkgs.json`。
 
 ## 许可证
 

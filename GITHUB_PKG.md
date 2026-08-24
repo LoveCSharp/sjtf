@@ -104,7 +104,7 @@ Structure: `fetch_asset.arch[os][arch]` is an object with the following fields:
 | `uninstall_program` | (optional, `installer` only) Uninstaller program file name, relative to the install directory. |
 | `uninstall_params` | (optional, `installer` only) Arguments passed to the uninstaller. Supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders. |
 
-> **Note:** Packages using the `update_code_visualstudio_com` fetch source replace the `file` field with `stable_latest_info_url`, which points to the VS Code update metadata API. The API returns JSON containing the real download URL, `productVersion` and `sha256hash`. See `sjtf/pkgs.json` (vscode entry) for an example.
+> **Note:** Packages using the `update_code_visualstudio_com` fetch source replace the `file` field with `stable_latest_info_url`, which points to the VS Code update metadata API. The API returns JSON containing the real download URL, `productVersion` and `sha256hash`. See `data/pkgs.json` (vscode entry) — or its source fragment under `sjtf.pkgs/pkg‑fragments/` — for an example.
 
 #### `fetch_asset.type` (required)
 
@@ -223,6 +223,21 @@ Hooks are **auto-detected** by path. Drop a JavaScript file at the expected loca
 - After-uninstall: `scripts/hooks/{name}-{os}-{arch}-after_uninstall.js`
 
 See [SCRIPTS.md](SCRIPTS.md) for the full hook authoring guide.
+
+## Overlay with `pkgs_custom.json`
+
+The optional `data/pkgs_custom.json` lets you add or override package definitions without editing `pkgs.json`. At load time, `Packages.Load()` merges the two files in memory:
+
+- If `pkgs_custom.json` is missing, only `pkgs.json` is used.
+- Same-name packages are fully replaced by the entry in `pkgs_custom.json` (no field-level merge — the entire package object is overridden).
+- The merge happens entirely in memory; `pkgs_custom.json` is never modified.
+- `sjtf packages update` only refreshes `pkgs.json`; customizations are preserved.
+
+Typical uses:
+
+- Pin specific versions of packages (by overriding `repo` or asset rules).
+- Customize description, install directory, or shim paths.
+- Add private packages without forking `pkgs.json`.
 
 ## Workflow
 
