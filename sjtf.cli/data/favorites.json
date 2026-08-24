@@ -4,9 +4,7 @@
   "g",
   "powershell",
   "nushell",
-  "zellij",
   "starship",
-  "oh-my-posh",
   "microsoft-coreutils",
   "fzf",
   "zoxide",
@@ -23,8 +21,6 @@
   "bottom",
   "procs",
   "carapace",
-  "pueue",
-  "pueued",
   "git",
   "delta",
   "lazygit",
@@ -35,5 +31,5 @@
   "vscode",
   "zed",
   "edit",
-  "notepad3"
+  "notepad4"
 ]
