@@ -125,6 +125,8 @@ You may create `data/pkgs_custom.json` to add or override package definitions wi
 - The merge happens entirely in memory; `pkgs_custom.json` is never modified.
 - `sjtf packages update` only refreshes `pkgs.json`; your customizations are preserved.
 
+In `packages list` and `list` output, names sourced from `pkgs_custom.json` are suffixed with `*c` (e.g. `ouch` → `ouch*c`) so you can tell at a glance which packages are custom overlays.
+
 Example — overriding vscode's description:
 
 ```json

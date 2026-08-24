@@ -125,6 +125,8 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 - 合并完全在内存中完成，`pkgs_custom.json` 永远不会被修改。
 - `sjtf packages update` 只刷新 `pkgs.json`，自定义内容会保留。
 
+在 `packages list` 与 `list` 的输出中，来自 `pkgs_custom.json` 的包名末尾追加 `*c`（例如 `ouch` → `ouch*c`），便于一眼区分自定义覆盖包。
+
 示例 —— 覆盖 vscode 的 description：
 
 ```json

@@ -233,6 +233,8 @@ The optional `data/pkgs_custom.json` lets you add or override package definition
 - The merge happens entirely in memory; `pkgs_custom.json` is never modified.
 - `sjtf packages update` only refreshes `pkgs.json`; customizations are preserved.
 
+In `packages list` and `list` output, custom-overlay packages are visually marked with a `*c` suffix on the name (e.g. `ouch*c`).
+
 Typical uses:
 
 - Pin specific versions of packages (by overriding `repo` or asset rules).

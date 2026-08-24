@@ -232,6 +232,8 @@ Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
 - 合并完全在内存中完成，`pkgs_custom.json` 永远不会被修改。
 - `sjtf packages update` 只刷新 `pkgs.json`，自定义内容会保留。
 
+在 `packages list` 与 `list` 的输出中，自定义覆盖包会在名称末尾追加 `*c` 标记（如 `ouch*c`）。
+
 典型用途：
 
 - 锁定特定版本的包（覆盖 `repo` 或资产规则）。
