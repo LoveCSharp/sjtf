@@ -118,7 +118,7 @@ return JSON.stringify({
 | `version` | 是 | — | 上游版本字符串，与 `installed.json` 比对 |
 | `url` | 是 | — | 流水线要下载的 URL |
 | `type` | 是 | — | 包类型，取自 `fetch_asset.arch.{os}.{arch}.type` |
-| `digest` | 否 | `""` | 期望的十六进制摘要 |
+| `digest` | 否 | `""` | 期望的十六进制摘要。为空或纯空白时跳过验证流程，stdout 输出 "no verification info (digest is empty), skipping digest verification" 后继续 install/upgrade。 |
 | `digest_algorithm` | 否 | `"sha256"` | 摘要算法标识 |
 | `install_program` | 否 | `""` | 安装程序可执行文件（占位符 `{DOWNLOADED_CACHE_FILE_FULL_PATH}` 由 C# 替换） |
 | `install_params` | 否 | `""` | 安装程序参数（支持 `{PKG_INSTALL_DIR}` / `{INSTALL_DIR}`） |

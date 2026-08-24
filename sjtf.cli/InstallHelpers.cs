@@ -55,6 +55,12 @@ internal static class InstallHelpers
                 await Downloader.DownloadFileAsync(plan.DownloadUrl, dlPath, $"{name}: downloading", maxConn, splitCount, minSplitMB);
             }
 
+            if (string.IsNullOrWhiteSpace(plan.ExpectedDigest))
+            {
+                Console.WriteLine($"{name}: no verification info (digest is empty), skipping digest verification");
+                return dlPath;
+            }
+
             Console.WriteLine($"{name}: verifying {plan.DigestAlgorithm} digest...");
             var actualDigest = await ComputeDigestAsync(dlPath, plan.DigestAlgorithm);
             if (string.Equals(actualDigest, plan.ExpectedDigest, StringComparison.OrdinalIgnoreCase))

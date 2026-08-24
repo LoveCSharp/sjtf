@@ -118,7 +118,7 @@ Field reference:
 | `version` | yes | — | Upstream version string compared against `installed.json` |
 | `url` | yes | — | Download URL the pipeline fetches |
 | `type` | yes | — | Package type, copied from `fetch_asset.arch.{os}.{arch}.type` |
-| `digest` | no | `""` | Expected hex digest |
+| `digest` | no | `""` | Expected hex digest. When empty or whitespace, verification is skipped with a "no verification info (digest is empty), skipping digest verification" notice and install/upgrade proceeds. |
 | `digest_algorithm` | no | `"sha256"` | Digest algorithm identifier |
 | `install_program` | no | `""` | Installer executable (placeholder `{DOWNLOADED_CACHE_FILE_FULL_PATH}` replaced by C#) |
 | `install_params` | no | `""` | Installer arguments (supports `{PKG_INSTALL_DIR}` / `{INSTALL_DIR}`) |
