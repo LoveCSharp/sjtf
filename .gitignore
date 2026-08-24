@@ -10,6 +10,9 @@ installed.json
 config.toml
 cache/
 
+# Test / smoke artifacts
+_smoke/
+
 # VS / IDE
 .vs/
 *.user
