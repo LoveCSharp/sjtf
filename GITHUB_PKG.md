@@ -1,21 +1,21 @@
-# Writing a GitHub Source Package
+# 编写 GitHub 源包
 
-[English](GITHUB_PKG.md) | [中文](GITHUB_PKG.zh_cn.md)
+[English](GITHUB_PKG.en.md) | [中文](GITHUB_PKG.md)
 
-This document provides a detailed guide on creating an sjtf package definition that fetches from GitHub Releases.
+本文档详细介绍如何编写一个基于 GitHub Releases 的 sjtf 包定义。
 
-## Overview
+## 概述
 
-A GitHub-based package requires two parts:
+基于 GitHub 的包需要两个部分：
 
-1. **Package definition in `pkgs.json`**: Describes the package's basic info, asset matching rules, install directory, and shim configuration
-2. **`fetch_source` set to `github`**: Uses the built-in `scripts/fetch/github_fetch_latest.js` to automatically fetch the latest version from GitHub Releases API
+1. **`pkgs.json` 中的包定义**：描述包的基本信息、资产匹配规则、安装目录和 shim 配置
+2. **`fetch_source` 指向 `github`**：使用内置的 `scripts/fetch/github_fetch_latest.js` 自动从 GitHub Releases API 获取最新版本
 
-`sjtf` has built-in support for GitHub Releases API, so no custom JavaScript scripts are needed.
+`sjtf` 内置了对 GitHub Releases API 的支持，无需编写自定义 JavaScript 脚本即可使用。
 
-## Complete Example
+## 完整示例
 
-Here is a complete package definition (using `fnm` as an example):
+以下是一个完整的包定义示例（以 `fnm` 为例）：
 
 ```json
 {
@@ -45,28 +45,28 @@ Here is a complete package definition (using `fnm` as an example):
 }
 ```
 
-## Field Reference
+## 字段详解
 
-### `repo` (required)
+### `repo`（必需）
 
-GitHub repository identifier in `owner/name` format.
+GitHub 仓库标识，格式为 `owner/name`。
 
 ```json
 "repo": "Schniz/fnm"
 ```
 
-`sjtf` constructs the GitHub API URL:
+`sjtf` 会将其拼接为 GitHub API URL：
 ```
 https://api.github.com/repos/Schniz/fnm/releases/latest
 ```
 
-### `fetch_asset` (required)
+### `fetch_asset`（必需）
 
-Asset matching configuration for selecting the correct file from a GitHub Release's assets list.
+资产匹配配置，用于从 GitHub Release 的 assets 列表中选择正确的文件。
 
-#### `fetch_asset.arch` (required)
+#### `fetch_asset.arch`（必需）
 
-A nested map keyed by OS and architecture. Each leaf value is an object carrying `file` and `type`, plus optional `installer` fields:
+按操作系统和架构分层的映射，每个叶节点是一个对象，包含 `file` 和 `type`，以及 `installer` 的可选字段：
 
 ```json
 "arch": {
@@ -91,53 +91,54 @@ A nested map keyed by OS and architecture. Each leaf value is an object carrying
 }
 ```
 
-Structure: `fetch_asset.arch[os][arch]` is an object with the following fields:
+结构：`fetch_asset.arch[os][arch]` 是一个对象，字段如下：
 
-| Field | Description |
-|-------|-------------|
-| `os` | `windows` / `linux` / `macos` — operating system |
-| `arch` | `x86_64` / `aarch64` / `arm` — architecture |
-| `file` | Asset URL (when the source returns a static download link) **or** a JavaScript regex string matched against the release asset's `name`. For non-URL sources, JavaScript `RegExp` syntax is used; the first matching asset is selected. |
-| `type` | One of the package types below. |
-| `install_program` | (optional, `installer` only) Installer executable. Supports the placeholder `{DOWNLOADED_CACHE_FILE_FULL_PATH}` (replaced by C# at install time with the cache file's absolute path); custom values are used verbatim. |
-| `install_params` | (optional, `installer` only) Arguments passed to the installer. Supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders. |
-| `uninstall_program` | (optional, `installer` only) Uninstaller program file name, relative to the install directory. |
-| `uninstall_params` | (optional, `installer` only) Arguments passed to the uninstaller. Supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders. |
+| 字段 | 说明 |
+|------|------|
+| `os` | `windows` / `linux` / `macos` — 操作系统 |
+| `arch` | `x86_64` / `aarch64` / `arm` — 架构 |
+| `file` | 资产 URL（源返回静态下载链接时）或用于匹配 release 资产 `name` 的 JavaScript 正则。非 URL 源使用 JavaScript `RegExp` 语法，命中首个匹配项。 |
+| `type` | 下表中的包类型之一 |
+| `install_program` | （可选，仅 `installer`）安装程序可执行文件。支持占位符 `{DOWNLOADED_CACHE_FILE_FULL_PATH}`（C# 在安装时替换为缓存文件绝对路径）；其他值按原值使用。 |
+| `install_params` | （可选，仅 `installer`）安装程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符 |
+| `uninstall_program` | （可选，仅 `installer`）卸载程序文件名，相对于安装目录 |
+| `uninstall_params` | （可选，仅 `installer`）卸载程序参数，支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符 |
 
-> **Note:** Packages using the `update_code_visualstudio_com` fetch source replace the `file` field with `stable_latest_info_url`, which points to the VS Code update metadata API. The API returns JSON containing the real download URL, `productVersion` and `sha256hash`. See `data/pkgs.json` (vscode entry) — or its source fragment under `sjtf.pkgs/pkg‑fragments/` — for an example.
+> **注：** 使用 `update_code_visualstudio_com` fetch 源的包把 `file` 字段替换为 `stable_latest_info_url`，该字段指向 VS Code 的更新元数据 API。API 返回 JSON，包含真实下载 URL、`productVersion` 和 `sha256hash`。示例见 `data/pkgs.json` 中的 vscode 条目——或其源码片段 `sjtf.pkgs/pkg‑fragments/` 下的对应文件。
 
-#### `fetch_asset.type` (required)
+#### `fetch_asset.type`（必需）
 
-Package type determining how the downloaded file is handled during installation:
+包类型，决定安装时的处理方式：
 
-| Type | Description |
-|------|-------------|
-| `portable-compressed-archive` | ZIP/TAR.GZ/7Z archive, automatically extracted to install directory |
-| `portable-executable` | Standalone executable, copied directly to install directory |
-| `installer` | Installer executable, runs with arguments specified by `install_params` |
+| 类型 | 说明 |
+|------|------|
+| `portable-compressed-archive` | ZIP/TAR.GZ/7Z 压缩包，自动解压到安装目录 |
+| `portable-executable` | 独立可执行文件，直接复制到安装目录 |
+| `installer` | 安装程序，执行 `install_params` 指定的参数 |
 
-### `pkg_install_relative_dir` (required)
+### `pkg_install_relative_dir`（必需）
 
-The relative path within the installation root where the package will be installed. The final absolute path is `config.install_dir + pkg_install_relative_dir`.
+包在安装根目录下的相对路径。最终完整路径为 `config.install_dir + pkg_install_relative_dir`。
 
 ```json
 "pkg_install_relative_dir": "langs\\fnm"
 ```
 
-If `config.toml` has `install_dir = "D:\\sjtf_pkgs"`, fnm's full install path will be:
+如果 `config.toml` 中 `install_dir = "D:\\sjtf_pkgs"`，则 fnm 的完整安装路径为：
 ```
 D:\sjtf_pkgs\langs\fnm
 ```
 
-### `shim` (optional)
+### `shim`（可选）
 
-Shim configuration, layered by operating system. Only takes effect when the current OS matches.
+Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
 
 ```json
 "shim": {
   "windows": {
     "symlink": {
-      "fnm.exe": "fnm.exe"
+      "fnm.exe": "fnm.exe",
+      "jcode.exe": "jcode-windows-x86_64.exe"
     },
     "shell_script": {
       "fnm.cmd": "@\"{PKG_INSTALL_DIR}\\fnm.exe\" %*",
@@ -149,7 +150,7 @@ Shim configuration, layered by operating system. Only takes effect when the curr
 
 #### `shim[os].symlink`
 
-Key-value object mapping shim file names to target relative paths within the install directory.
+键值对对象。**键** 为 `shims/` 下的符号链接文件名，**值** 为包安装目录内的相对目标路径。
 
 ```json
 "symlink": {
@@ -158,20 +159,18 @@ Key-value object mapping shim file names to target relative paths within the ins
 }
 ```
 
-This creates:
+上述配置会创建：
 - `shims/fnm.exe` -> `langs\fnm\fnm.exe`
 - `shims/jcode.exe` -> `ai\jcode\jcode-windows-x86_64.exe`
 
-The **key** is the shim file name in `shims/`, the **value** is the relative path inside the package install directory.
-
 #### `shim[os].shell_script`
 
-Key-value object creating text shim files. Supports placeholders:
+键值对对象，为每个键创建同名文件，内容为对应的值。支持占位符：
 
-| Placeholder | Replaced with |
-|-------------|---------------|
-| `{PKG_INSTALL_DIR}` | Full package install path |
-| `{INSTALL_DIR}` | Global install root (`config.install_dir`) |
+| 占位符 | 替换为 |
+|--------|--------|
+| `{PKG_INSTALL_DIR}` | 包的完整安装路径 |
+| `{INSTALL_DIR}` | 全局安装根目录（`config.install_dir`） |
 
 ```json
 "shell_script": {
@@ -180,136 +179,136 @@ Key-value object creating text shim files. Supports placeholders:
 }
 ```
 
-This creates:
-- `shims/fnm.cmd`: Windows batch script
-- `shims/fnm.ps1`: PowerShell script
+上述配置会创建：
+- `shims/fnm.cmd`：Windows 批处理脚本
+- `shims/fnm.ps1`：PowerShell 脚本
 
-Files are written as UTF-8 without BOM.
+文件以 UTF-8 无 BOM 格式写入。
 
-### Package-level fields
+### 包级字段
 
-In addition to the per-arch `fetch_asset.arch.{os}.{arch}` entry, the following fields are set on the package root object:
+除了 `fetch_asset.arch.{os}.{arch}` 下的字段外，包对象顶层还支持以下字段：
 
-| Field | Description |
+| 字段 | 说明 |
 |---|---|
-| `file_mode_0755` | (Linux/macOS only) Array of file paths (relative to `pkg_install_relative_dir`) that should be given `0755` permissions after install. Windows is a no-op. |
+| `file_mode_0755` | （仅 Linux/macOS）文件路径数组（相对于 `pkg_install_relative_dir`），安装完成后给这些文件设置 `0755` 权限。Windows 上为 no-op。 |
 
-### `fetch_source` (required)
+### `fetch_source`（必需）
 
-Specifies the version fetch source. For GitHub Releases, use the built-in `github` source:
+指定版本获取源。GitHub Releases 使用内置的 `github` 源：
 
 ```json
 "fetch_source": "github"
 ```
 
-Corresponding script: `scripts/fetch/github_fetch_latest.js`
+对应脚本路径：`scripts/fetch/github_fetch_latest.js`
 
-This script:
-1. Calls `https://api.github.com/repos/{repo}/releases/latest`
-2. Parses `tag_name` as the version string
-3. Uses `fetch_asset.arch[os][arch]` regex to match assets
-4. Extracts `browser_download_url` as the download URL
-5. Extracts `digest` for verification (GitHub API digest format: `sha256:abc123...`)
+该脚本会：
+1. 调用 `https://api.github.com/repos/{repo}/releases/latest`
+2. 解析 `tag_name` 作为版本号
+3. 使用 `fetch_asset.arch[os][arch]` 正则匹配 assets 列表
+4. 提取 `browser_download_url` 作为下载地址
+5. 提取 `digest` 作为摘要（GitHub API 返回的资产 digest 格式为 `sha256:abc123...`）
 
-### Pre/post install, upgrade, and uninstall hooks
+### 安装/升级/卸载的前后钩子
 
-Hooks are **auto-detected** by path. Drop a JavaScript file at the expected location and `sjtf` will run it; no `pkgs.json` field is required. The six hook kinds are independent — each one is silently skipped if its file is missing.
+钩子按路径**自动检测**：把 JavaScript 文件放到约定路径下 `sjtf` 就会执行，无需在 `pkgs.json` 中配置任何字段。六种钩子彼此独立——任一文件缺失时静默跳过。
 
-- Before-install: `scripts/hooks/{name}-{os}-{arch}-before_install.js`
-- After-install: `scripts/hooks/{name}-{os}-{arch}-after_install.js`
-- Before-upgrade: `scripts/hooks/{name}-{os}-{arch}-before_upgrade.js`
-- After-upgrade: `scripts/hooks/{name}-{os}-{arch}-after_upgrade.js`
-- Before-uninstall: `scripts/hooks/{name}-{os}-{arch}-before_uninstall.js`
-- After-uninstall: `scripts/hooks/{name}-{os}-{arch}-after_uninstall.js`
+- 安装前：`scripts/hooks/{name}-{os}-{arch}-before_install.js`
+- 安装后：`scripts/hooks/{name}-{os}-{arch}-after_install.js`
+- 升级前：`scripts/hooks/{name}-{os}-{arch}-before_upgrade.js`
+- 升级后：`scripts/hooks/{name}-{os}-{arch}-after_upgrade.js`
+- 卸载前：`scripts/hooks/{name}-{os}-{arch}-before_uninstall.js`
+- 卸载后：`scripts/hooks/{name}-{os}-{arch}-after_uninstall.js`
 
-See [SCRIPTS.md](SCRIPTS.md) for the full hook authoring guide.
+完整的钩子编写指南见 [SCRIPTS.md](SCRIPTS.md)。
 
-## Overlay with `pkgs_custom.json`
+## 使用 `pkgs_custom.json` 进行覆盖
 
-The optional `data/pkgs_custom.json` lets you add or override package definitions without editing `pkgs.json`. At load time, `Packages.Load()` merges the two files in memory:
+可选的 `data/pkgs_custom.json` 允许你在不修改 `pkgs.json` 的前提下，新增或覆盖包定义。加载时，`Packages.Load()` 会在内存中合并两个文件：
 
-- If `pkgs_custom.json` is missing, only `pkgs.json` is used.
-- Same-name packages are fully replaced by the entry in `pkgs_custom.json` (no field-level merge — the entire package object is overridden).
-- The merge happens entirely in memory; `pkgs_custom.json` is never modified.
-- `sjtf packages update` only refreshes `pkgs.json`; customizations are preserved.
+- 若 `pkgs_custom.json` 缺失，则只使用 `pkgs.json`。
+- 同名包会被 `pkgs_custom.json` 中的条目**完全替换**（不做字段级合并，整个包对象被覆盖）。
+- 合并完全在内存中完成，`pkgs_custom.json` 永远不会被修改。
+- `sjtf packages update` 只刷新 `pkgs.json`，自定义内容会保留。
 
-In `packages list` and `list` output, custom-sourced packages are visually marked:
+在 `packages list` 与 `list` 的输出中，自定义来源的包会按以下后缀标记：
 
-- `name*co` — name exists in both `pkgs.json` and `pkgs_custom.json` (the custom entry fully overrides the base)
-- `name*c` — name exists only in `pkgs_custom.json` (custom-only addition)
+- `name*co` — 包名同时存在于 `pkgs.json` 与 `pkgs_custom.json`（custom 项完整覆盖 base）
+- `name*c` — 包名**仅**存在于 `pkgs_custom.json`（纯新增）
 
-Typical uses:
+典型用途：
 
-- Pin specific versions of packages (by overriding `repo` or asset rules).
-- Customize description, install directory, or shim paths.
-- Add private packages without forking `pkgs.json`.
+- 锁定特定版本的包（覆盖 `repo` 或资产规则）。
+- 自定义描述、安装目录或 shim 路径。
+- 添加私有包而无需 fork `pkgs.json`。
 
-## Workflow
+## 工作流程
 
-When a user runs `sjtf install fnm`:
+当用户执行 `sjtf install fnm` 时：
 
-1. **Version fetch**: Executes `scripts/fetch/github_fetch_latest.js`
-   - Calls GitHub API for the latest Release
-   - Matches asset regex, extracts download URL and version
-   - Returns a JSON object with: `version` (required), `url` (required), `type` (required, from `fetch_asset.arch.{os}.{arch}.type`), plus optional `digest`, `digest_algorithm` (default `"sha256"`), `install_program`, `install_params`, `uninstall_program`, `uninstall_params` — all consumed by `ScriptFetchSource.cs` as `DownloadPlan`
+1. **版本获取**：执行 `scripts/fetch/github_fetch_latest.js`
+   - 调用 GitHub API 获取最新 Release
+   - 匹配资产正则，提取下载 URL 和版本号
+   - 返回一个 JSON 对象，包含：`version`（必需）、`url`（必需）、`type`（必需，取自 `fetch_asset.arch.{os}.{arch}.type`），以及可选的 `digest`、`digest_algorithm`（默认 `"sha256"`）、`install_program`、`install_params`、`uninstall_program`、`uninstall_params` —— 全部由 `ScriptFetchSource.cs` 解析为 `DownloadPlan`
 
-2. **Download**: Multi-threaded chunked download (or aria2c) to cache directory
-   - Cache filename format: `{name}-{os}-{arch}-{version}.{ext}`
+2. **下载**：使用多线程分块下载（或 aria2c）到缓存目录
+   - 缓存文件名格式：`{name}-{os}-{arch}-{version}.{ext}`
 
-3. **Verification**: Computes file digest and compares with GitHub API digest
-   - Mismatch triggers immediate file deletion and one re-download
-   - Second mismatch throws an error
+3. **验证**：计算下载文件的摘要，与 GitHub API 返回的 digest 比对
+   - 不匹配则立即删除文件并重新下载一次
+   - 再次不匹配则报错
 
-4. **Install**: Handles based on `fetch_asset.arch.{os}.{arch}.type`
-   - `portable-compressed-archive`: Extract to `pkg_install_relative_dir`
-   - `portable-executable`: Copy to `pkg_install_relative_dir`
-   - `installer`: Run installer with `install_params`
+4. **安装**：根据 `fetch_asset.arch.{os}.{arch}.type` 处理
+   - `portable-compressed-archive`：解压到 `pkg_install_relative_dir`
+   - `portable-executable`：复制到 `pkg_install_relative_dir`
+   - `installer`：执行安装程序
 
-5. **Create shims**: Creates symlinks or shell scripts based on `shim[os]`
+5. **创建 shim**：根据 `shim[os]` 创建符号链接或 shell 脚本
 
-6. **After-install hook** (auto-detected): Executes `scripts/hooks/{name}-{os}-{arch}-after_install.js` if present
+6. **安装后钩子**（自动检测）：如果存在 `scripts/hooks/{name}-{os}-{arch}-after_install.js` 则执行
 
-## Regex Examples
+## 正则表达式示例
 
-Write match patterns based on asset naming conventions:
+根据资产命名规则编写匹配正则：
 
-| Asset Name | Match Regex | Description |
-|-----------|-------------|-------------|
-| `fnm-windows-x86_64.zip` | `(?=.*windows)(?=.*x86_64).*\.zip$` | Windows x64 zip |
+| 资产名示例 | 匹配正则 | 说明 |
+|-----------|---------|------|
+| `fnm-windows-x86_64.zip` | `(?=.*windows)(?=.*x86_64).*\.zip$` | 同时包含 windows 和 x86_64 的 zip |
 | `uv-aarch64-apple-darwin.tar.gz` | `(?=.*aarch64)(?=.*darwin).*\.tar\.gz$` | macOS ARM64 |
 | `jq-windows-amd64.exe` | `(?=.*windows)(?=.*amd64).*\.exe$` | Windows x64 exe |
 | `rg-x86_64-unknown-linux-musl.tar.gz` | `(?=.*x86_64)(?=.*linux).*\.tar\.gz$` | Linux x64 |
 
-Tips:
-- Use `(?=.*keyword)` positive lookahead to ensure multiple keywords are present
-- Use `\.` to escape dots when matching file extensions
-- Use `$` anchor for end of string
+技巧：
+- 使用 `(?=.*keyword)` 正向预查确保多个关键词同时出现
+- 使用 `\.` 转义点号匹配文件扩展名
+- 使用 `$` 锚定结尾
 
-## GitHub API Authentication
+## GitHub API 认证
 
-Configure GitHub authentication in `config.toml` to increase API rate limits:
+在 `config.toml` 中可以配置 GitHub 认证信息，以提高 API 速率限制：
 
 ```toml
 [github]
-token_classic = "ghp_xxxxxxxxxxxx"  # GitHub personal access token
-proxy = "https://gh-proxy.com"       # Optional proxy
+token_classic = "ghp_xxxxxxxxxxxx"  # GitHub 个人访问令牌
+proxy = "https://gh-proxy.com"       # 可选代理
 ```
 
-- `token_classic`: GitHub classic personal access token, must start with `ghp_`
-- `proxy`: Proxy URL, replaces the domain in GitHub API requests (`github.com` -> `gh-proxy.com`)
+- `token_classic`：GitHub 经典个人访问令牌，必须以 `ghp_` 开头
+- `proxy`：代理地址，用于替换 GitHub API 请求的域名（`github.com` → `gh-proxy.com`）
 
-Auth headers and proxy are handled automatically by `scripts/fetch/github_fetch_latest.js`.
+认证头和代理由 `scripts/fetch/github_fetch_latest.js` 自动处理。
 
-## Debugging
+## 调试技巧
 
-If package installation fails, check the error message:
+如果包安装失败，可以查看错误信息定位问题：
 
-- **`no fetch_asset entry for os=xxx`**: Missing `arch` config for current OS in `pkgs.json`
-- **`no asset matching xxx`**: Regex didn't match any Release assets, check asset names and pattern
-- **`GitHub API response missing tag_name`**: Release has no `tag_name`, check repository Release settings
-- **`digest mismatch`**: Downloaded file doesn't match GitHub API digest, possible network issue or tampering. The corrupted file is deleted and re-downloaded automatically.
+- **`no fetch_asset entry for os=xxx`**：`pkgs.json` 中缺少当前操作系统的 `arch` 配置
+- **`no asset matching xxx`**：正则表达式没有匹配到任何 Release asset，检查资产名和正则
+- **`GitHub API response missing tag_name`**：Release 没有 tag_name，检查仓库 Release 配置
+- **`digest mismatch`**：下载的文件与 GitHub API 返回的 digest 不一致，可能是网络问题或文件被篡改。程序会自动删除坏文件并重新下载一次。
 
-## Related Documentation
+## 相关文档
 
-- [SCRIPTS.md](SCRIPTS.md) — Scripting Guide (fetch sources, six hook kinds)
-- [README.md](README.md) — Project homepage
+- [SCRIPTS.md](SCRIPTS.md) — 脚本编写指南（获取源、六种钩子）
+- [README.md](README.md) — 项目主页

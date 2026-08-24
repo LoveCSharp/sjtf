@@ -1,24 +1,24 @@
-# sjtf Scripting Guide
+# sjtf 脚本编写指南
 
-[English](SCRIPTS.md) | [中文](SCRIPTS.zh_cn.md)
+[English](SCRIPTS.en.md) | [中文](SCRIPTS.md)
 
-`sjtf` supports one fetch-source script plus six hook scripts (before/after × install/upgrade/uninstall). Scripts are executed by the embedded [Jint](https://github.com/sebastienros/jint) engine with async/await enabled. All C# ↔ JS data exchange happens via JSON strings; scripts parse them with `JSON.parse(...)` and return values via `JSON.stringify(...)`.
+`sjtf` 支持一种获取源脚本加上六种钩子脚本（前/后 × 安装/升级/卸载）。脚本由内嵌的 [Jint](https://github.com/sebastienros/jint) 引擎执行，开启了 async/await 支持。所有 C# ↔ JS 数据通过 JSON 字符串交换：脚本内部用 `JSON.parse(...)` 解析，用 `JSON.stringify(...)` 返回值。
 
-## Script Types Overview
+## 脚本类型概览
 
-| Kind | Path | Triggered when | Purpose |
+| 类型 | 路径 | 触发时机 | 作用 |
 |---|---|---|---|
-| Fetch source | `scripts/fetch/{fetch_source}_fetch_latest.js` | Install or upgrade | Resolve latest version, download URL, and digest |
-| Before-install | `scripts/hooks/{name}-{os}-{arch}-before_install.js` | Before install's PlaceAsset | Pre-install cleanup (kill running processes, etc.) |
-| After-install | `scripts/hooks/{name}-{os}-{arch}-after_install.js` | After install's PlaceAsset | Post-processing on first install |
-| Before-upgrade | `scripts/hooks/{name}-{os}-{arch}-before_upgrade.js` | Before upgrade's PlaceAsset | Pre-upgrade cleanup |
-| After-upgrade | `scripts/hooks/{name}-{os}-{arch}-after_upgrade.js` | After upgrade's PlaceAsset | Post-processing after upgrade |
-| Before-uninstall | `scripts/hooks/{name}-{os}-{arch}-before_uninstall.js` | Before uninstall logic | Pre-uninstall cleanup |
-| After-uninstall | `scripts/hooks/{name}-{os}-{arch}-after_uninstall.js` | Uninstall only | Cleanup after uninstallation |
+| 获取源脚本 | `scripts/fetch/{fetch_source}_fetch_latest.js` | 安装或升级时 | 从指定源解析最新版本、下载 URL 和摘要 |
+| 安装前钩子 | `scripts/hooks/{name}-{os}-{arch}-before_install.js` | 安装 PlaceAsset 之前 | 安装前的清理（如终止运行中的进程等） |
+| 安装后钩子 | `scripts/hooks/{name}-{os}-{arch}-after_install.js` | 安装 PlaceAsset 之后 | 包首次安装完成后执行后续处理 |
+| 升级前钩子 | `scripts/hooks/{name}-{os}-{arch}-before_upgrade.js` | 升级 PlaceAsset 之前 | 升级前的清理工作 |
+| 升级后钩子 | `scripts/hooks/{name}-{os}-{arch}-after_upgrade.js` | 升级 PlaceAsset 之后 | 包升级完成后执行后续处理 |
+| 卸载前钩子 | `scripts/hooks/{name}-{os}-{arch}-before_uninstall.js` | 卸载逻辑之前 | 卸载前的清理工作 |
+| 卸载后钩子 | `scripts/hooks/{name}-{os}-{arch}-after_uninstall.js` | 仅卸载 | 包卸载完成后执行清理工作 |
 
-Hooks are **auto-detected**: `sjtf` looks for the matching file in `scripts/hooks/` before/after each operation. The six hook kinds are independent — each one is silently skipped if its file is missing. No `pkgs.json` field is required.
+钩子采用**自动检测**机制：每次操作前/完成后，`sjtf` 在 `scripts/hooks/` 中查找对应的脚本。六种钩子彼此独立——文件不存在时静默跳过。无需在 `pkgs.json` 中配置任何字段。
 
-## Directory Layout
+## 目录结构
 
 ```
 scripts/
@@ -36,51 +36,51 @@ scripts/
     └── vscode-windows-x86_64-before_upgrade.js
 ```
 
-## Globals Injected by C#
+## C# 注入的全局变量
 
-Before executing a script, C# binds the following global variables:
+执行脚本前，C# 会绑定以下全局变量：
 
-| Name | Type | Description |
+| 名称 | 类型 | 说明 |
 |---|---|---|
-| `pkgJSON` | string | Current package definition (raw JSON string) |
-| `configJSON` | string | Configuration (raw JSON string from `config.toml`) |
-| `os` | string | Current operating system (`windows` / `linux` / `macos`) |
-| `arch` | string | Current architecture (`x86_64` / `aarch64` / `arm`) |
-| `installDir` | string | Full path to the package install directory (hooks only) |
-| `installRoot` | string | Global install root (`config.install_dir`, hooks only) |
+| `pkgJSON` | string | 当前包定义（原始 JSON 字符串） |
+| `configJSON` | string | 配置（`config.toml` 的原始 JSON 字符串） |
+| `os` | string | 当前操作系统（`windows` / `linux` / `macos`） |
+| `arch` | string | 当前架构（`x86_64` / `aarch64` / `arm`） |
+| `installDir` | string | 包的完整安装目录路径（仅钩子可用） |
+| `installRoot` | string | 全局安装根目录，即 `config.install_dir`（仅钩子可用） |
 
-Inside the script, parse the JSON with `JSON.parse(...)`:
+脚本内部用 `JSON.parse(...)` 解析：
 
 ```javascript
 const pkg = JSON.parse(pkgJSON);
 const config = JSON.parse(configJSON);
 ```
 
-## C# Registered Functions
+## C# 注册的函数
 
-The following functions are registered on the global scope and can be called directly. Functions returning `string?` return `null` on success and an error message on failure; functions returning `string` return JSON.
+以下函数挂载在全局作用域，可直接调用。返回 `string?` 的函数成功返回 `null`，失败返回错误信息；返回 `string` 的函数返回 JSON。
 
-| Name | Signature | Description |
+| 名称 | 签名 | 说明 |
 |---|---|---|
-| `log(msg)` | `(string) => void` | Print to stdout with `[label]` prefix |
-| `logError(msg)` | `(string) => void` | Print to stderr |
-| `httpGet(url)` | `(string) => Promise<string>` | Synchronous HTTP GET, returns body string. `User-Agent` is added automatically from `config.toml`. |
-| `httpGetWithHeaders(url, headersJson)` | `(string, string) => Promise<string>` | HTTP GET with extra headers. `headersJson` is a JSON object string; each entry overrides the default request header. |
-| `createDirectory(path)` | `(string) => string?` | Create a directory (recursive). Returns `null` on success, error message on failure. |
-| `removeDirectory(path)` | `(string) => string?` | Recursively delete a directory. |
-| `removeFile(path)` | `(string) => string?` | Delete a file. |
-| `directoryList(path)` | `(string) => string` | JSON object describing the directory contents. |
-| `fileExists(path)` | `(string) => boolean` | Check whether a file exists. |
-| `directoryExists(path)` | `(string) => boolean` | Check whether a directory exists. |
-| `writeFile(path, content)` | `(string, string) => void` | Write a UTF-8 (no BOM) text file. |
+| `log(msg)` | `(string) => void` | 带 `[label]` 前缀打印到 stdout |
+| `logError(msg)` | `(string) => void` | 打印到 stderr |
+| `httpGet(url)` | `(string) => Promise<string>` | 同步 HTTP GET，返回响应体字符串。自动从 `config.toml` 添加 `User-Agent`。 |
+| `httpGetWithHeaders(url, headersJson)` | `(string, string) => Promise<string>` | 带额外请求头的 HTTP GET。`headersJson` 为 JSON 对象字符串，其中的键值对覆盖默认请求头。 |
+| `createDirectory(path)` | `(string) => string?` | 创建目录（递归）。成功返回 `null`，失败返回错误信息。 |
+| `removeDirectory(path)` | `(string) => string?` | 递归删除目录。 |
+| `removeFile(path)` | `(string) => string?` | 删除文件。 |
+| `directoryList(path)` | `(string) => string` | 描述目录内容的 JSON 对象。 |
+| `fileExists(path)` | `(string) => boolean` | 检查文件是否存在。 |
+| `directoryExists(path)` | `(string) => boolean` | 检查目录是否存在。 |
+| `writeFile(path, content)` | `(string, string) => void` | 写入 UTF-8（无 BOM）文本文件。 |
 
-## Fetch Source Scripts
+## 获取源脚本
 
-### Purpose
+### 作用
 
-Dynamically fetch the latest version information for a package based on the `fetch_source` field in `pkgs.json`. Different sources have different API formats, so JavaScript scripts are used for extensibility.
+根据 `pkgs.json` 中 `fetch_source` 字段指定的源，动态获取包的最新版本信息。不同源的 API 格式不同，因此使用 JavaScript 脚本实现可扩展性。
 
-### Script Location
+### 脚本位置
 
 ```
 scripts/
@@ -88,44 +88,44 @@ scripts/
     └── {fetch_source}_fetch_latest.js
 ```
 
-For example, if `fetch_source` is `github`, the script path is `scripts/fetch/github_fetch_latest.js`.
+例如 `fetch_source` 为 `github` 时，脚本路径为 `scripts/fetch/github_fetch_latest.js`。
 
-### Required Return Value
+### 必须的返回值
 
-The script must export an `async function fetch()` that returns a `JSON.stringify(...)`-ed object:
+脚本必须导出一个 `async function fetch()`，并 `return` 一个由 `JSON.stringify(...)` 包装的对象：
 
 ```javascript
 return JSON.stringify({
-    version: "v1.2.3",       // (required) Upstream version string, compared against installed.json
-    url: "https://...",      // (required) Download URL
-    type: "portable-compressed-archive",  // (required) Package type from fetch_asset.arch.{os}.{arch}.type
-    digest: "abc123...",     // (optional, default "") Digest value
-    digest_algorithm: "sha256",  // (optional, default "sha256") Digest algorithm
-    install_program: "",     // (optional, default "") Installer executable; placeholder {DOWNLOADED_CACHE_FILE_FULL_PATH} is replaced by C# with the cache file path at install time; custom values used verbatim
-    install_params: "",      // (optional, default "") Installer arguments; supports {PKG_INSTALL_DIR} and {INSTALL_DIR} placeholders
-    uninstall_program: "",   // (optional, default "") Uninstaller executable; {PKG_INSTALL_DIR} must be substituted by JS before return (using the installFull global) — C# does not rewrite it
-    uninstall_params: ""     // (optional, default "") Uninstaller arguments
+    version: "v1.2.3",       // （必需）上游版本字符串，用于与 installed.json 比较
+    url: "https://...",      // （必需）下载 URL
+    type: "portable-compressed-archive",  // （必需）包类型，取自 fetch_asset.arch.{os}.{arch}.type
+    digest: "abc123...",     // （可选，默认 ""）摘要值
+    digest_algorithm: "sha256",  // （可选，默认 "sha256"）摘要算法
+    install_program: "",     // （可选，默认 ""）安装程序可执行文件；占位符 {DOWNLOADED_CACHE_FILE_FULL_PATH} 由 C# 在安装时替换为缓存文件路径；自定义值按原值使用
+    install_params: "",      // （可选，默认 ""）安装程序参数；支持 {PKG_INSTALL_DIR} 和 {INSTALL_DIR} 占位符
+    uninstall_program: "",   // （可选，默认 ""）卸载程序可执行文件；{PKG_INSTALL_DIR} 必须由 JS 在返回前替换（使用 installFull 全局变量）—— C# 不会再做替换
+    uninstall_params: ""     // （可选，默认 ""）卸载程序参数
 });
 ```
 
-Field reference:
+字段说明：
 
-- **Required**: `version`, `url`, `type` (the `type` is normally copied verbatim from `fetch_asset.arch.{os}.{arch}.type` in `pkgs.json`).
-- **Optional**: all remaining fields default to `""` (empty string), and `digest_algorithm` defaults to `"sha256"`. Optional fields are typically read from `pkgs.json`'s `fetch_asset.arch.{os}.{arch}` and passed through.
+- **必需**：`version`、`url`、`type`（`type` 一般直接从 `pkgs.json` 的 `fetch_asset.arch.{os}.{arch}.type` 透传）。
+- **可选**：其余字段默认空字符串 `""`，`digest_algorithm` 默认 `"sha256"`。可选字段通常从 `pkgs.json` 的 `fetch_asset.arch.{os}.{arch}` 读取后透传。
 
-| Field | Required | Default | Description |
+| 字段 | 必需 | 默认值 | 说明 |
 |---|---|---|---|
-| `version` | yes | — | Upstream version string compared against `installed.json` |
-| `url` | yes | — | Download URL the pipeline fetches |
-| `type` | yes | — | Package type, copied from `fetch_asset.arch.{os}.{arch}.type` |
-| `digest` | no | `""` | Expected hex digest |
-| `digest_algorithm` | no | `"sha256"` | Digest algorithm identifier |
-| `install_program` | no | `""` | Installer executable (placeholder `{DOWNLOADED_CACHE_FILE_FULL_PATH}` replaced by C#) |
-| `install_params` | no | `""` | Installer arguments (supports `{PKG_INSTALL_DIR}` / `{INSTALL_DIR}`) |
-| `uninstall_program` | no | `""` | Uninstaller executable; `{PKG_INSTALL_DIR}` must be substituted by JS before return |
-| `uninstall_params` | no | `""` | Uninstaller arguments |
+| `version` | 是 | — | 上游版本字符串，与 `installed.json` 比对 |
+| `url` | 是 | — | 流水线要下载的 URL |
+| `type` | 是 | — | 包类型，取自 `fetch_asset.arch.{os}.{arch}.type` |
+| `digest` | 否 | `""` | 期望的十六进制摘要 |
+| `digest_algorithm` | 否 | `"sha256"` | 摘要算法标识 |
+| `install_program` | 否 | `""` | 安装程序可执行文件（占位符 `{DOWNLOADED_CACHE_FILE_FULL_PATH}` 由 C# 替换） |
+| `install_params` | 否 | `""` | 安装程序参数（支持 `{PKG_INSTALL_DIR}` / `{INSTALL_DIR}`） |
+| `uninstall_program` | 否 | `""` | 卸载程序可执行文件；`{PKG_INSTALL_DIR}` 必须由 JS 在返回前替换 |
+| `uninstall_params` | 否 | `""` | 卸载程序参数 |
 
-### Example: GitHub Releases
+### 示例：GitHub Releases
 
 ```javascript
 // scripts/fetch/github_fetch_latest.js
@@ -222,7 +222,7 @@ async function fetch() {
 }
 ```
 
-### Example: VS Code Update API
+### 示例：VS Code 更新 API
 
 ```javascript
 // scripts/fetch/update_code_visualstudio_com_fetch_latest.js
@@ -233,8 +233,8 @@ async function fetch() {
     const entry = pkg.fetch_asset.arch[os] && pkg.fetch_asset.arch[os][arch];
     if (!entry) throw new Error("no fetch_asset entry for os=" + os + " arch=" + arch);
 
-    // The "stable_latest_info_url" points to the VS Code update metadata API.
-    // The API returns JSON with the real download URL, productVersion, and sha256hash.
+    // "stable_latest_info_url" 指向 VS Code 更新元数据 API。
+    // 该 API 返回包含真实下载 URL、productVersion 和 sha256hash 的 JSON。
     const updateUrl = entry.stable_latest_info_url;
     if (typeof updateUrl !== "string") throw new Error("missing stable_latest_info_url");
 
@@ -249,21 +249,21 @@ async function fetch() {
 }
 ```
 
-> Each fetch-source script reads the fields dictated by its protocol. The `github` source reads `assetEntry.file` (a JavaScript regex); the `update_code_visualstudio_com` source reads `assetEntry.stable_latest_info_url` (a URL).
+> 每个获取源脚本读取的字段取决于其协议。`github` 源读取 `assetEntry.file`（JavaScript 正则）；`update_code_visualstudio_com` 源读取 `assetEntry.stable_latest_info_url`（URL）。
 
-### Adding a New Fetch Source
+### 新增自定义获取源
 
-To support a new version source, create `scripts/fetch/{name}_fetch_latest.js` and set the package's `fetch_source` field in `pkgs.json` to `{name}`. No C# code changes are needed.
+要支持新的版本获取源，只需创建 `scripts/fetch/{name}_fetch_latest.js`，然后在 `pkgs.json` 中将包的 `fetch_source` 字段设置为 `{name}`，无需修改 C# 代码。
 
-## Before-Install Hooks
+## 安装前钩子
 
-### Purpose
+### 作用
 
-Execute immediately before `PlaceAsset` runs during install. Use this hook for pre-install cleanup that the installer itself cannot do — killing running processes backed by the same shims, removing leftover files from a previous install attempt, or backing up user data before the directory is overwritten.
+在安装 `PlaceAsset` 之前立即执行。用于安装程序本身无法完成的预清理：终止同一组 shim 指向的运行中进程、移除上一次安装尝试遗留的文件、或在被覆盖前备份用户数据。
 
-> The hook runs on every install call (including re-installs when `skipIfUptodate` is false), independent of whether an `after_install` hook also exists.
+> 钩子在每次安装调用时都会执行（包括 `skipIfUptodate` 为 false 时的重新安装），与是否存在 `after_install` 钩子无关。
 
-### Script Location
+### 脚本位置
 
 ```
 scripts/
@@ -271,12 +271,12 @@ scripts/
     └── {name}-{os}-{arch}-before_install.js
 ```
 
-For example, before installing vscode on Windows x86_64:
+例如 Windows x86_64 上安装 vscode 前的钩子路径为：
 `scripts/hooks/vscode-windows-x86_64-before_install.js`
 
-The hook is auto-detected by path — no `pkgs.json` field is required.
+钩子按路径自动检测——无需在 `pkgs.json` 中启用任何字段。
 
-### Required Function Signature
+### 函数签名
 
 ```javascript
 async function beforeInstall() {
@@ -284,11 +284,11 @@ async function beforeInstall() {
 }
 ```
 
-### Globals
+### 可用全局变量
 
-`pkgJSON`, `configJSON`, `os`, `arch`, `installDir`, `installRoot` (see [Globals Injected by C#](#globals-injected-by-c)).
+`pkgJSON`、`configJSON`、`os`、`arch`、`installDir`、`installRoot`（参见 [C# 注入的全局变量](#c-注入的全局变量)）。
 
-### Example
+### 示例
 
 ```javascript
 // scripts/hooks/vscode-windows-x86_64-before_install.js
@@ -297,21 +297,21 @@ async function beforeInstall() {
     const exe = installDir + "\\Code.exe";
     const exists = fileExists(exe);
     if (exists) {
-        log("stopping any running vscode instance before install");
-        // ... custom cleanup logic ...
+        log("安装前停止运行中的 vscode 实例");
+        // ... 自定义清理逻辑 ...
     }
 }
 ```
 
-## After-Install Hooks
+## 安装后钩子
 
-### Purpose
+### 作用
 
-Execute after a package is installed. Handles post-installation tasks that the installer itself cannot complete, such as creating data directories or generating wrapper scripts.
+包首次安装完成后执行。用于处理安装程序本身无法完成的后续任务，例如创建数据目录或生成包装脚本。
 
-> **Note:** For simple wrapper script creation, consider using the `shell_script` shim block in `pkgs.json` instead of an after-install hook. `shell_script` supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders and writes files as UTF-8 without BOM.
+> **注意：** 如果只是创建包装脚本，可以考虑使用 `pkgs.json` 中的 `shell_script` shim 块代替安装后钩子。`shell_script` 支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符，并以 UTF-8 无 BOM 格式写入文件。
 
-### Script Location
+### 脚本位置
 
 ```
 scripts/
@@ -319,12 +319,12 @@ scripts/
     └── {name}-{os}-{arch}-after_install.js
 ```
 
-For example, after installing vscode on Windows x86_64:
+例如 Windows x86_64 上安装 vscode 后的钩子路径为：
 `scripts/hooks/vscode-windows-x86_64-after_install.js`
 
-The hook is auto-detected by path — no `pkgs.json` field is required.
+钩子按路径自动检测——无需在 `pkgs.json` 中启用任何字段。
 
-### Required Function Signature
+### 函数签名
 
 ```javascript
 async function afterInstall() {
@@ -332,11 +332,11 @@ async function afterInstall() {
 }
 ```
 
-### Globals
+### 可用全局变量
 
-`pkgJSON`, `configJSON`, `os`, `arch`, `installDir`, `installRoot` (see [Globals Injected by C#](#globals-injected-by-c)).
+`pkgJSON`、`configJSON`、`os`、`arch`、`installDir`、`installRoot`（参见 [C# 注入的全局变量](#c-注入的全局变量)）。
 
-### Example
+### 示例
 
 ```javascript
 // scripts/hooks/vscode-windows-x86_64-after_install.js
@@ -350,15 +350,15 @@ async function afterInstall() {
 }
 ```
 
-## Before-Upgrade Hooks
+## 升级前钩子
 
-### Purpose
+### 作用
 
-Execute immediately before `PlaceAsset` runs during upgrade. Use this hook for upgrade-only cleanup that depends on the existing install — flushing in-memory state of the running binary, persisting user data that the next version will not preserve, or stopping daemons so the new binary can replace their files cleanly.
+在升级 `PlaceAsset` 之前立即执行。用于依赖现有安装状态的预清理：将运行中二进制的状态刷出内存、保留下一版本不再携带的用户数据、或停守护进程以便新二进制干净地替换其文件。
 
-Runs **only** when the upgrade actually proceeds — i.e. the installed version differs from the resolved latest version. Never fires on a first-time install.
+**仅**在确实发生版本变更时触发——若解析的最新版本等于已安装版本则不会运行。也不会在首次安装时触发。
 
-### Script Location
+### 脚本位置
 
 ```
 scripts/
@@ -366,12 +366,12 @@ scripts/
     └── {name}-{os}-{arch}-before_upgrade.js
 ```
 
-For example, before upgrading vscode on Windows x86_64:
+例如 Windows x86_64 上升级 vscode 前的钩子路径为：
 `scripts/hooks/vscode-windows-x86_64-before_upgrade.js`
 
-The hook is auto-detected by path. If the file is missing the upgrade proceeds without it — no fallback to `before_install.js`, `after_install.js`, or any other hook, and no error.
+钩子按路径自动检测。若文件缺失，升级流程正常进行——既不会回退到 `before_install.js`、`after_install.js` 或其他任何钩子，也不会报错。
 
-### Required Function Signature
+### 函数签名
 
 ```javascript
 async function beforeUpgrade() {
@@ -379,11 +379,11 @@ async function beforeUpgrade() {
 }
 ```
 
-### Globals
+### 可用全局变量
 
-`pkgJSON`, `configJSON`, `os`, `arch`, `installDir`, `installRoot` (see [Globals Injected by C#](#globals-injected-by-c)).
+`pkgJSON`、`configJSON`、`os`、`arch`、`installDir`、`installRoot`（参见 [C# 注入的全局变量](#c-注入的全局变量)）。
 
-### Example
+### 示例
 
 ```javascript
 // scripts/hooks/vscode-windows-x86_64-before_upgrade.js
@@ -397,15 +397,15 @@ async function beforeUpgrade() {
 }
 ```
 
-## After-Upgrade Hooks
+## 升级后钩子
 
-### Purpose
+### 作用
 
-Execute after a package is upgraded (replaced with a newer version). Runs **only** when the upgrade actually proceeds — i.e. the installed version differs from the resolved latest version. Unlike the after-install hook, this never fires on a first-time install.
+包升级（替换为新版本）完成后执行，**仅**在确实发生版本变更时触发——若解析的最新版本等于已安装版本则不会运行。也不会在首次安装时触发。
 
-Use this hook for upgrade-only work such as cleaning stale caches left by the previous version, regenerating caches that depend on the new binary, or bumping config files.
+用于处理仅与升级相关的任务：清理旧版本遗留的缓存、为新二进制重新生成缓存、迁移配置文件等。
 
-### Script Location
+### 脚本位置
 
 ```
 scripts/
@@ -413,12 +413,12 @@ scripts/
     └── {name}-{os}-{arch}-after_upgrade.js
 ```
 
-For example, after upgrading vscode on Windows x86_64:
+例如 Windows x86_64 上升级 vscode 后的钩子路径为：
 `scripts/hooks/vscode-windows-x86_64-after_upgrade.js`
 
-The hook is auto-detected by path. If the file is missing the upgrade proceeds without it — no fallback to `after_install.js` and no error.
+钩子按路径自动检测。若文件缺失，升级流程正常进行——既不会回退到 `after_install.js`，也不会报错。
 
-### Required Function Signature
+### 函数签名
 
 ```javascript
 async function afterUpgrade() {
@@ -426,11 +426,11 @@ async function afterUpgrade() {
 }
 ```
 
-### Globals
+### 可用全局变量
 
-`pkgJSON`, `configJSON`, `os`, `arch`, `installDir`, `installRoot` (see [Globals Injected by C#](#globals-injected-by-c)).
+`pkgJSON`、`configJSON`、`os`、`arch`、`installDir`、`installRoot`（参见 [C# 注入的全局变量](#c-注入的全局变量)）。
 
-### Example
+### 示例
 
 ```javascript
 // scripts/hooks/vscode-windows-x86_64-after_upgrade.js
@@ -444,15 +444,15 @@ async function afterUpgrade() {
 }
 ```
 
-## Before-Uninstall Hooks
+## 卸载前钩子
 
-### Purpose
+### 作用
 
-Execute immediately before uninstall logic runs (before shims and the install directory are removed). Use this hook for cleanup that depends on the package still being installed — stopping running processes backed by the same shims, flushing in-memory state, or backing up user data before the directory is removed.
+在卸载逻辑（删除 shim 与安装目录）之前立即执行。用于依赖包仍处于已安装状态的清理：终止同一组 shim 指向的运行中进程、刷出内存中的运行状态、或在被删除前备份用户数据。
 
-> The hook runs on every uninstall call (including re-uninstall attempts where the package is still recorded in `installed.json`), independent of whether an `after_uninstall` hook also exists.
+> 钩子在每次卸载调用时都会执行（包括 `installed.json` 中仍记录包名的重复卸载尝试），与是否存在 `after_uninstall` 钩子无关。
 
-### Script Location
+### 脚本位置
 
 ```
 scripts/
@@ -460,12 +460,12 @@ scripts/
     └── {name}-{os}-{arch}-before_uninstall.js
 ```
 
-For example, before uninstalling vscode on Windows x86_64:
+例如 Windows x86_64 上卸载 vscode 前的钩子路径为：
 `scripts/hooks/vscode-windows-x86_64-before_uninstall.js`
 
-The hook is auto-detected by path. If the file is missing the uninstall proceeds without it — no fallback to `before_install.js`, `after_install.js`, `before_upgrade.js`, `after_upgrade.js`, `after_uninstall.js`, or any other hook, and no error.
+钩子按路径自动检测。若文件缺失，卸载流程正常进行——既不会回退到 `before_install.js`、`after_install.js`、`before_upgrade.js`、`after_upgrade.js`、`after_uninstall.js` 或其他任何钩子，也不会报错。
 
-### Required Function Signature
+### 函数签名
 
 ```javascript
 async function beforeUninstall() {
@@ -473,13 +473,13 @@ async function beforeUninstall() {
 }
 ```
 
-### Globals
+### 可用全局变量
 
-`pkgJSON`, `configJSON`, `os`, `arch`, `installDir`, `installRoot` (see [Globals Injected by C#](#globals-injected-by-c)).
+`pkgJSON`、`configJSON`、`os`、`arch`、`installDir`、`installRoot`（参见 [C# 注入的全局变量](#c-注入的全局变量)）。
 
-> During uninstall, `installDir` still points to a real directory (it has not been deleted yet), so it can be used to clean up files inside it.
+> 卸载时 `installDir` 仍指向真实目录（尚未删除），可用于清理该目录内的文件。
 
-### Example
+### 示例
 
 ```javascript
 // scripts/hooks/vscode-windows-x86_64-before_uninstall.js
@@ -488,19 +488,19 @@ async function beforeUninstall() {
     const exe = installDir + "\\Code.exe";
     const exists = fileExists(exe);
     if (exists) {
-        log("stopping any running vscode instance before uninstall");
-        // ... custom cleanup logic ...
+        log("卸载前停止运行中的 vscode 实例");
+        // ... 自定义清理逻辑 ...
     }
 }
 ```
 
-## After-Uninstall Hooks
+## 卸载后钩子
 
-### Purpose
+### 作用
 
-Execute after a package is uninstalled. Used to clean up files created during installation, such as removing shims or residual data.
+包卸载完成后执行。用于清理安装过程中创建的文件，例如删除 shim 包装脚本或残留数据。
 
-### Script Location
+### 脚本位置
 
 ```
 scripts/
@@ -508,12 +508,12 @@ scripts/
     └── {name}-{os}-{arch}-after_uninstall.js
 ```
 
-For example, after uninstalling vscode on Windows x86_64:
+例如 Windows x86_64 上卸载 vscode 后的钩子路径为：
 `scripts/hooks/vscode-windows-x86_64-after_uninstall.js`
 
-The hook is auto-detected by path — no `pkgs.json` field is required.
+钩子按路径自动检测——无需在 `pkgs.json` 中启用任何字段。
 
-### Required Function Signature
+### 函数签名
 
 ```javascript
 async function afterUninstall() {
@@ -521,13 +521,13 @@ async function afterUninstall() {
 }
 ```
 
-### Globals
+### 可用全局变量
 
-`pkgJSON`, `configJSON`, `os`, `arch`, `installDir`, `installRoot` (see [Globals Injected by C#](#globals-injected-by-c)).
+`pkgJSON`、`configJSON`、`os`、`arch`、`installDir`、`installRoot`（参见 [C# 注入的全局变量](#c-注入的全局变量)）。
 
-> During uninstall, `installDir` still points to a real directory (it has not been deleted yet), so it can be used to clean up files inside it.
+> 卸载时 `installDir` 仍指向真实目录（尚未删除），可用于清理该目录内的文件。
 
-### Example
+### 示例
 
 ```javascript
 // scripts/hooks/vscode-windows-x86_64-after_uninstall.js
@@ -543,12 +543,12 @@ async function afterUninstall() {
 }
 ```
 
-## Notes
+## 注意事项
 
-1. **Path matching**: Hook paths must strictly match `{name}-{os}-{arch}-{before|after}_{install|upgrade|uninstall}.js`, otherwise the hook is skipped silently.
-2. **Independent hooks**: `before_install`, `before_upgrade`, `before_uninstall`, `after_install`, `after_upgrade`, and `after_uninstall` are six independent hooks. No operation ever falls back to a different hook — if a hook file is missing, that step is silently skipped.
-3. **Error handling**: Hook failures do not abort install/upgrade/uninstall; errors are logged to stderr.
-4. **`installDir` accessible during uninstall**: The directory has not been deleted yet, so it can be used to clean up files inside it.
-5. **Shims directory auto-created**: `installRoot/shims` is created automatically when the program starts; no need to create it manually in hooks.
-6. **Async functions**: All entry functions (`fetch`, `beforeInstall`, `beforeUpgrade`, `afterInstall`, `afterUpgrade`, `beforeUninstall`, `afterUninstall`) must be declared `async`; you can `await` the registered C# functions.
-7. **No filesystem sandboxing**: Scripts run with full process privileges and can call any registered C# function. Do not run untrusted scripts.
+1. **路径匹配**：钩子路径必须严格匹配 `{name}-{os}-{arch}-{before|after}_{install|upgrade|uninstall}.js`，否则会被静默跳过。
+2. **六种钩子彼此独立**：`before_install`、`before_upgrade`、`before_uninstall`、`after_install`、`after_upgrade`、`after_uninstall` 是六种互相独立的钩子。任意操作都不会回退到其他钩子——任一文件缺失时该步骤静默跳过。
+3. **错误处理**：钩子执行失败不会终止安装/升级/卸载流程，错误信息会打印到 stderr。
+4. **卸载时 `installDir` 仍可访问**：卸载过程中目录尚未被删除，可用于清理该目录内创建的文件。
+5. **shims 目录自动创建**：`installRoot/shims` 目录会在程序启动时自动创建，脚本中无需手动创建。
+6. **异步函数**：所有入口函数（`fetch`、`beforeInstall`、`beforeUpgrade`、`afterInstall`、`afterUpgrade`、`beforeUninstall`、`afterUninstall`）必须声明为 `async`，可以直接 `await` 注册的 C# 函数。
+7. **无沙箱保护**：脚本以当前进程权限运行，可调用任何已注册的 C# 函数，请勿执行不受信任的脚本。
