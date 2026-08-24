@@ -46,7 +46,7 @@ sjtf --version        # Show version
 
 ## Configuration Files
 
-All configuration files are located in the same directory as the executable.
+`config.toml`, `pkgs.json`, `favorites.json`, and `installed.json` all live under the `data/` subdirectory next to the executable. `pkgs.json` and `favorites.json` are copied there at build time; `config.toml` and `installed.json` are auto-generated there on first run.
 
 > **Note (Windows):** Creating symbolic links requires Administrator privileges or Developer Mode enabled. Without it, symlink creation will fail.
 

@@ -46,7 +46,7 @@ sjtf --version        # 显示版本号
 
 ## 配置文件
 
-所有配置文件位于可执行文件同级目录。
+`config.toml`、`pkgs.json`、`favorites.json`、`installed.json` 都位于可执行文件同级目录的 `data/` 子目录下。`pkgs.json` 和 `favorites.json` 在构建时拷贝进去；`config.toml` 和 `installed.json` 在首次运行时自动生成。
 
 > **注意（Windows）：** 创建符号链接需要管理员权限或启用开发人员模式。否则 symlink 创建会失败。
 

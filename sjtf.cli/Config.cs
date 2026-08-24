@@ -189,7 +189,7 @@ internal static class Config
     /// <summary>
     /// 获取 config.toml 的完整路径 / Get the full path of config.toml.
     /// </summary>
-    private static string ConfigPath() => Path.Combine(Paths.SjtfCliRoot(), "config.toml");
+    private static string ConfigPath() => Path.Combine(Paths.DataDir(), "config.toml");
 
     private static SjtfCliConfig? _cachedDoc;
     private static long _cachedDocMtime;

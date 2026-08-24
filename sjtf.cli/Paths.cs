@@ -31,4 +31,14 @@ internal static class Paths
         Directory.CreateDirectory(d);
         return d;
     }
+
+    /// <summary>
+    /// 获取数据目录路径（如不存在则创建） / Get data directory path (create if not exists).
+    /// </summary>
+    public static string DataDir()
+    {
+        var d = Path.Combine(SjtfCliRoot(), "data");
+        Directory.CreateDirectory(d);
+        return d;
+    }
 }

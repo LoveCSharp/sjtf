@@ -21,10 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="pkgs.json">
+    <Content Include="pkgs.json" Link="data/pkgs.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="favorites.json">
+    <Content Include="favorites.json" Link="data/favorites.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="scripts\**\*">

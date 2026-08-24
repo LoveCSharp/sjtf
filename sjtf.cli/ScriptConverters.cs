@@ -21,7 +21,7 @@ internal static class ScriptConverters
     /// <returns>JSON 字符串 / JSON string.</returns>
     public static string LoadConfigJson()
     {
-        var path = Path.Combine(Paths.SjtfCliRoot(), "config.toml");
+        var path = Path.Combine(Paths.DataDir(), "config.toml");
         if (!File.Exists(path)) return "{}";
 
         string raw;
