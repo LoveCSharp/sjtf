@@ -5,8 +5,12 @@ let script_dir = ($script_path | path dirname | path expand)
 # 获取.net 解决方案路径
 let sln_dir = ($script_dir | path dirname | path expand)
 
-ls $"($script_dir)/pkg‑fragments"
+let merged_json = (
+    ls $"($script_dir)/pkg‑fragments"
 | where { |row| ($row.name | str ends-with ".json") and ($row.name != "pkgs.json") }
 | sort-by name -r
 | each { open $in.name } | reduce { |acc, next| $acc | merge $next }
-| to json | save --force $"($sln_dir)/sjtf.cli/data/pkgs.json"
+| to json)
+
+$merged_json | save --force $"($sln_dir)/sjtf.cli/data/pkgs.json"
+$merged_json | save --force $"($sln_dir)/pkgs.json"
