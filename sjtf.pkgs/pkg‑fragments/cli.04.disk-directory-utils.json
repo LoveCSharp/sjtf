@@ -1,0 +1,71 @@
+{
+  "eza": {
+    "description": "Modern replacement for ls with colors and Git integration",
+    "repo": "eza-community/eza",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*gnu).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/eza",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "eza.exe": "eza.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "dust": {
+    "description": "More intuitive version of du that shows disk usage",
+    "repo": "bootandy/dust",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/dust",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "dust.exe": "dust.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "duf": {
+    "description": "Better df alternative with colorful output",
+    "repo": "muesli/duf",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*x86_64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/duf",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "duf.exe": "duf.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  }
+}

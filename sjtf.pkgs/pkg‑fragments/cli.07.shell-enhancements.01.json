@@ -1,0 +1,94 @@
+{
+  "zoxide": {
+    "description": "Smarter cd command that learns your habits",
+    "repo": "ajeetdsouza/zoxide",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/zoxide",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "zoxide.exe": "zoxide.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "atuin": {
+    "description": "magical shell history",
+    "repo": "atuinsh/atuin",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?!.*server)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/atuin/atuin",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "atuin.exe": "atuin.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "atuin-server": {
+    "description": "magical shell history",
+    "repo": "atuinsh/atuin",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*server)(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/atuin/atuin-server",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "atuin-server.exe": "atuin-server.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "carapace": {
+    "description": "Multi-shell tab completion generator for CLI tools",
+    "repo": "carapace-sh/carapace-bin",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*amd64)(?=.*windows).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/carapace",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "carapace.exe": "carapace.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  }
+}

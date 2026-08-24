@@ -1,0 +1,48 @@
+{
+  "pueue": {
+    "description": "A command-line task management tool for sequential and parallel execution of long-running tasks",
+    "repo": "Nukesor/pueue",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*pueue-)(?=.*windows)(?=.*x86_64).*\\.exe$",
+            "type": "portable-executable"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/pueue/pueue",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "pueue.exe": "pueue.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "pueued": {
+    "description": "A command-line task management tool for sequential and parallel execution of long-running tasks",
+    "repo": "Nukesor/pueue",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*pueued-)(?=.*windows)(?=.*x86_64).*\\.exe$",
+            "type": "portable-executable"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/pueue/pueued",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "pueued.exe": "pueued.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  }
+}

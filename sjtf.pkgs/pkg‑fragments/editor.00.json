@@ -1,0 +1,176 @@
+{
+  "zed": {
+    "description": "High-performance multiplayer code editor from the creators of Atom",
+    "repo": "zed-industries/zed",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x86_64).*\\.exe$",
+            "type": "installer",
+            "install_program": "{DOWNLOADED_CACHE_FILE_FULL_PATH}",
+            "install_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /TASKS=\"!addtopath\" /DIR=\"{PKG_INSTALL_DIR}\"",
+            "uninstall_program": "{PKG_INSTALL_DIR}\\unins000.exe",
+            "uninstall_params": "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "editor/zed",
+    "shim": {
+      "windows": {
+        "shell_script": {
+          "zed.cmd": "@\"{PKG_INSTALL_DIR}\\bin\\zed.exe\" --user-data-dir \"{PKG_INSTALL_DIR}\\user-data\" %*",
+          "zed.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\bin\\zed.exe\" --user-data-dir \"{PKG_INSTALL_DIR}\\user-data\" @args"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "lapce": {
+    "description": "Lightning-fast And Powerful Code Editor",
+    "repo": "lapce/lapce",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*portable).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "editor/lapce",
+    "shim": {
+      "windows": {
+        "shell_script": {
+          "lapce.cmd": "@\"{PKG_INSTALL_DIR}\\lapce.exe\" %*",
+          "lapce.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\lapce.exe\" @args"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "vscode": {
+    "description": "Visual Studio Code - lightweight source code editor by Microsoft",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "stable_latest_info_url": "https://update.code.visualstudio.com/api/update/win32-x64-archive/stable/latest",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "editor/vscode",
+    "shim": {
+      "windows": {
+        "shell_script": {
+          "code.cmd": "@\"{PKG_INSTALL_DIR}\\bin\\code.cmd\" %*",
+          "code.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\bin\\code.cmd\" @args"
+        }
+      }
+    },
+    "fetch_source": "update_code_visualstudio_com"
+  },
+  "neovim": {
+    "description": "Neovim is a modern, extensible fork of Vim focused on usability, API access and plugin ecosystem.",
+    "repo": "neovim/neovim",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*win64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "editor/nvim",
+    "shim": {
+      "windows": {
+        "shell_script": {
+          "nvm.cmd": "@\"{PKG_INSTALL_DIR}\\bin\\nvim.exe\" %*",
+          "nvm.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\bin\\nvim.exe\" @args"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "edit": {
+    "description": "Simple text editor for Windows inspired by MS-DOS Editor",
+    "repo": "microsoft/edit",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*x86_64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "editor/edit",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "edit.exe": "edit.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "notepad3": {
+    "description": "Lightweight Scintilla-based text editor with syntax highlighting",
+    "repo": "rizonesoft/Notepad3",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x64)(?=.*Portable).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "editor/notepad3",
+    "shim": {
+      "windows": {
+        "shell_script": {
+          "notepad3.cmd": "@\"{PKG_INSTALL_DIR}\\Notepad3.exe\" %*",
+          "notepad3.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\Notepad3.exe\" @args",
+          "n3.cmd": "@\"{PKG_INSTALL_DIR}\\Notepad3.exe\" %*",
+          "n3.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\Notepad3.exe\" @args"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "notepad4": {
+    "description": "a light-weight Scintilla based text editor for Windows",
+    "repo": "zufuliu/notepad4",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*HD)(?=.*zh-Hans)(?=.*x64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "editor/notepad4",
+    "shim": {
+      "windows": {
+        "shell_script": {
+          "notepad4.cmd": "@\"{PKG_INSTALL_DIR}\\Notepad4.exe\" %*",
+          "notepad4.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\Notepad4.exe\" @args",
+          "n4.cmd": "@\"{PKG_INSTALL_DIR}\\Notepad4.exe\" %*",
+          "n4.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\Notepad4.exe\" @args"
+        }
+      }
+    },
+    "fetch_source": "github"
+  }
+}

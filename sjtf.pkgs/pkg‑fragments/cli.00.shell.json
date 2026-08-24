@@ -1,0 +1,42 @@
+{
+  "powershell": {
+    "description": "PowerShell is a cross‑platform task‑automation shell and scripting language built on .NET, for system administration and command‑line work.",
+    "repo": "PowerShell/PowerShell",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*win)(?=.*x64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/powershell",
+    "fetch_source": "github"
+  },
+  "nushell": {
+    "description": "A new type of shell that works with structured data",
+    "repo": "nushell/nushell",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*x86_64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/nushell",
+    "shim": {
+      "windows": {
+        "shell_script": {
+          "nu.cmd": "@\"{PKG_INSTALL_DIR}\\nu.exe\" %*",
+          "nu.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\nu.exe\" @args"
+        }
+      }
+    },
+    "fetch_source": "github"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "oh-my-posh": {
+    "description": "Cross-platform prompt theme engine for any shell",
+    "repo": "JanDeDobbeleer/oh-my-posh",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*amd64).*\\.exe$",
+            "type": "portable-executable"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/oh-my-posh",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "oh-my-posh.exe": "oh-my-posh.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "starship": {
+    "description": "Cross-shell prompt customizable in milliseconds",
+    "repo": "starship/starship",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/starship",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "starship.exe": "starship.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  }
+}

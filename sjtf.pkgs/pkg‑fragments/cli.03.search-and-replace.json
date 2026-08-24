@@ -1,0 +1,106 @@
+{
+  "fzf": {
+    "description": "Command-line fuzzy finder",
+    "repo": "junegunn/fzf",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*amd64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/fzf",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "fzf.exe": "fzf.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "fd": {
+    "description": "Simple, fast and user-friendly alternative to find",
+    "repo": "sharkdp/fd",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/fd",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "fd.exe": "fd.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "sd": {
+    "description": "Intuitive find and replace CLI tool",
+    "repo": "chmln/sd",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        },
+        "linux": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*linux)(?=.*gnu).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/sd",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "sd.exe": "sd.exe"
+        }
+      },
+      "linux": {
+        "symlink": {
+          "sd": "sd"
+        }
+      }
+    },
+    "file_mode_0755": ["sd"],
+    "fetch_source": "github"
+  },
+  "ripgrep": {
+    "description": "Fast line-oriented search tool that recursively searches directories",
+    "repo": "BurntSushi/ripgrep",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/ripgrep",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "rg.exe": "rg.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  }
+}

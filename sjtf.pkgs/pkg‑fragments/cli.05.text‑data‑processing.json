@@ -1,0 +1,48 @@
+{
+  "bat": {
+    "description": "Cat clone with syntax highlighting and Git integration",
+    "repo": "sharkdp/bat",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/bat",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "bat.exe": "bat.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "jq": {
+    "description": "Lightweight command-line JSON processor",
+    "repo": "jqlang/jq",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*amd64).*\\.exe$",
+            "type": "portable-executable"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/jq",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "jq.exe": "jq.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  }
+}

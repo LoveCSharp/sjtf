@@ -1,0 +1,118 @@
+{
+  "git": {
+    "description": "Distributed version control system",
+    "repo": "git-for-windows/git",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*MinGit)(?=.*64-bit)(?!.*busybox).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "vcs/git",
+    "shim": {
+      "windows": {
+        "shell_script": {
+          "git.cmd": "@\"{PKG_INSTALL_DIR}\\cmd\\git.exe\" %*",
+          "git.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\cmd\\git.exe\" @args"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "delta": {
+    "description": "A syntax-highlighting pager for git, diff, and grep output",
+    "repo": "dandavison/delta",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/delta",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "delta.exe": "delta.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "lazygit": {
+    "description": "A simple terminal UI for git commands",
+    "repo": "jesseduffield/lazygit",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/lazygit",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "lazygit.exe": "lazygit.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "ziggity": {
+    "description": "A fast terminal UI for Git, written in Zig.",
+    "repo": "simoarpe/ziggity",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*gnu).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/ziggity",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "ziggity.exe": "ziggity.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "gitui": {
+    "description": "GitUI provides you with the comfort of a git GUI but right in your terminal",
+    "repo": "gitui-org/gitui",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*win).*\\.tar.gz$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/gitui",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "gitui.exe": "gitui.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  }
+}

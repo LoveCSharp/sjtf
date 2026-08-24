@@ -1,0 +1,25 @@
+{
+  "microsoft-coreutils": {
+    "description": "Cross-platform Unix core utilities for Windows by Microsoft",
+    "repo": "microsoft/coreutils",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/microsoft-coreutils",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "coreutils.exe": "coreutils.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  }
+}
