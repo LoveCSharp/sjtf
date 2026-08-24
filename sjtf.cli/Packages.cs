@@ -26,12 +26,16 @@ internal static class Packages
         Console.WriteLine($"pkgs: updated {pkgsPath}");
     }
     /// <summary>
-    /// Packages.Load() 的返回值：合并后的根 JsonObject + 来自 pkgs_custom.json 的包名集合。
-    /// Returned by Packages.Load(): merged root JsonObject + set of names sourced from pkgs_custom.json.
+    /// Packages.Load() 的返回值：合并后的根 JsonObject + 自定义包来源分类。
+    /// Returned by Packages.Load(): merged root JsonObject + classification of custom packages.
     /// </summary>
-    /// <param name="Root">合并后的根 JsonObject（包含 base 与 custom 的所有 key，custom 同名覆盖 base）/ Merged root JsonObject (custom overrides base for same-name keys).</param>
-    /// <param name="CustomKeys">来自 pkgs_custom.json 的包名集合（大小写不敏感）/ Set of names that came from pkgs_custom.json (case-insensitive).</param>
-    public sealed record LoadedPackages(JsonObject Root, HashSet<string> CustomKeys);
+    /// <param name="Root">合并后的根 JsonObject（custom 同名覆盖 base）/ Merged root JsonObject (custom overrides base).</param>
+    /// <param name="NewKeys">仅在 pkgs_custom.json 出现的包名集合（大小写不敏感）/ Names present ONLY in pkgs_custom.json (case-insensitive).</param>
+    /// <param name="OverriddenKeys">pkgs.json 和 pkgs_custom.json 同时出现的包名集合（custom 覆盖 base）/ Names present in BOTH pkgs.json and pkgs_custom.json (custom overrides base).</param>
+    public sealed record LoadedPackages(
+        JsonObject Root,
+        HashSet<string> NewKeys,
+        HashSet<string> OverriddenKeys);
 
     /// <summary>
     /// 加载 pkgs.json（必要时从远程下载）并与 pkgs_custom.json 合并，返回根 JSON 对象 / Load pkgs.json
@@ -43,7 +47,7 @@ internal static class Packages
     /// 如果本地 pkgs.json 不存在且配置了 remote_url，则自动从远程下载。
     /// If pkgs.json does not exist locally and remote_url is configured, automatically download it from remote.
     /// </summary>
-    /// <returns>合并后的包定义 JSON 对象 + 来自 pkgs_custom.json 的包名集合 / Merged package definition JSON object plus set of names sourced from pkgs_custom.json.</returns>
+    /// <returns>合并后的包定义 JSON 对象 + 自定义包来源分类（NewKeys 仅新增 / OverriddenKeys 覆盖）/ Merged package definition JSON object plus custom-source classification (NewKeys = custom-only, OverriddenKeys = custom overrides base).</returns>
     public static LoadedPackages Load()
     {
         var basePath = Path.Combine(Paths.DataDir(), "pkgs.json");
@@ -62,7 +66,8 @@ internal static class Packages
 
         var baseDoc = LoadJsonObjectFile(basePath, "pkgs.json");
 
-        var customKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var newKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var overriddenKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var customPath = Path.Combine(Paths.DataDir(), "pkgs_custom.json");
         if (File.Exists(customPath))
         {
@@ -70,14 +75,19 @@ internal static class Packages
 
             // custom 中的每个 key 完全覆盖 base 中同名 key。
             // DeepClone 避免 base 与 custom 共享 JsonNode 引用导致后续突变相互影响。
+            // 分类：同名覆盖 → OverriddenKeys；仅 custom 新增 → NewKeys。
             foreach (var kvp in customDoc)
             {
-                customKeys.Add(kvp.Key);
+                if (baseDoc.ContainsKey(kvp.Key))
+                    overriddenKeys.Add(kvp.Key);
+                else
+                    newKeys.Add(kvp.Key);
+
                 baseDoc[kvp.Key] = kvp.Value?.DeepClone();
             }
         }
 
-        return new LoadedPackages(baseDoc, customKeys);
+        return new LoadedPackages(baseDoc, newKeys, overriddenKeys);
     }
 
     /// <summary>

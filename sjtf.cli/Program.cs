@@ -282,9 +282,12 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
     {
         try
         {
-            var pkgs = Packages.Load();
+            var loaded = Packages.Load();
+            var pkgs = loaded.Root;
+            var newKeys = loaded.NewKeys;
+            var overriddenKeys = loaded.OverriddenKeys;
 
-            if (pkgs.Root.Count == 0)
+            if (pkgs.Count == 0)
             {
                 AnsiConsole.MarkupLine("[yellow]packages:[/]");
                 AnsiConsole.MarkupLine("  [grey](none)[/]");
@@ -292,12 +295,14 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
             }
 
             var rows = new List<(string Name, string Description)>();
-            foreach (var prop in pkgs.Root.AsObject())
+            foreach (var prop in pkgs.AsObject())
             {
                 var description = "";
                 if (prop.Value is JsonObject descObj && descObj.TryGetPropertyValue("description", out var descNode) && descNode is JsonValue descVal && descVal.GetValueKind() == JsonValueKind.String)
                     description = descVal.GetValue<string>();
-                var displayName = pkgs.CustomKeys.Contains(prop.Key) ? prop.Key + "*c" : prop.Key;
+                var displayName = overriddenKeys.Contains(prop.Key) ? prop.Key + "*co"
+                                : newKeys.Contains(prop.Key)       ? prop.Key + "*c"
+                                : prop.Key;
                 rows.Add((displayName, description));
             }
             rows.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
@@ -332,12 +337,14 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
         }
 
         var descriptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        HashSet<string> customKeys = new(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> newKeys = new(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> overriddenKeys = new(StringComparer.OrdinalIgnoreCase);
         try
         {
-            var pkgs = Packages.Load();
-            customKeys = pkgs.CustomKeys;
-            foreach (var prop in pkgs.Root.AsObject())
+            var loaded = Packages.Load();
+            newKeys = loaded.NewKeys;
+            overriddenKeys = loaded.OverriddenKeys;
+            foreach (var prop in loaded.Root.AsObject())
             {
                 if (prop.Value is JsonObject descObj && descObj.TryGetPropertyValue("description", out var descNode) && descNode is JsonValue descVal && descVal.GetValueKind() == JsonValueKind.String)
                     descriptions[prop.Key] = descVal.GetValue<string>();
@@ -370,7 +377,9 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
                     _ => prop.Value.GetRawText()
                 };
                 descriptions.TryGetValue(prop.Name, out var description);
-                var displayName = customKeys.Contains(prop.Name) ? prop.Name + "*c" : prop.Name;
+                var displayName = overriddenKeys.Contains(prop.Name) ? prop.Name + "*co"
+                                : newKeys.Contains(prop.Name)         ? prop.Name + "*c"
+                                : prop.Name;
                 entries.Add((displayName, version, description ?? ""));
             }
             entries.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
