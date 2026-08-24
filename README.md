@@ -65,7 +65,7 @@ sjtf --version        # 显示版本号
 install_dir = "D:\\sjtf_pkgs"     # 所有安装的根目录
 
 [pkgs]
-remote_url = "https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json"  # `sjtf packages update` 使用的远程 pkgs.json URL
+remote_url = "https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/pkgs.json"  # `sjtf packages update` 使用的远程 pkgs.json URL
 
 [download]
 aria2_enable = true                # 是否启用 aria2 下载

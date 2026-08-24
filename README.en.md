@@ -65,7 +65,7 @@ Main configuration file. Automatically created with default values on first run.
 install_dir = "D:\\sjtf_pkgs"     # Root directory for all installations
 
 [pkgs]
-remote_url = "https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json"  # Remote pkgs.json URL for `sjtf packages update`
+remote_url = "https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/pkgs.json"  # Remote pkgs.json URL for `sjtf packages update`
 
 [download]
 aria2_enable = true                # Enable aria2 download
