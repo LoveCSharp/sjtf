@@ -721,6 +721,29 @@
     },
     "fetch_source": "github"
   },
+  "ouch": {
+    "description": "stands for Obvious Unified Compression Helper.",
+    "repo": "ouch-org/ouch",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/ouch",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "ouch.exe": "ouch.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
   "zed": {
     "description": "High-performance multiplayer code editor from the creators of Atom",
     "repo": "zed-industries/zed",
