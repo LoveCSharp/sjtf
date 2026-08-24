@@ -287,5 +287,4 @@ MIT — 详见 [LICENSE](LICENSE) 文件。
 > - [Jint 4.16.0](https://github.com/sebastienros/jint) — 内嵌 JavaScript 引擎
 > - [SharpCompress 0.50.4](https://github.com/adamhathcock/sharpcompress) — ZIP / TAR.GZ / 7Z 压缩包处理
 > - [Spectre.Console 0.57.2](https://github.com/spectreconsole/spectre.console) — 终端 UI 渲染
-> - [System.CommandLine 2.0.10](https://github.com/dotnet/command-line-api) — CLI 参数解析
 > - [Tomlyn 2.10.1](https://github.com/xen2/Tomlyn) — TOML 解析
