@@ -253,7 +253,7 @@ async function fetch() {
 
 ### Adding a New Fetch Source
 
-To support a new version source, create `scripts/fetch/{name}_fetch_latest.js` and set the package's `fetch_source` field in `pkgs.json` to `{name}`. No C# code changes are needed.
+To support a new version source, create `scripts/fetch/{name}_fetch_latest.js` and set the package's `fetch_source` field in `pkgs.json` to `{name}`. The new source is auto-discovered at startup by scanning `scripts/fetch/` for any `*_fetch_latest.js` file — no C# code changes are needed.
 
 ## Before-Install Hooks
 

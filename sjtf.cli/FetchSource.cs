@@ -52,11 +52,37 @@ public sealed record DownloadPlan(
 
 internal static class FetchSources
 {
-    private static readonly Dictionary<string, IFetchSource> _all = new()
+    // 延迟初始化字典：首次访问时扫描<exe>/scripts/fetch/ 下所有
+    // *_fetch_latest.js，按文件名剥离后缀作为 fetch_source 名称。
+    // 用户只需将 xxx_fetch_latest.js 放入 scripts/fetch/，无需修改 C# 代码。
+    //
+    // Lazy-initialized registry: scans <exe>/scripts/fetch/*_fetch_latest.js
+    // on first access, registering each file's name (sans suffix) as a
+    // fetch_source. Users add custom sources by dropping a JS file in —
+    // no C# changes required.
+    private static Dictionary<string, IFetchSource>? _all;
+
+    private static Dictionary<string, IFetchSource> All => _all ??= LoadFromDisk();
+
+    private static Dictionary<string, IFetchSource> LoadFromDisk()
     {
-        ["github"] = new ScriptFetchSource("github"),
-        ["update_code_visualstudio_com"] = new ScriptFetchSource("update_code_visualstudio_com"),
-    };
+        var result = new Dictionary<string, IFetchSource>(StringComparer.OrdinalIgnoreCase);
+        var dir = Path.Combine(Paths.SjtfCliRoot(), "scripts", "fetch");
+        if (!Directory.Exists(dir)) return result;
+
+        const string suffix = "_fetch_latest.js";
+        foreach (var file in Directory.EnumerateFiles(dir, "*" + suffix))
+        {
+            var name = Path.GetFileNameWithoutExtension(file); // 去掉 .js
+            if (!name.EndsWith("_fetch_latest", StringComparison.OrdinalIgnoreCase))
+                continue;
+            var sourceName = name.Substring(0, name.Length - "_fetch_latest".Length);
+            if (string.IsNullOrEmpty(sourceName))
+                continue;
+            result[sourceName] = new ScriptFetchSource(sourceName);
+        }
+        return result;
+    }
 
     /// <summary>
     /// 按名称获取资源获取源 / Get a fetch source by name.
@@ -65,8 +91,15 @@ internal static class FetchSources
     /// <returns>资源获取源实现 / Fetch source implementation.</returns>
     public static IFetchSource Get(string name)
     {
-        if (_all.TryGetValue(name, out var src)) return src;
+        if (All.TryGetValue(name, out var src)) return src;
         throw new InvalidOperationException(
-            $"unsupported fetch_source \"{name}\" (supported: {string.Join(", ", _all.Keys)})");
+            $"unsupported fetch_source \"{name}\" " +
+            $"(no <exe>/scripts/fetch/{name}_fetch_latest.js found; " +
+            $"discovered: {string.Join(", ", All.Keys)})");
     }
+
+    /// <summary>
+    /// 列出已发现的源名称 / List discovered fetch source names.
+    /// </summary>
+    public static IReadOnlyCollection<string> KnownNames => All.Keys;
 }

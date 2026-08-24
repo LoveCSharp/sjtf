@@ -253,7 +253,7 @@ async function fetch() {
 
 ### 新增自定义获取源
 
-要支持新的版本获取源，只需创建 `scripts/fetch/{name}_fetch_latest.js`，然后在 `pkgs.json` 中将包的 `fetch_source` 字段设置为 `{name}`，无需修改 C# 代码。
+要支持新的版本获取源，只需创建 `scripts/fetch/{name}_fetch_latest.js`，然后在 `pkgs.json` 中将包的 `fetch_source` 字段设置为 `{name}`。新源会在启动时通过扫描 `scripts/fetch/` 下所有 `*_fetch_latest.js` 文件自动被发现，无需修改 C# 代码。
 
 ## 安装前钩子
 
