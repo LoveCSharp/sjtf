@@ -1,7 +1,7 @@
 {
-  "ouch": {
-    "description": "stands for Obvious Unified Compression Helper.",
-    "repo": "ouch-org/ouch",
+  "lolcrab": {
+    "description": "make your life more colorful, still boring but more colorful",
+    "repo": "mazznoer/lolcrab",
     "fetch_asset": {
       "arch": {
         "windows": {
@@ -12,11 +12,11 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli/ouch",
+    "pkg_install_relative_dir": "cli/lolcrab",
     "shim": {
       "windows": {
         "symlink": {
-          "ouch.exe": "ouch.exe"
+          "lolcrab.exe": "lolcrab.exe"
         }
       }
     },
