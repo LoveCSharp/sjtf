@@ -153,7 +153,7 @@ Example — overriding vscode's description:
 
 `shim` is layered by operating system. Only takes effect when the current OS matches.
 
-- `symlink`: Key-value object. The **key** is the shim file name in `shims/`, the **value** is the relative path within the package install directory.
+- `symlink`: Key-value object. The **key** is the shim file name in `shims/` (subdirectories allowed, e.g. `"tools/fnm.exe"`); the **value** is the relative path within the package install directory.
 - `shell_script`: Key-value object. Each key becomes a shim file name, and its value becomes the file content. Supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders. Files are written as UTF-8 without BOM.
 
 ```json
@@ -165,6 +165,18 @@ Example — overriding vscode's description:
     "shell_script": {
       "fnm.cmd": "@\"{PKG_INSTALL_DIR}\\fnm.exe\" %*",
       "fnm.ps1": "& \"{PKG_INSTALL_DIR}\\fnm.exe\" @args"
+    }
+  }
+}
+```
+
+Nested-key example (`tools/fnm.exe` auto-creates the `shims/tools/` subdirectory):
+
+```json
+"shim": {
+  "windows": {
+    "symlink": {
+      "tools/fnm.exe": "fnm.exe"
     }
   }
 }

@@ -163,6 +163,8 @@ Shim 配置，按操作系统分层。仅在当前操作系统匹配时生效。
 - `shims/fnm.exe` -> `langs\fnm\fnm.exe`
 - `shims/jcode.exe` -> `ai\jcode\jcode-windows-x86_64.exe`
 
+key 可以包含子目录（如 `"tools/fnm.exe"`），父目录会自动创建。
+
 #### `shim[os].shell_script`
 
 键值对对象，为每个键创建同名文件，内容为对应的值。支持占位符：

@@ -164,6 +164,8 @@ This creates:
 
 The **key** is the shim file name in `shims/`, the **value** is the relative path inside the package install directory.
 
+Keys may include subdirectories (e.g. `"tools/fnm.exe"`); the parent directory is created automatically.
+
 #### `shim[os].shell_script`
 
 Key-value object creating text shim files. Supports placeholders:

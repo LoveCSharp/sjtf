@@ -153,7 +153,7 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 
 `shim` 按操作系统分层，仅在当前操作系统匹配时生效。
 
-- `symlink`：键值对对象。**键** 为 `shims/` 下的符号链接文件名，**值** 为包安装目录内的相对目标路径。
+- `symlink`：键值对对象。**键** 为 `shims/` 下的符号链接文件名（支持子目录，如 `"tools/fnm.exe"`），**值** 为包安装目录内的相对目标路径。
 - `shell_script`：键值对对象。为每个键创建同名文件，内容为对应的值。支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符。文件以 UTF-8 无 BOM 写入。
 
 ```json
@@ -165,6 +165,18 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
     "shell_script": {
       "fnm.cmd": "@\"{PKG_INSTALL_DIR}\\fnm.exe\" %*",
       "fnm.ps1": "& \"{PKG_INSTALL_DIR}\\fnm.exe\" @args"
+    }
+  }
+}
+```
+
+嵌套 key 示例（`tools/fnm.exe` 会自动创建 `shims/tools/` 子目录）：
+
+```json
+"shim": {
+  "windows": {
+    "symlink": {
+      "tools/fnm.exe": "fnm.exe"
     }
   }
 }

@@ -241,6 +241,9 @@ internal static class InstallHelpers
                 var targetRel = kv.Value?.GetValue<string>() ?? "";
                 if (string.IsNullOrEmpty(targetRel)) continue;
                 var linkPath = Path.Combine(symRoot, linkName);
+                var parentDir = Path.GetDirectoryName(linkPath);
+                if (!string.IsNullOrEmpty(parentDir))
+                    Directory.CreateDirectory(parentDir);
                 var targetFull = Path.Combine(installFull, targetRel);
                 Console.WriteLine($"{name}: shim {linkPath} -> {targetFull}");
                 Tools.CreateSymlink(linkPath, targetFull);
@@ -257,6 +260,9 @@ internal static class InstallHelpers
                 var scriptContent = kv.Value?.GetValue<string>() ?? "";
                 if (string.IsNullOrEmpty(scriptContent)) continue;
                 var scriptPath = Path.Combine(symRoot, scriptName);
+                var parentDir = Path.GetDirectoryName(scriptPath);
+                if (!string.IsNullOrEmpty(parentDir))
+                    Directory.CreateDirectory(parentDir);
                 var replaced = scriptContent.Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase)
                                             .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
                 Console.WriteLine($"{name}: shim {scriptPath}");
