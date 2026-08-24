@@ -284,7 +284,7 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
         {
             var pkgs = Packages.Load();
 
-            if (pkgs.Count == 0)
+            if (pkgs.Root.Count == 0)
             {
                 AnsiConsole.MarkupLine("[yellow]packages:[/]");
                 AnsiConsole.MarkupLine("  [grey](none)[/]");
@@ -292,12 +292,13 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
             }
 
             var rows = new List<(string Name, string Description)>();
-            foreach (var prop in pkgs.AsObject())
+            foreach (var prop in pkgs.Root.AsObject())
             {
                 var description = "";
                 if (prop.Value is JsonObject descObj && descObj.TryGetPropertyValue("description", out var descNode) && descNode is JsonValue descVal && descVal.GetValueKind() == JsonValueKind.String)
                     description = descVal.GetValue<string>();
-                rows.Add((prop.Key, description));
+                var displayName = pkgs.CustomKeys.Contains(prop.Key) ? prop.Key + "*c" : prop.Key;
+                rows.Add((displayName, description));
             }
             rows.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
 
@@ -331,10 +332,12 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
         }
 
         var descriptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> customKeys = new(StringComparer.OrdinalIgnoreCase);
         try
         {
             var pkgs = Packages.Load();
-            foreach (var prop in pkgs.AsObject())
+            customKeys = pkgs.CustomKeys;
+            foreach (var prop in pkgs.Root.AsObject())
             {
                 if (prop.Value is JsonObject descObj && descObj.TryGetPropertyValue("description", out var descNode) && descNode is JsonValue descVal && descVal.GetValueKind() == JsonValueKind.String)
                     descriptions[prop.Key] = descVal.GetValue<string>();
@@ -367,7 +370,8 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
                     _ => prop.Value.GetRawText()
                 };
                 descriptions.TryGetValue(prop.Name, out var description);
-                entries.Add((prop.Name, version, description ?? ""));
+                var displayName = customKeys.Contains(prop.Name) ? prop.Name + "*c" : prop.Name;
+                entries.Add((displayName, version, description ?? ""));
             }
             entries.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
 
@@ -403,7 +407,7 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
     static async Task InstallOneAsync(string name, bool skipIfUptodate)
     {
         var pkgs = Packages.Load();
-        if (!pkgs.TryGetPropertyValue(name, out var pkgNode) || pkgNode is not JsonObject pkg)
+        if (!pkgs.Root.TryGetPropertyValue(name, out var pkgNode) || pkgNode is not JsonObject pkg)
         {
             throw new InvalidOperationException($"package \"{name}\" not found in pkgs.json");
         }
@@ -477,7 +481,7 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
     }
 
     var pkgs = Packages.Load();
-    if (!pkgs.TryGetPropertyValue(name, out var pkgNode) || pkgNode is not JsonObject pkg)
+    if (!pkgs.Root.TryGetPropertyValue(name, out var pkgNode) || pkgNode is not JsonObject pkg)
     {
         throw new InvalidOperationException($"package \"{name}\" not found in pkgs.json");
     }
@@ -624,7 +628,7 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
         }
 
         var pkgs = Packages.Load();
-        if (!pkgs.TryGetPropertyValue(name, out var pkgNode) || pkgNode is not JsonObject pkg)
+        if (!pkgs.Root.TryGetPropertyValue(name, out var pkgNode) || pkgNode is not JsonObject pkg)
         {
             throw new InvalidOperationException($"package \"{name}\" not found in pkgs.json");
         }
