@@ -1,4 +1,27 @@
 {
+  "just": {
+  "description": "Just a command runner",
+  "repo": "casey/just",
+  "fetch_asset": {
+    "arch": {
+      "windows": {
+        "x86_64": {
+          "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+          "type": "portable-compressed-archive"
+        }
+      }
+    }
+  },
+  "pkg_install_relative_dir": "cli/just",
+  "shim": {
+    "windows": {
+      "symlink": {
+        "just.exe": "just.exe"
+      }
+    }
+  },
+  "fetch_source": "github"
+},
   "pueue": {
     "description": "A command-line task management tool for sequential and parallel execution of long-running tasks",
     "repo": "Nukesor/pueue",
