@@ -4,8 +4,14 @@ using Spectre.Console;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-Config.EnsureDefault();
+var configCreated = Config.EnsureDefault();
 Config.EnsureSymlinkDir();
+
+if (configCreated)
+{
+    Console.Error.WriteLine("config.toml was generated for the first time. Please review and adjust settings (e.g. install_dir) before running sjtf again.");
+    return 1;
+}
 
 var rootCommand = new RootCommand("sjtf - command-line skeleton tool.");
 

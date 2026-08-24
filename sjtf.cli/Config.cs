@@ -366,13 +366,14 @@ internal static class Config
 
     /// <summary>
     /// 确保默认配置文件存在 / Ensure the default configuration file exists.
-    /// 如果 config.toml 不存在，则使用默认值创建该文件。
-    /// If config.toml does not exist, create it with default values.
+    /// 若文件原本不存在，则写入默认值并返回 true；否则返回 false。
+    /// If the file does not exist, write defaults and return true; otherwise return false.
     /// </summary>
-    public static void EnsureDefault()
+    /// <returns>true 表示本次为首次创建；false 表示文件原本已存在。 / true if newly created; false if already existed.</returns>
+    public static bool EnsureDefault()
     {
         var path = ConfigPath();
-        if (File.Exists(path)) return;
+        if (File.Exists(path)) return false;
 
         var dir = Path.GetDirectoryName(path);
         if (!string.IsNullOrEmpty(dir))
@@ -425,5 +426,6 @@ proxy = ""https://gh-proxy.com""
 user_agent = ""{DefaultUserAgent}""
 ";
         File.WriteAllText(path, content);
+        return true;
     }
 }

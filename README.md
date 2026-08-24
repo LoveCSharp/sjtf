@@ -54,6 +54,8 @@ sjtf --version        # Show version
 
 Main configuration file. Automatically created with default values on first run.
 
+**First-run behavior:** when `data/config.toml` does not yet exist, sjtf generates it with defaults and then aborts the command with a prompt asking you to review and adjust settings (e.g. `install_dir`) before running sjtf again. This ensures users configure `install_dir` (and any other preferences) before any install / fetch / shim operation can use a wrong default.
+
 ```toml
 [general]
 install_dir = "D:\\sjtf_pkgs"     # Root directory for all installations
