@@ -407,7 +407,7 @@ internal static class Config
 install_dir = ""{installDir}""
 
 [pkgs]
-remote_url = ""https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/sjtf/pkgs.json""
+remote_url = ""https://cdn.jsdelivr.net/gh/LoveCSharp/sjtf@main/pkgs.json""
 
 [download]
 aria2_enable = true
