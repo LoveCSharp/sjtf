@@ -1,0 +1,26 @@
+{
+  "lnav": {
+    "description": "The Logfile Navigator is a log file viewer for the terminal.",
+    "repo": "tstack/lnav",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*x86_64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/lnav",
+    "shim": {
+      "windows": {
+        "shell_script": {
+          "lnav.cmd": "@\"{PKG_INSTALL_DIR}\\bin\\lnav.exe\" %*",
+          "lnav.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\bin\\lnav.exe\" @args"
+        }
+      }
+    },
+    "fetch_source": "github"
+  }
+}
