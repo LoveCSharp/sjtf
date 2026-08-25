@@ -32,7 +32,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "langs\\fnm",
+    "pkg_install_relative_dir": "langs/fnm",
     "shim": {
       "windows": {
         "symlink": {
@@ -121,7 +121,7 @@ https://api.github.com/repos/Schniz/fnm/releases/latest
 包在安装根目录下的相对路径。最终完整路径为 `config.install_dir + pkg_install_relative_dir`。
 
 ```json
-"pkg_install_relative_dir": "langs\\fnm"
+"pkg_install_relative_dir": "langs/fnm"
 ```
 
 如果 `config.toml` 中 `install_dir = "D:\\sjtf_pkgs"`，则 fnm 的完整安装路径为：

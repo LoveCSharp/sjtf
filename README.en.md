@@ -103,7 +103,7 @@ Package definitions. Use `sjtf packages update` to download the latest version f
         }
       }
     },
-    "pkg_install_relative_dir": "langs\\fnm",
+    "pkg_install_relative_dir": "langs/fnm",
     "shim": {
       "windows": {
         "symlink": {

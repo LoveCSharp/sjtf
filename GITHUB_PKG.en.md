@@ -32,7 +32,7 @@ Here is a complete package definition (using `fnm` as an example):
         }
       }
     },
-    "pkg_install_relative_dir": "langs\\fnm",
+    "pkg_install_relative_dir": "langs/fnm",
     "shim": {
       "windows": {
         "symlink": {
@@ -121,7 +121,7 @@ Package type determining how the downloaded file is handled during installation:
 The relative path within the installation root where the package will be installed. The final absolute path is `config.install_dir + pkg_install_relative_dir`.
 
 ```json
-"pkg_install_relative_dir": "langs\\fnm"
+"pkg_install_relative_dir": "langs/fnm"
 ```
 
 If `config.toml` has `install_dir = "D:\\sjtf_pkgs"`, fnm's full install path will be:

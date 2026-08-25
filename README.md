@@ -103,7 +103,7 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
         }
       }
     },
-    "pkg_install_relative_dir": "langs\\fnm",
+    "pkg_install_relative_dir": "langs/fnm",
     "shim": {
       "windows": {
         "symlink": {
