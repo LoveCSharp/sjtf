@@ -309,6 +309,7 @@ proxy = "https://gh-proxy.com"       # 可选代理
 - **`no asset matching xxx`**：正则表达式没有匹配到任何 Release asset，检查资产名和正则
 - **`GitHub API response missing tag_name`**：Release 没有 tag_name，检查仓库 Release 配置
 - **`digest mismatch`**：下载的文件与 GitHub API 返回的 digest 不一致，可能是网络问题或文件被篡改。程序会自动删除坏文件并重新下载一次。
+- **`digest is empty`**：fetch 脚本未返回 `digest` 字段；sjtf 跳过摘要校验并继续 install/upgrade。详见 [SCRIPTS.md](SCRIPTS.md)。
 
 ## 相关文档
 

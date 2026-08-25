@@ -81,7 +81,7 @@ token_classic = "put your classic token here"  # GitHub 个人访问令牌（可
 proxy = "https://gh-proxy.com"                 # GitHub 代理（可选）
 
 [http.request.header]
-user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0"
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0"
 ```
 
 ### `pkgs.json`
@@ -124,6 +124,8 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 - 同名包会被 `pkgs_custom.json` 中的条目**完全替换**（不做字段级深合并，整个包对象被覆盖）。
 - 合并完全在内存中完成，`pkgs_custom.json` 永远不会被修改。
 - `sjtf packages update` 只刷新 `pkgs.json`，自定义内容会保留。
+
+同名匹配按大小写不敏感（`Packages.Load()` 使用 `OrdinalIgnoreCase`）。
 
 在 `packages list` 与 `list` 的输出中，来自 `pkgs_custom.json` 的包名追加后缀以区分新增与覆盖：
 
@@ -223,7 +225,7 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 
 `favorites` 命令使用的 JSON 数组，包含包名列表。
 
-完整默认列表见 `sjtf/favorites.json`（38 个条目），以下为片段示例：
+完整默认列表见 `sjtf.cli/data/favorites.json`（33 个条目），以下为片段示例：
 
 ```json
 [
@@ -260,7 +262,7 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTM
 
 `sjtf` 支持通过 JavaScript 脚本自定义获取源和安装/卸载后处理。
 
-- **内置获取源**：`github`、`update_code_visualstudio_com`（新增自定义源见 [SCRIPTS.md](SCRIPTS.md)）
+- **内置获取源**：`github`、`update_code_visualstudio_com` 由 `scripts/fetch/` 下的脚本提供。新增自定义源：把 `{name}_fetch_latest.js` 放入 `scripts/fetch/`，启动时自动发现，无需修改 C# 代码。详见 [SCRIPTS.md](SCRIPTS.md)。
 - **获取源脚本**：`scripts/fetch/{fetch_source}_fetch_latest.js`
 - **安装前钩子**：`scripts/hooks/{name}-{os}-{arch}-before_install.js`
 - **安装后钩子**：`scripts/hooks/{name}-{os}-{arch}-after_install.js`

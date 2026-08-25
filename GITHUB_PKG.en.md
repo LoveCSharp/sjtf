@@ -310,6 +310,7 @@ If package installation fails, check the error message:
 - **`no asset matching xxx`**: Regex didn't match any Release assets, check asset names and pattern
 - **`GitHub API response missing tag_name`**: Release has no `tag_name`, check repository Release settings
 - **`digest mismatch`**: Downloaded file doesn't match GitHub API digest, possible network issue or tampering. The corrupted file is deleted and re-downloaded automatically.
+- **`digest is empty`**: fetch script returned no `digest` field; sjtf skips digest verification and continues install/upgrade. See [SCRIPTS.md](SCRIPTS.md).
 
 ## Related Documentation
 

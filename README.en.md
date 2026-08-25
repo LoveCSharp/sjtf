@@ -81,7 +81,7 @@ token_classic = "put your classic token here"  # GitHub personal access token (o
 proxy = "https://gh-proxy.com"                 # GitHub proxy (optional)
 
 [http.request.header]
-user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64, x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0"
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0"
 ```
 
 ### `pkgs.json`
@@ -124,6 +124,8 @@ You may create `data/pkgs_custom.json` to add or override package definitions wi
 - Same-name packages are fully replaced by the entry in `pkgs_custom.json` (a deep merge is **not** performed — the entire package object is overridden).
 - The merge happens entirely in memory; `pkgs_custom.json` is never modified.
 - `sjtf packages update` only refreshes `pkgs.json`; your customizations are preserved.
+
+Same-name matching is case-insensitive (`Packages.Load()` uses `OrdinalIgnoreCase`).
 
 In `packages list` and `list` output, names sourced from `pkgs_custom.json` are suffixed to distinguish additions from overrides:
 
@@ -223,7 +225,7 @@ Auto-generated file tracking installed packages and their versions. Do not edit 
 
 JSON array of package names for the `favorites` command.
 
-The full default list ships in `sjtf/favorites.json` (38 entries). An abridged example:
+The full default list ships in `sjtf.cli/data/favorites.json` (33 entries). An abridged example:
 
 ```json
 [
@@ -260,7 +262,7 @@ See [GITHUB_PKG.md](GITHUB_PKG.en.md) for a complete guide on writing `fetch_sou
 
 `sjtf` supports custom fetch sources and post-install/uninstall hooks via JavaScript.
 
-- **Built-in fetch sources**: `github`, `update_code_visualstudio_com` (see [SCRIPTS.md](SCRIPTS.en.md) for adding custom sources)
+- **Built-in fetch sources**: `github`, `update_code_visualstudio_com` ship as scripts under `scripts/fetch/`. Adding custom sources: drop `{name}_fetch_latest.js` into `scripts/fetch/`; it's auto-discovered at startup — no C# changes required. See [SCRIPTS.md](SCRIPTS.en.md).
 - **Fetch sources**: `scripts/fetch/{fetch_source}_fetch_latest.js`
 - **Before-install hooks**: `scripts/hooks/{name}-{os}-{arch}-before_install.js`
 - **After-install hooks**: `scripts/hooks/{name}-{os}-{arch}-after_install.js`

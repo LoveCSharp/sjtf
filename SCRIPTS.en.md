@@ -48,6 +48,7 @@ Before executing a script, C# binds the following global variables:
 | `arch` | string | Current architecture (`x86_64` / `aarch64` / `arm`) |
 | `installDir` | string | Full path to the package install directory (hooks only) |
 | `installRoot` | string | Global install root (`config.install_dir`, hooks only) |
+| `installFull` | string | Absolute path to the package's future install directory (fetch source scripts only); used to substitute `{PKG_INSTALL_DIR}` in `uninstall_program` |
 
 Inside the script, parse the JSON with `JSON.parse(...)`:
 

@@ -48,6 +48,7 @@ scripts/
 | `arch` | string | 当前架构（`x86_64` / `aarch64` / `arm`） |
 | `installDir` | string | 包的完整安装目录路径（仅钩子可用） |
 | `installRoot` | string | 全局安装根目录，即 `config.install_dir`（仅钩子可用） |
+| `installFull` | string | 包未来安装目录的绝对路径（仅 fetch 源脚本可用）；用于替换 `uninstall_program` 中的 `{PKG_INSTALL_DIR}` |
 
 脚本内部用 `JSON.parse(...)` 解析：
 
