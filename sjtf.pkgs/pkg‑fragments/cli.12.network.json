@@ -1,0 +1,25 @@
+{
+  "gping": {
+    "description": "Ping, but with a graph.",
+    "repo": "orf/gping",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*msvc)(?=.*x86_64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/gping",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "gping.exe": "gping.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  }
+}
