@@ -421,6 +421,52 @@
     },
     "fetch_source": "github"
   },
+  "yq": {
+    "description": "A lightweight and portable command-line YAML, JSON, INI and XML processor.",
+    "repo": "mikefarah/yq",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*amd64).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/yq",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "yq.exe": "yq_windows_amd64.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
+  "dasel": {
+    "description": "Dasel (short for Data-Select) is a command-line tool and library for querying, modifying, and transforming data structures such as JSON, YAML, TOML, XML, CSV, and KDL.",
+    "repo": "TomWright/dasel",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*windows)(?=.*amd64).*\\.exe$",
+            "type": "portable-executable"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/dasel",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "dasel.exe": "dasel.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
   "yazi": {
     "description": "Blazing fast terminal file manager written in Rust",
     "repo": "sxyazi/yazi",
