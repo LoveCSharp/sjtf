@@ -3,7 +3,7 @@
 [English](README.en.md) | [中文](README.md)
 
 ![.NET](https://img.shields.io/badge/.NET-10.0-blue)
-![Version](https://img.shields.io/badge/version-0.0.3-blue)
+![Version](https://img.shields.io/badge/version-0.0.6-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)
 
 一个便携式 CLI 包管理器，用于从 GitHub 和其他源下载、校验和管理命令行工具。

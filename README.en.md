@@ -3,7 +3,7 @@
 [English](README.en.md) | [中文](README.md)
 
 ![.NET](https://img.shields.io/badge/.NET-10.0-blue)
-![Version](https://img.shields.io/badge/version-0.0.3-blue)
+![Version](https://img.shields.io/badge/version-0.0.6-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)
 
 A portable CLI package manager that downloads, verifies, and manages command-line tools from GitHub and other sources.
