@@ -131,6 +131,22 @@
     },
     "fetch_source": "github"
   },
+  "windows-terminal": {
+    "description": "Windows Terminal",
+    "repo": "microsoft/terminal",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^Microsoft\\.WindowsTerminal_\\d+(\\.\\d+)*_x64\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/windows-terminal",
+    "fetch_source": "github"
+  },
   "zellij": {
     "description": "A terminal workspace with batteries included",
     "repo": "zellij-org/zellij",
