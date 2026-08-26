@@ -145,6 +145,18 @@
       }
     },
     "pkg_install_relative_dir": "cli/windows-terminal",
+    "shim": {
+      "windows": {
+        "desktop_shortcut": {
+          "Windows Terminal": {
+            "target": "WindowsTerminal.exe",
+            "working_dir": "{PKG_INSTALL_DIR}",
+            "arguments": "",
+            "icon": "WindowsTerminal.exe,0"
+          }
+        }
+      }
+    },
     "fetch_source": "github"
   },
   "zellij": {
