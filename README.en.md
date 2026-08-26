@@ -157,6 +157,7 @@ Example — overriding vscode's description:
 
 - `symlink`: Key-value object. The **key** is the shim file name in `shims/` (subdirectories allowed, e.g. `"tools/fnm.exe"`); the **value** is the relative path within the package install directory.
 - `shell_script`: Key-value object. Each key becomes a shim file name, and its value becomes the file content. Supports `{PKG_INSTALL_DIR}` and `{INSTALL_DIR}` placeholders. Files are written as UTF-8 without BOM.
+- `desktop_shortcut`: (Windows only) Key-value object. Each entry creates a `.lnk` file in the current user's Desktop folder. Key = shortcut file name (without `.lnk`); value = object with `target` (executable path relative to install dir), `working_dir` (supports `{PKG_INSTALL_DIR}` / `{INSTALL_DIR}` placeholders), `arguments` (launch args), `icon` (path relative to install dir, optionally with `,index` for index-in-exe). Created on install/upgrade, removed on uninstall.
 
 ```json
 "shim": {
@@ -167,6 +168,14 @@ Example — overriding vscode's description:
     "shell_script": {
       "fnm.cmd": "@\"{PKG_INSTALL_DIR}\\fnm.exe\" %*",
       "fnm.ps1": "& \"{PKG_INSTALL_DIR}\\fnm.exe\" @args"
+    },
+    "desktop_shortcut": {
+      "Windows Terminal": {
+        "target": "WindowsTerminal.exe",
+        "working_dir": "{PKG_INSTALL_DIR}",
+        "arguments": "",
+        "icon": "WindowsTerminal.exe,0"
+      }
     }
   }
 }

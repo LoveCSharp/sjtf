@@ -157,6 +157,7 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 
 - `symlink`：键值对对象。**键** 为 `shims/` 下的符号链接文件名（支持子目录，如 `"tools/fnm.exe"`），**值** 为包安装目录内的相对目标路径。
 - `shell_script`：键值对对象。为每个键创建同名文件，内容为对应的值。支持 `{PKG_INSTALL_DIR}` 和 `{INSTALL_DIR}` 占位符。文件以 UTF-8 无 BOM 写入。
+- `desktop_shortcut`：（仅 Windows）键值对对象。每个条目在当前用户的 Desktop 目录下生成 `.lnk`。键 = 快捷方式文件名（不含 `.lnk`）；值 = 对象，含 `target`（相对安装目录的可执行文件路径）、`working_dir`（支持 `{PKG_INSTALL_DIR}` / `{INSTALL_DIR}` 占位符）、`arguments`（启动参数）、`icon`（相对安装目录的图片路径，可选 `,索引` 表示 exe 内的图标索引）。安装/升级时创建，卸载时删除。
 
 ```json
 "shim": {
@@ -167,6 +168,14 @@ user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
     "shell_script": {
       "fnm.cmd": "@\"{PKG_INSTALL_DIR}\\fnm.exe\" %*",
       "fnm.ps1": "& \"{PKG_INSTALL_DIR}\\fnm.exe\" @args"
+    },
+    "desktop_shortcut": {
+      "Windows Terminal": {
+        "target": "WindowsTerminal.exe",
+        "working_dir": "{PKG_INSTALL_DIR}",
+        "arguments": "",
+        "icon": "WindowsTerminal.exe,0"
+      }
     }
   }
 }

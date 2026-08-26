@@ -187,6 +187,32 @@ key 可以包含子目录（如 `"tools/fnm.exe"`），父目录会自动创建�
 
 文件以 UTF-8 无 BOM 格式写入。
 
+#### `shim[os].desktop_shortcut`（仅 Windows）
+
+键值对对象。每个条目在当前用户的 Desktop 目录下生成 `.lnk` 快捷方式。**键** 为快捷方式文件名（不含 `.lnk`），**值** 为对象：
+
+| 字段 | 说明 |
+|---|---|
+| `target` | 可执行文件路径，相对 `pkg_install_relative_dir` |
+| `working_dir` | 起始目录；支持 `{PKG_INSTALL_DIR}` / `{INSTALL_DIR}` 占位符 |
+| `arguments` | 启动参数 |
+| `icon` | 图标路径，相对 `pkg_install_relative_dir`。若有逗号，第一部分为 exe 路径（相对），第二部分为该 exe 内的图标索引 |
+
+示例：
+
+```json
+"desktop_shortcut": {
+  "Windows Terminal": {
+    "target": "WindowsTerminal.exe",
+    "working_dir": "{PKG_INSTALL_DIR}",
+    "arguments": "",
+    "icon": "WindowsTerminal.exe,0"
+  }
+}
+```
+
+快捷方式在安装 / 升级时创建，卸载时删除。实现细节：通过 `powershell.exe` 进程外调用 `WScript.Shell` COM（写入临时 `.ps1` 脚本），保持 AOT 兼容。
+
 ### 包级字段
 
 除了 `fetch_asset.arch.{os}.{arch}` 下的字段外，包对象顶层还支持以下字段：

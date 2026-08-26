@@ -466,6 +466,7 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
         await InstallHelpers.RunBeforeInstallScript(name, pkg, installRoot, installFull);
         InstallHelpers.PlaceAsset(name, pkg, plan, dlPath, installRoot, installFull);
         InstallHelpers.ApplyFilePermissions(name, pkg, installFull);
+        InstallHelpers.RemoveDesktopShortcuts(name, pkg);
         InstallHelpers.CreateShims(name, pkg, installRoot, installFull);
         await InstallHelpers.RunAfterInstallScript(name, pkg, installRoot, installFull);
 
@@ -553,6 +554,7 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
             }
         }
     }
+
     else if (pkg.TryGetPropertyValue("symlinks", out var symNode) && symNode is JsonObject symObj)
     {
         var symRoot = Path.Combine(installRoot, "shims");
@@ -566,6 +568,8 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
             }
         }
     }
+
+    InstallHelpers.RemoveDesktopShortcuts(name, pkg);
 
     if (pkgType == "installer")
     {
@@ -676,6 +680,7 @@ return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration());
         await InstallHelpers.RunBeforeUpgradeScript(name, pkg, installRoot, installFull);
         InstallHelpers.PlaceAsset(name, pkg, plan, dlPath, installRoot, installFull);
         InstallHelpers.ApplyFilePermissions(name, pkg, installFull);
+        InstallHelpers.RemoveDesktopShortcuts(name, pkg);
         InstallHelpers.CreateShims(name, pkg, installRoot, installFull);
         await InstallHelpers.RunAfterUpgradeScript(name, pkg, installRoot, installFull);
 

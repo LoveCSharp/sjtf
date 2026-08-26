@@ -188,6 +188,32 @@ This creates:
 
 Files are written as UTF-8 without BOM.
 
+#### `shim[os].desktop_shortcut` (Windows only)
+
+Key-value object. Each entry creates a `.lnk` shortcut in the current user's Desktop folder. The **key** is the shortcut file name (without `.lnk`); the **value** is an object:
+
+| Field | Description |
+|---|---|
+| `target` | Executable path, relative to `pkg_install_relative_dir` |
+| `working_dir` | Working directory; supports `{PKG_INSTALL_DIR}` / `{INSTALL_DIR}` placeholders |
+| `arguments` | Launch arguments |
+| `icon` | Icon path; relative to `pkg_install_relative_dir`. If a comma is present, the first part is the exe path (relative) and the second part is the icon index inside that exe |
+
+Example:
+
+```json
+"desktop_shortcut": {
+  "Windows Terminal": {
+    "target": "WindowsTerminal.exe",
+    "working_dir": "{PKG_INSTALL_DIR}",
+    "arguments": "",
+    "icon": "WindowsTerminal.exe,0"
+  }
+}
+```
+
+Shortcuts are created on install / upgrade and removed on uninstall. Implementation: invokes `powershell.exe` out of process to drive the `WScript.Shell` COM (via a temp `.ps1` script file) to keep AOT compatibility.
+
 ### Package-level fields
 
 In addition to the per-arch `fetch_asset.arch.{os}.{arch}` entry, the following fields are set on the package root object:

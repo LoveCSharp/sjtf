@@ -276,6 +276,113 @@ internal static class InstallHelpers
                 SetExecutable(scriptPath);
             }
         }
+
+        if (osObj.TryGetPropertyValue("desktop_shortcut", out var dsNode) && dsNode is JsonObject dsObj)
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                Console.WriteLine($"{name}: desktop_shortcut is Windows-only, skipping");
+            }
+            else
+            {
+                var desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                if (string.IsNullOrEmpty(desktopDir))
+                {
+                    Console.WriteLine($"{name}: warning: cannot resolve Desktop folder, skipping desktop_shortcut");
+                }
+                else
+                {
+                    Directory.CreateDirectory(desktopDir);
+                    foreach (var kv in dsObj)
+                    {
+                        var shortcutName = kv.Key;
+                        if (string.IsNullOrEmpty(shortcutName)) continue;
+                        if (kv.Value is not JsonObject specObj) continue;
+
+                        var targetRel = specObj["target"]?.GetValue<string>() ?? "";
+                        if (string.IsNullOrEmpty(targetRel)) continue;
+
+                        var workingDirRaw = specObj["working_dir"]?.GetValue<string>() ?? "";
+                        var workingDir = workingDirRaw
+                            .Replace("{PKG_INSTALL_DIR}", installFull, StringComparison.OrdinalIgnoreCase)
+                            .Replace("{INSTALL_DIR}", installRoot, StringComparison.OrdinalIgnoreCase);
+
+                        var arguments = specObj["arguments"]?.GetValue<string>() ?? "";
+                        var iconRaw = specObj["icon"]?.GetValue<string>() ?? "";
+
+                        // 解析 icon：第一个逗号前是相对路径，后面是索引
+                        // Resolve icon: pre-comma is relative path, post-comma is index.
+                        var iconLocation = ResolveIconSpec(iconRaw, installFull);
+
+                        var targetFull = Path.Combine(installFull, targetRel);
+                        var lnkPath = Path.Combine(desktopDir, shortcutName + ".lnk");
+
+                        try
+                        {
+                            Tools.CreateShortcut(lnkPath, targetFull, workingDir, arguments, iconLocation);
+                            Console.WriteLine($"{name}: desktop shortcut '{shortcutName}' -> {targetFull}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"{name}: warning: failed to create shortcut '{shortcutName}': {ex.Message}");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 解析 icon 字段：无逗号视为相对 installFull 的图标路径；有逗号第一部分
+    /// 是相对路径 exe，第二部分是 exe 内的图标索引。返回拼接后的 IconLocation 字符串。
+    ///
+    /// Resolve the icon spec: no comma → icon file path relative to installFull; with
+    /// comma → first part is the exe (relative path), second part is the icon index
+    /// inside that exe. Returns the joined IconLocation string.
+    /// </summary>
+    private static string ResolveIconSpec(string iconRaw, string installFull)
+    {
+        if (string.IsNullOrEmpty(iconRaw)) return "";
+        var commaIdx = iconRaw.IndexOf(',');
+        if (commaIdx < 0)
+        {
+            return Path.Combine(installFull, iconRaw);
+        }
+        var exeRel = iconRaw.Substring(0, commaIdx);
+        var idx = iconRaw.Substring(commaIdx + 1);
+        return Path.Combine(installFull, exeRel) + "," + idx;
+    }
+
+    /// <summary>
+    /// 移除包在 Desktop 目录下的 .lnk 快捷方式 / Remove .lnk shortcuts for this package.
+    /// 仅 Windows 下生效，其他平台为 no-op。
+    /// No-op on non-Windows.
+    /// </summary>
+    /// <param name="name">包名称 / Package name.</param>
+    /// <param name="pkg">包定义 JSON 对象 / Package definition JSON object.</param>
+    public static void RemoveDesktopShortcuts(string name, JsonObject pkg)
+    {
+        if (!OperatingSystem.IsWindows()) return;
+
+        if (!pkg.TryGetPropertyValue("shim", out var shimNode) || shimNode is not JsonObject shimObj)
+            return;
+        var os = Arch.CurrentOs();
+        if (!shimObj.TryGetPropertyValue(os, out var osNode) || osNode is not JsonObject osObj)
+            return;
+        if (!osObj.TryGetPropertyValue("desktop_shortcut", out var dsNode) || dsNode is not JsonObject dsObj)
+            return;
+
+        var desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        if (string.IsNullOrEmpty(desktopDir)) return;
+
+        foreach (var kv in dsObj)
+        {
+            var shortcutName = kv.Key;
+            if (string.IsNullOrEmpty(shortcutName)) continue;
+            var lnkPath = Path.Combine(desktopDir, shortcutName + ".lnk");
+            Tools.RemoveShortcut(lnkPath);
+            Console.WriteLine($"{name}: removed desktop shortcut '{shortcutName}'");
+        }
     }
 
     /// <summary>
