@@ -1373,5 +1373,33 @@
       }
     },
     "fetch_source": "github"
+  },
+  "copyq": {
+    "description": "an advanced clipboard manager with powerful editing and scripting features.",
+    "repo": "hluk/CopyQ",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^copyq-\\d+(\\.\\d+)*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/system-utilities/copyq",
+    "shim": {
+      "windows": {
+        "desktop_shortcut": {
+          "copyq": {
+            "target": "copyq.exe",
+            "working_dir": "{PKG_INSTALL_DIR}",
+            "arguments": "",
+            "icon": "copyq.exe,0"
+          }
+        }
+      }
+    },
+    "fetch_source": "github"
   }
 }
