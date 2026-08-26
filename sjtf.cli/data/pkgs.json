@@ -1387,7 +1387,7 @@
         }
       }
     },
-    "pkg_install_relative_dir": "cli/system-utilities/copyq",
+    "pkg_install_relative_dir": "system-utilities/copyq",
     "shim": {
       "windows": {
         "desktop_shortcut": {
