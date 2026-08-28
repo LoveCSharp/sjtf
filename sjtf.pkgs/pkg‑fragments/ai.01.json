@@ -1,4 +1,31 @@
 {
+  "cc-switch": {
+    "description": "The All-in-One Manager for Claude Code, Claude Desktop, Codex, Gemini CLI, Grok Build, OpenCode, OpenClaw & Hermes Agent",
+    "repo": "farion1231/cc-switch",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*windows-portable).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "ai/cc-switch",
+    "shim": {
+      "windows": {
+        "shell_script": {
+          "cc-switch.cmd": "@\"{PKG_INSTALL_DIR}\\cc-switch.exe\" %*",
+          "cc-switch.ps1": "\u0026 \"{PKG_INSTALL_DIR}\\cc-switch.exe\" @args"
+        },
+        "desktop_shortcut": {
+          "cc-switch": {"target": "cc-switch.exe","working_dir":"{PKG_INSTALL_DIR}", "arguments": "", "icon": "cc-switch.exe,0"}
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
   "rtk": {
     "description": "CLI toolkit for AI-assisted development workflows",
     "repo": "rtk-ai/rtk",
