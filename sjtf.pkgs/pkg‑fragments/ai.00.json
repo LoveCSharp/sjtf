@@ -45,6 +45,29 @@
     },
     "fetch_source": "github"
   },
+  "codex": {
+    "description": "a coding agent from OpenAI that runs locally on your computer.",
+    "repo": "openai/codex",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^codex-x86_64-pc-windows-msvc\\.exe\\.tar\\.gz$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "ai/codex",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "codex.exe": "codex-x86_64-pc-windows-msvc.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
   "jcode": {
     "description": "The most RAM efficient harness.The most most intelligent harness.",
     "repo": "1jehuang/jcode",
