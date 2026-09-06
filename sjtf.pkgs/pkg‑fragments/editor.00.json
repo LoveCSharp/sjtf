@@ -98,6 +98,29 @@
     },
     "fetch_source": "github"
   },
+  "fresh": {
+    "description": "A modern, full-featured terminal text editor, with zero configuration.",
+    "repo": "sinelaw/fresh",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*x86_64)(?=.*windows)(?=.*msvc).*\\.zip$",
+            "type": "portable-compressed-archive"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "editor/edit",
+    "shim": {
+      "windows": {
+        "symlink": {
+          "fresh.exe": "fresh.exe"
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
   "edit": {
     "description": "Simple text editor for Windows inspired by MS-DOS Editor",
     "repo": "microsoft/edit",
