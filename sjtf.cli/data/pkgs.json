@@ -214,6 +214,34 @@
     },
     "fetch_source": "github"
   },
+  "alacritty": {
+    "description": "A fast, cross-platform, OpenGL terminal emulator",
+    "repo": "alacritty/alacritty",
+    "fetch_asset": {
+      "arch": {
+        "windows": {
+          "x86_64": {
+            "file": "^(?=.*portable).*\\.exe$",
+            "type": "portable-executable"
+          }
+        }
+      }
+    },
+    "pkg_install_relative_dir": "cli/alacritty",
+    "shim": {
+      "windows": {
+        "desktop_shortcut": {
+          "Alacritty": {
+            "target": "alacritty.exe",
+            "working_dir": "{PKG_INSTALL_DIR}",
+            "arguments": "",
+            "icon": "alacritty.exe,0"
+          }
+        }
+      }
+    },
+    "fetch_source": "github"
+  },
   "zellij": {
     "description": "A terminal workspace with batteries included",
     "repo": "zellij-org/zellij",
